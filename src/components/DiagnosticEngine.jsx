@@ -89,6 +89,20 @@ const meterModeLabels = {
   Continuity: 'Süreklilik',
 }
 
+const defaultAssistantModel = 'gemma4:e2b-it-qat'
+
+function formatAssistantModel(model = defaultAssistantModel) {
+  if (model.startsWith('gemma4:e2b')) {
+    return 'Gemma 4 E2B'
+  }
+
+  if (model.startsWith('gemma4:e4b') || model === 'gemma4') {
+    return 'Gemma 4 E4B'
+  }
+
+  return model
+}
+
 const diagnosticDraftKey = 'terminal-elektronik-active-diagnostic'
 
 const defaultSymptom = diagnostics.deviceProfiles.find((profile) => profile.id === 'ups')?.commonSymptoms[0] || ''
@@ -589,7 +603,7 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
   const [mode, setMode] = useState('fast')
-  const [modelStatus, setModelStatus] = useState({ checked: false, available: false, model: 'gemma4' })
+  const [modelStatus, setModelStatus] = useState({ checked: false, available: false, model: defaultAssistantModel })
   const requestControllerRef = useRef(null)
   const activeResponseIdRef = useRef(null)
   const [messages, setMessages] = useState([
@@ -614,13 +628,13 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
           setModelStatus({
             checked: true,
             available: Boolean(status.connected && status.modelAvailable),
-            model: status.configuredModel || 'gemma4',
+            model: status.configuredModel || defaultAssistantModel,
           })
         }
       })
       .catch(() => {
         if (active) {
-          setModelStatus({ checked: true, available: false, model: 'gemma4' })
+          setModelStatus({ checked: true, available: false, model: defaultAssistantModel })
         }
       })
 
@@ -666,6 +680,12 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
                 category: currentNode.category,
                 expected: currentNode.expected,
                 unit: currentNode.unit,
+                meterMode: currentNode.meterMode,
+                powerState: currentNode.powerState,
+                probeBlack: currentNode.probeBlack,
+                probeRed: currentNode.probeRed,
+                testSteps: currentNode.testSteps,
+                stopConditions: currentNode.stopConditions,
               }
             : null,
           history: history.slice(-8),
@@ -678,11 +698,12 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
       throw new Error(`Local model HTTP ${response.status}`)
     }
 
-    const modelName = response.headers.get('X-Assistant-Model') || modelStatus.model || 'gemma4'
+    const modelName = response.headers.get('X-Assistant-Model') || modelStatus.model || defaultAssistantModel
+    const modelLabel = formatAssistantModel(modelName)
     const reader = response.body?.getReader()
     if (!reader) {
       const text = await response.text()
-      upsertAssistantMessage(responseId, text, modelName)
+      upsertAssistantMessage(responseId, text, modelLabel)
       return text
     }
 
@@ -694,7 +715,7 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
       reply += decoder.decode(value || new Uint8Array(), { stream: !done })
 
       if (reply) {
-        upsertAssistantMessage(responseId, reply, modelName)
+        upsertAssistantMessage(responseId, reply, modelLabel)
       }
 
       if (done) {
@@ -783,12 +804,12 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
               <div className="min-w-0">
                 <div className="flex items-center gap-2 text-base font-black text-white">
                   Astra
-                  <Badge tone="cyan">{messages.at(-1)?.source || (mode === 'deep' ? modelStatus.model : 'HIZLI')}</Badge>
+                  <Badge tone="cyan">{messages.at(-1)?.source || (mode === 'deep' ? formatAssistantModel(modelStatus.model) : 'HIZLI')}</Badge>
                 </div>
                 <p className="truncate text-xs text-zinc-500">
                   {modelStatus.checked
                     ? modelStatus.available
-                      ? `${modelStatus.model} hazır`
+                      ? `${formatAssistantModel(modelStatus.model)} hazır`
                       : 'Yerel model çevrimdışı'
                     : 'Yerel model kontrol ediliyor'}
                 </p>
@@ -854,7 +875,7 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
                   mode === 'deep' ? 'bg-cyan-300/15 text-cyan-100' : 'text-zinc-500 hover:text-zinc-200',
                 )}
               >
-                Derin / {modelStatus.model}
+                Derin / {formatAssistantModel(modelStatus.model)}
               </button>
             </div>
             <div className="mb-3 flex gap-2 overflow-x-auto pb-1">

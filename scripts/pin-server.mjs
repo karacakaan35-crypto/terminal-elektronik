@@ -11,7 +11,7 @@ const host = process.env.HOST || '127.0.0.1'
 const pin = process.env.FIXBOARD_PIN || '1559'
 const secret = process.env.FIXBOARD_SECRET || randomBytes(32).toString('hex')
 const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434'
-const ollamaModel = process.env.FIXBOARD_AI_MODEL || 'gemma4'
+const ollamaModel = process.env.FIXBOARD_AI_MODEL || 'gemma4:e2b-it-qat'
 const cookieName = 'fixboard_session'
 const maxAgeSeconds = 60 * 60 * 8
 

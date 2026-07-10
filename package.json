@@ -14,9 +14,10 @@
     "preview": "vite preview",
     "preview:lan": "vite preview --host 0.0.0.0",
     "serve:pin": "node scripts/pin-server.mjs",
+    "serve:astra": "node scripts/astra-bridge.mjs",
     "ollama:serve": "/Applications/Ollama.app/Contents/Resources/ollama serve",
     "ollama:list": "/Applications/Ollama.app/Contents/Resources/ollama list",
-    "ollama:pull:gemma4": "/Applications/Ollama.app/Contents/Resources/ollama pull gemma4",
+    "ollama:pull:gemma4": "/Applications/Ollama.app/Contents/Resources/ollama pull gemma4:e2b-it-qat",
     "tunnel": "tools/cloudflared tunnel --protocol http2 --url http://127.0.0.1:4174"
   },
   "dependencies": {
