@@ -1,4 +1,4 @@
-import { copyFile, mkdir } from 'node:fs/promises'
+import { copyFile, mkdir, rm } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -7,6 +7,11 @@ function sitesBundle(mode) {
   return {
     name: 'terminal-elektronik-sites-bundle',
     apply: 'build',
+    async buildStart() {
+      if (mode === 'sites') {
+        await rm(resolve('dist'), { recursive: true, force: true })
+      }
+    },
     async closeBundle() {
       if (mode !== 'sites') {
         return
