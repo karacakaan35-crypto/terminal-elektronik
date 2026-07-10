@@ -50,7 +50,7 @@ Kalıcı statik yayın paketi için:
 npm run build:sites
 ```
 
-Bu sürüm tarayıcı içi PIN ekranını, teşhis motorunu, PDF raporunu ve hızlı Astra yanıtlarını içerir. Derin Gemma4 modu yerel Ollama bağlantısı gerektirdiği için yalnız servis bilgisayarından sunulan sürümde etkinleşir.
+Bu sürüm bağlantı açıldığında doğrudan teşhis motorunu, PDF raporunu ve hızlı Astra yanıtlarını sunar. Derin Gemma4 modu yerel Ollama bağlantısı gerektirdiği için yalnız servis bilgisayarından sunulan sürümde etkinleşir.
 
 ## Yerel AI / Ollama
 

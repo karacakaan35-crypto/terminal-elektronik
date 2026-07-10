@@ -30,7 +30,4 @@ export default defineConfig(({ mode }) => ({
     outDir: mode === 'sites' ? 'dist/client' : 'dist',
     emptyOutDir: true,
   },
-  define: {
-    'import.meta.env.VITE_PUBLIC_HOSTED': JSON.stringify(mode === 'sites' ? 'true' : 'false'),
-  },
 }))
