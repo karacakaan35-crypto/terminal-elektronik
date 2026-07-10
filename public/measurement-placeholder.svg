@@ -1,0 +1,24 @@
+<svg width="960" height="420" viewBox="0 0 960 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="420" fill="#09090B"/>
+  <rect x="34" y="34" width="892" height="352" rx="18" fill="#10141C" stroke="#3F3F46" stroke-width="2"/>
+  <path d="M82 322H878" stroke="#27272A" stroke-width="2"/>
+  <path d="M82 98H878" stroke="#27272A" stroke-width="2"/>
+  <rect x="120" y="132" width="260" height="156" rx="14" fill="#18181B" stroke="#52525B" stroke-width="3"/>
+  <rect x="440" y="118" width="116" height="184" rx="12" fill="#111827" stroke="#22C55E" stroke-width="3"/>
+  <rect x="610" y="142" width="190" height="52" rx="8" fill="#18181B" stroke="#71717A" stroke-width="2"/>
+  <rect x="610" y="226" width="190" height="52" rx="8" fill="#18181B" stroke="#71717A" stroke-width="2"/>
+  <circle cx="184" cy="210" r="28" fill="#052E16" stroke="#22C55E" stroke-width="4"/>
+  <circle cx="316" cy="210" r="28" fill="#450A0A" stroke="#EF4444" stroke-width="4"/>
+  <circle cx="670" cy="168" r="13" fill="#22C55E"/>
+  <circle cx="670" cy="252" r="13" fill="#F97316"/>
+  <path d="M212 210H288" stroke="#22C55E" stroke-width="5" stroke-linecap="round"/>
+  <path d="M380 210H440" stroke="#22C55E" stroke-width="4" stroke-dasharray="10 10"/>
+  <path d="M556 168H610" stroke="#22C55E" stroke-width="4" stroke-dasharray="10 10"/>
+  <path d="M556 252H610" stroke="#F97316" stroke-width="4" stroke-dasharray="10 10"/>
+  <text x="120" y="91" fill="#A1A1AA" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24">MEASUREMENT POINT PLACEHOLDER</text>
+  <text x="146" y="216" fill="#BBF7D0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">+VIN</text>
+  <text x="286" y="216" fill="#FECACA" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">GND</text>
+  <text x="467" y="214" fill="#BBF7D0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20">IC</text>
+  <text x="704" y="174" fill="#D4D4D8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">3.3V / BUS</text>
+  <text x="704" y="258" fill="#D4D4D8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">RESET / OUT</text>
+</svg>

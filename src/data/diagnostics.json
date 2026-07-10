@@ -1,0 +1,4934 @@
+{
+  "appName": "Terminal Elektronik",
+  "version": "2.0",
+  "probabilityDisclaimer": "Bu oranlar kesin arıza istatistiği değil; üretici troubleshooting dokümanları, saha servis önceliği ve tipik arıza sınıflarına göre hazırlanmış başlangıç ön tanı dağılımıdır.",
+  "researchBasis": [
+    "Analog dahili hatlarda açık devre, kısa devre, hat voltajı ve FXS/FXO port durumları kontrol edilir.",
+    "Bariyer ve otomatik kapılarda fotosel blokajı, hizalama, kablolama ve emniyet girişleri kapanmama şikayetlerinde ilk sıradadır.",
+    "PoE kameralarda kablo/konnektör, PoE güç bütçesi, switch/NVR portu ve ağ yapılandırması sık kontrol edilen sınıflardır.",
+    "UPS ve akülü sistemlerde akü sağlığı, şarj devresi, aşırı yük, giriş koruma ve DC rail kontrolleri önceliklidir.",
+    "OSDP/RS485 ve Wiegand okuyucularda kablo tipi, D0/D1 veya A/B yönü, adres/terminasyon ve okuyucu beslemesi kritik kontrol başlıklarıdır."
+  ],
+  "faultPriorScores": {
+    "ups": {
+      "battery_degraded": 32,
+      "charger_fault": 18,
+      "input_protection_fault": 15,
+      "rail_short": 12,
+      "capacitor_esr": 10,
+      "mosfet_short": 8,
+      "mcu_boot": 5
+    },
+    "barrier": {
+      "photo_sensor": 40,
+      "remote_receiver": 14,
+      "motor_output": 18,
+      "relay_driver": 12,
+      "mcu_boot": 9,
+      "rail_short": 7
+    },
+    "fire_panel": {
+      "zone_loop_fault": 28,
+      "panel_battery_fault": 16,
+      "rail_short": 14,
+      "siren_output_fault": 13,
+      "mcu_boot": 18,
+      "charger_fault": 11
+    },
+    "cctv": {
+      "video_link_fault": 46,
+      "poe_power_fault": 24,
+      "ir_led_fault": 12,
+      "mcu_boot": 10,
+      "rail_short": 8
+    },
+    "access": {
+      "reader_bus_fault": 37,
+      "lock_output_fault": 27,
+      "access_psu_sag": 15,
+      "mcu_boot": 13,
+      "rail_short": 8
+    },
+    "uvis": {
+      "uvis_trigger_fault": 22,
+      "uvis_network_fault": 20,
+      "video_link_fault": 17,
+      "uvis_software_fault": 25,
+      "uvis_control_power": 9,
+      "input_protection_fault": 7
+    },
+    "pbx": {
+      "pbx_line_fault": 64,
+      "pbx_port_fault": 22,
+      "pbx_config_fault": 8,
+      "pbx_power_fault": 6
+    },
+    "sliding": {
+      "sliding_sensor_fault": 35,
+      "sliding_mechanical_fault": 29,
+      "sliding_drive_fault": 16,
+      "input_protection_fault": 10,
+      "rail_short": 10
+    },
+    "support": {
+      "support_psu_fault": 42,
+      "rail_short": 15,
+      "support_relay_fault": 25,
+      "relay_driver": 8,
+      "capacitor_esr": 10
+    },
+    "general": {
+      "general_regulator_fault": 22,
+      "general_visual_damage": 28,
+      "mosfet_short": 15,
+      "mcu_boot": 13,
+      "general_clock_memory_fault": 12,
+      "input_protection_fault": 10
+    }
+  },
+  "faultCatalog": {
+    "battery_degraded": {
+      "label": "Akü zayıf / hücre arızası",
+      "componentGroup": "Akü ve şarj hattı",
+      "risk": "warning"
+    },
+    "charger_fault": {
+      "label": "Şarj regülatörü veya adaptör hattı arızası",
+      "componentGroup": "Şarj katı",
+      "risk": "critical"
+    },
+    "input_protection_fault": {
+      "label": "Giriş koruma, sigorta veya köprü diyot arızası",
+      "componentGroup": "Giriş koruma",
+      "risk": "critical"
+    },
+    "rail_short": {
+      "label": "5V/3.3V hattında kısa devre veya aşırı yük",
+      "componentGroup": "Dijital besleme",
+      "risk": "critical"
+    },
+    "capacitor_esr": {
+      "label": "Elektrolitik kondansatör ESR yüksek",
+      "componentGroup": "Filtreleme",
+      "risk": "warning"
+    },
+    "mosfet_short": {
+      "label": "MOSFET / sürücü kısa devresi",
+      "componentGroup": "Güç anahtarlama",
+      "risk": "critical"
+    },
+    "relay_driver": {
+      "label": "Röle sürücü transistörü veya bobin hattı arızası",
+      "componentGroup": "Röle sürme",
+      "risk": "warning"
+    },
+    "motor_output": {
+      "label": "Motor çıkışı, kontaktör veya klemens hattı arızası",
+      "componentGroup": "Çıkış gücü",
+      "risk": "warning"
+    },
+    "photo_sensor": {
+      "label": "Fotosel / emniyet girişi aktif veya hatalı",
+      "componentGroup": "Emniyet girişleri",
+      "risk": "warning"
+    },
+    "remote_receiver": {
+      "label": "Kumanda alıcısı, anten veya öğrenme hafızası arızası",
+      "componentGroup": "RF alıcı",
+      "risk": "info"
+    },
+    "mcu_boot": {
+      "label": "MCU reset, kristal veya firmware açılış arızası",
+      "componentGroup": "Kontrol katı",
+      "risk": "critical"
+    },
+    "zone_loop_fault": {
+      "label": "Yangın paneli zone hattı açık/kısa devre",
+      "componentGroup": "Zone döngüsü",
+      "risk": "warning"
+    },
+    "siren_output_fault": {
+      "label": "Siren çıkışı, sigorta veya sürücü arızası",
+      "componentGroup": "Alarm çıkışı",
+      "risk": "critical"
+    },
+    "panel_battery_fault": {
+      "label": "Panel aküsü veya akü şarj devresi arızası",
+      "componentGroup": "Panel akü hattı",
+      "risk": "warning"
+    },
+    "poe_power_fault": {
+      "label": "PoE/enjektör veya kamera besleme arızası",
+      "componentGroup": "Kamera beslemesi",
+      "risk": "critical"
+    },
+    "video_link_fault": {
+      "label": "Video/ağ hattı, BNC/RJ45 veya switch portu arızası",
+      "componentGroup": "Görüntü ve ağ hattı",
+      "risk": "warning"
+    },
+    "ir_led_fault": {
+      "label": "IR LED kartı, LDR veya gece modu sürücü arızası",
+      "componentGroup": "Kamera IR aydınlatma",
+      "risk": "info"
+    },
+    "reader_bus_fault": {
+      "label": "Wiegand/RS485 okuyucu haberleşme hattı arızası",
+      "componentGroup": "Okuyucu veri yolu",
+      "risk": "warning"
+    },
+    "lock_output_fault": {
+      "label": "Kilit rölesi, diyot veya kilit besleme çıkışı arızası",
+      "componentGroup": "Kapı kilit çıkışı",
+      "risk": "warning"
+    },
+    "access_psu_sag": {
+      "label": "CACS adaptörü boşta normal, yük altında çöküyor veya temassız",
+      "componentGroup": "CACS harici besleme",
+      "risk": "warning"
+    },
+    "uvis_control_power": {
+      "label": "UVIS kontrol PC/NVR/monitör güç arızası",
+      "componentGroup": "UVIS kontrol ünitesi",
+      "risk": "critical"
+    },
+    "uvis_trigger_fault": {
+      "label": "Loop/fotosel/tetik sensörü veya I/O hattı arızası",
+      "componentGroup": "UVIS tetik hattı",
+      "risk": "warning"
+    },
+    "uvis_network_fault": {
+      "label": "UVIS kamera ağı, switch veya kablo bağlantı arızası",
+      "componentGroup": "UVIS ağ ve görüntü hattı",
+      "risk": "warning"
+    },
+    "uvis_software_fault": {
+      "label": "UVIS yazılım, kalibrasyon veya kayıt akışı arızası",
+      "componentGroup": "UVIS yazılım ve kayıt",
+      "risk": "info"
+    },
+    "pbx_power_fault": {
+      "label": "Santral/PBX ana besleme veya port kartı arızası",
+      "componentGroup": "PBX güç ve port kartı",
+      "risk": "critical"
+    },
+    "pbx_line_fault": {
+      "label": "Dahili hat voltajı, patch panel veya kablo arızası",
+      "componentGroup": "Telefon dahili hat",
+      "risk": "warning"
+    },
+    "pbx_port_fault": {
+      "label": "PBX FXS portu, port kartı veya telefon uç cihazı arızası",
+      "componentGroup": "PBX port ve uç cihaz",
+      "risk": "warning"
+    },
+    "pbx_config_fault": {
+      "label": "Santral abone, trunk veya yönlendirme konfigürasyon arızası",
+      "componentGroup": "PBX yazılım/konfigürasyon",
+      "risk": "info"
+    },
+    "sliding_sensor_fault": {
+      "label": "Kayar kapı radar/fotosel/açma butonu algılama arızası",
+      "componentGroup": "Kayar kapı sensörleri",
+      "risk": "warning"
+    },
+    "sliding_drive_fault": {
+      "label": "Kayar kapı motor sürücü veya kontrol kartı çıkış arızası",
+      "componentGroup": "Kayar kapı sürücü",
+      "risk": "critical"
+    },
+    "sliding_mechanical_fault": {
+      "label": "Kayar kapı mekanik ray, limit veya encoder arızası",
+      "componentGroup": "Kayar kapı mekanik/limit",
+      "risk": "warning"
+    },
+    "support_psu_fault": {
+      "label": "Yardımcı adaptör/SMPS çıkışı veya yükte çökme arızası",
+      "componentGroup": "Yardımcı besleme",
+      "risk": "warning"
+    },
+    "support_relay_fault": {
+      "label": "Yardımcı röle, kontaktör veya NO/NC kontak arızası",
+      "componentGroup": "Yardımcı röle modülü",
+      "risk": "warning"
+    },
+    "general_visual_damage": {
+      "label": "Kart üzerinde görsel hasar, oksit veya çatlak lehim",
+      "componentGroup": "Genel kart fiziksel durum",
+      "risk": "warning"
+    },
+    "general_regulator_fault": {
+      "label": "Kart regülatör hattı, 5V/3.3V veya giriş besleme arızası",
+      "componentGroup": "Genel kart besleme",
+      "risk": "critical"
+    },
+    "general_clock_memory_fault": {
+      "label": "Reset, kristal, EEPROM/SPI Flash veya firmware arızası",
+      "componentGroup": "Genel kart dijital çekirdek",
+      "risk": "warning"
+    }
+  },
+  "deviceProfiles": [
+    {
+      "id": "ups",
+      "name": "UPS / Akü Destekli Güç",
+      "shortName": "UPS",
+      "description": "Küçük UPS, akü destekli kontrol beslemesi, şarj kartı ve regülatör arızaları.",
+      "startNodeId": "ups_symptom",
+      "accent": "emerald",
+      "supported": true,
+      "commonSymptoms": [
+        "Cihaz hiç açılmıyor",
+        "Akü şarj etmiyor",
+        "Yükte kapanıyor",
+        "Sigorta attırıyor",
+        "Çıkış voltajı kararsız"
+      ],
+      "faultPriors": [
+        {
+          "label": "Akü zayıf, sülfatlı veya bağlantısı gevşek",
+          "probability": 32,
+          "basis": "UPS arızalarında ilk ayrım akü sağlığı ve bağlantıdır."
+        },
+        {
+          "label": "Şarj regülatörü / adaptör hattı arızası",
+          "probability": 18,
+          "basis": "Akü dolmuyor veya voltaj anormal ise şarj hattı önceliklidir."
+        },
+        {
+          "label": "Giriş sigortası, NTC, köprü diyot veya koruma hattı",
+          "probability": 15,
+          "basis": "Hiç açılmama ve sigorta attırma şikayetinde giriş koruma kontrol edilir."
+        },
+        {
+          "label": "Aşırı yük / bağlı cihaz kapasiteyi aşıyor",
+          "probability": 12,
+          "basis": "Yükte kapanma ve overload uyarılarında kapasite kontrolü gerekir."
+        },
+        {
+          "label": "Elektrolitik kondansatör ESR yüksek",
+          "probability": 10,
+          "basis": "Yük altında çökme ve kararsız çıkışta filtreleme şüphelidir."
+        },
+        {
+          "label": "MOSFET, inverter veya güç anahtarlama kısa devresi",
+          "probability": 8,
+          "basis": "Sigorta atması ve ısınma varsa güç anahtarlama katı kontrol edilir."
+        },
+        {
+          "label": "MCU reset, kristal veya firmware açılış sorunu",
+          "probability": 5,
+          "basis": "Beslemeler normal ama sistem boot etmiyorsa dijital çekirdek incelenir."
+        }
+      ]
+    },
+    {
+      "id": "barrier",
+      "name": "Bariyer Kontrol Kartı",
+      "shortName": "Bariyer",
+      "description": "Nice, Egeteta ve benzeri bariyer kartlarında motor, röle, fotosel ve kumanda hatları.",
+      "startNodeId": "barrier_symptom",
+      "accent": "amber",
+      "supported": true,
+      "commonSymptoms": [
+        "Motor çalışmıyor",
+        "Röle çekmiyor",
+        "Kumanda algılanmıyor",
+        "Fotosel hatası var",
+        "Kart açılıyor ama çıkış vermiyor"
+      ],
+      "faultPriors": [
+        {
+          "label": "Fotosel hizalama / ışın karşılamama",
+          "probability": 24,
+          "basis": "Kapanmama ve emniyet girişi hatasında ilk saha kontrolüdür."
+        },
+        {
+          "label": "Fotosel lensi kirli, engel var veya güneş yansıması yapıyor",
+          "probability": 16,
+          "basis": "Dış ortam bariyerlerinde blokaj ve kir sık tekrarlayan problemdir."
+        },
+        {
+          "label": "Kumanda alıcısı, anten veya öğrenme hafızası",
+          "probability": 14,
+          "basis": "Kumanda algılanmıyorsa RF alıcı ve hafıza kontrol edilir."
+        },
+        {
+          "label": "Motor kondansatörü, motor sargısı veya sürücü yükü",
+          "probability": 13,
+          "basis": "Röle çekiyor ama hareket yoksa motor hattı önceliklidir."
+        },
+        {
+          "label": "Röle, kontaktör veya motor çıkış terminali",
+          "probability": 12,
+          "basis": "Kart komut veriyor ama çıkış oluşmuyorsa güç çıkışı ölçülür."
+        },
+        {
+          "label": "Limit switch, encoder veya konum algısı",
+          "probability": 9,
+          "basis": "Yarım hareket ve yön hatalarında limit/konum bilgisi kontrol edilir."
+        },
+        {
+          "label": "Kart besleme regülatörü / 24V aksesuar hattı",
+          "probability": 7,
+          "basis": "Kart açılıyor gibi görünse de aksesuar beslemesi düşük olabilir."
+        },
+        {
+          "label": "Mekanik sıkışma, redüktör veya yay dengesi",
+          "probability": 5,
+          "basis": "Elektriksel ölçümler normalse mekanik sürtünme değerlendirilir."
+        }
+      ]
+    },
+    {
+      "id": "fire_panel",
+      "name": "Yangın İhbar Paneli",
+      "shortName": "Yangın",
+      "description": "Zone hattı, siren çıkışı, akü, panel beslemesi ve haberleşme hatları için profil.",
+      "startNodeId": "fire_symptom",
+      "accent": "red",
+      "supported": true,
+      "commonSymptoms": [
+        "Zone arızası",
+        "Siren çıkışı yok",
+        "Panel resetliyor",
+        "Akü hatası",
+        "Panel hiç açılmıyor"
+      ],
+      "faultPriors": [
+        {
+          "label": "Zone hattı açık/kısa devre veya EOL direnç hatası",
+          "probability": 28,
+          "basis": "Panel trouble uyarılarında zone döngüsü ilk doğrulama noktasıdır."
+        },
+        {
+          "label": "Panel aküsü zayıf veya akü şarj devresi sorunlu",
+          "probability": 16,
+          "basis": "Akü trouble ve reset şikayetlerinde akü yük testi gerekir."
+        },
+        {
+          "label": "AUX besleme aşırı yük / kısa devre",
+          "probability": 14,
+          "basis": "Dedektör ve modül beslemesi çökerse panel resetleyebilir."
+        },
+        {
+          "label": "Siren/NAC çıkışı, sigorta veya EOL hattı",
+          "probability": 13,
+          "basis": "Siren çıkışı yoksa çıkış sigortası ve hat sonu denetimi ölçülür."
+        },
+        {
+          "label": "Toprak kaçağı / hat izolasyon problemi",
+          "probability": 11,
+          "basis": "Saha kablosu ve nem kaynaklı trouble sınıfıdır."
+        },
+        {
+          "label": "Dedektör kirlenmesi, yanlış alarm veya taban teması",
+          "probability": 10,
+          "basis": "Zone aktifliği normal hat ölçümüyle açıklanamıyorsa dedektör incelenir."
+        },
+        {
+          "label": "Haberleşme modülü, telefon/IP communicator trouble",
+          "probability": 8,
+          "basis": "Panel sağlamken dış bildirim gitmiyorsa communicator kontrol edilir."
+        }
+      ]
+    },
+    {
+      "id": "cctv",
+      "name": "Kamera / CCTV",
+      "shortName": "Kamera",
+      "description": "Besleme, PoE, IR LED, görüntü yok ve ağ bağlantısı sorunları için profil.",
+      "startNodeId": "cctv_symptom",
+      "accent": "cyan",
+      "supported": true,
+      "commonSymptoms": [
+        "Görüntü yok",
+        "IR çalışmıyor",
+        "PoE besleme yok",
+        "Gece görüntüsü kötü",
+        "Ağda görünmüyor"
+      ],
+      "faultPriors": [
+        {
+          "label": "Ethernet kablo, RJ45 krimp veya PoE çiftleri sorunlu",
+          "probability": 28,
+          "basis": "PoE kameralarda kablo/konnektör küçük hasarı bile kesinti yapabilir."
+        },
+        {
+          "label": "IP, VLAN, NVR kanal veya ağ yapılandırması",
+          "probability": 18,
+          "basis": "Kamera enerjili ama ağda yoksa yapılandırma ve NVR eşleşmesi kontrol edilir."
+        },
+        {
+          "label": "Adaptör / PoE enjektör / kamera besleme arızası",
+          "probability": 15,
+          "basis": "Hiç açılmama ve reboot döngüsünde besleme doğrulanır."
+        },
+        {
+          "label": "IR yansıması, lens/kubbe kirliliği veya gece modu ayarı",
+          "probability": 12,
+          "basis": "Gece görüntüsü bozuksa optik yüzey ve IR yansıması önceliklidir."
+        },
+        {
+          "label": "Kamera donanımı, sensor board veya reset/firmware",
+          "probability": 10,
+          "basis": "Besleme ve ağ normal ama görüntü yoksa kamera kartı incelenir."
+        },
+        {
+          "label": "Switch PoE bütçesi veya port arızası",
+          "probability": 9,
+          "basis": "Birden fazla kamera düşüyorsa switch toplam güç bütçesi önemlidir."
+        },
+        {
+          "label": "Lens odak, güneş/parlama veya çevresel montaj sorunu",
+          "probability": 8,
+          "basis": "Görüntü kalitesi şikayetlerinde montaj ve optik koşullar değerlendirilir."
+        }
+      ]
+    },
+    {
+      "id": "access",
+      "name": "CACS / Erişim Kontrol",
+      "shortName": "CACS",
+      "description": "Kart okuyucu, röle çıkışı, Wiegand/RS485 ve kilit beslemesi için profil.",
+      "startNodeId": "access_symptom",
+      "accent": "violet",
+      "supported": true,
+      "commonSymptoms": [
+        "Kart okumuyor",
+        "Kilit çekmiyor",
+        "RS485 yok",
+        "Okuyucu beslemesi yok",
+        "Kapı sürekli açık"
+      ],
+      "faultPriors": [
+        {
+          "label": "Okuyucu kablosu, D0/D1 veya RS485 A/B bağlantı hatası",
+          "probability": 21,
+          "basis": "Kart okumama ve haberleşme yok şikayetinde ilk kontrol kablolamadır."
+        },
+        {
+          "label": "Kilit beslemesi, röle kontağı veya flyback diyot sorunu",
+          "probability": 16,
+          "basis": "Yetki var ama kapı açmıyorsa kilit çıkışı ölçülür."
+        },
+        {
+          "label": "Adaptör boşta sağlam, yük altında voltaj çökmesi / ripple / DC jak temassızlığı",
+          "probability": 15,
+          "basis": "Adaptör değişince sistem düzeliyorsa eski adaptör mutlaka cihaz üzerinde ve yük altında test edilir."
+        },
+        {
+          "label": "Kart yetkisi, zaman planı veya panel konfigürasyonu",
+          "probability": 13,
+          "basis": "Donanım sağlamken erişim reddi yazılım/kurala işaret eder."
+        },
+        {
+          "label": "Kapı kontağı, REX, tamper veya anti-passback durumu",
+          "probability": 11,
+          "basis": "Kapı sürekli açık veya beklenmeyen alarmda giriş durumları kontrol edilir."
+        },
+        {
+          "label": "OSDP adresi, RS485 terminasyon veya kablo tipi",
+          "probability": 10,
+          "basis": "OSDP/RS485 hatlarında adres ve sonlandırma kritik arıza sınıfıdır."
+        },
+        {
+          "label": "Okuyucu/panel 12V besleme düşümü",
+          "probability": 8,
+          "basis": "Uzun kabloda okuyucu LED var ama okuma kararsız olabilir."
+        },
+        {
+          "label": "Kontrol paneli portu veya okuyucu donanımı arızalı",
+          "probability": 6,
+          "basis": "Kablo ve besleme sağlamken port/okuyucu değişimli test edilir."
+        }
+      ]
+    },
+    {
+      "id": "uvis",
+      "name": "Araç Altı Görüntüleme Sistemi",
+      "shortName": "UVIS",
+      "description": "Kamera/aydınlatma barı, tetik sensörü, NVR/PC, ağ ve görüntü kayıt akışı.",
+      "startNodeId": "uvis_symptom",
+      "accent": "cyan",
+      "supported": true,
+      "commonSymptoms": [
+        "Görüntü yok",
+        "Araç geçince kayıt başlamıyor",
+        "Aydınlatma çalışmıyor",
+        "PC/NVR açılmıyor",
+        "Görüntü kalitesi bozuk"
+      ],
+      "faultPriors": [
+        {
+          "label": "Loop/fotosel/tetik sensörü veya I/O kablosu",
+          "probability": 22,
+          "basis": "Araç geçişi algılanmıyorsa tetik hattı ilk sıradadır."
+        },
+        {
+          "label": "Kamera ağı, switch veya saha kablosu",
+          "probability": 20,
+          "basis": "UVIS görüntü zincirinde ağ/kablo kesintisi sık kontrol edilir."
+        },
+        {
+          "label": "Aydınlatma barı, LED sürücü veya güç hattı",
+          "probability": 17,
+          "basis": "Alt görüntü karanlıksa aydınlatma ve sürücü ölçülür."
+        },
+        {
+          "label": "NVR/PC yazılımı, disk veya servis süreci",
+          "probability": 15,
+          "basis": "Görüntü var ama kayıt/akış yoksa yazılım tarafı incelenir."
+        },
+        {
+          "label": "Kalibrasyon, kamera açıları veya görüntü birleştirme",
+          "probability": 10,
+          "basis": "Bozuk görüntüde optik hizalama ve kalibrasyon kontrol edilir."
+        },
+        {
+          "label": "Kontrol beslemesi veya UPS/adaptör hattı",
+          "probability": 9,
+          "basis": "Sistem parçalı çalışıyorsa ortak güç hattı doğrulanır."
+        },
+        {
+          "label": "Kir, su, mekanik darbe veya saha çevresel etkisi",
+          "probability": 7,
+          "basis": "Dış ortam ekipmanlarında mekanik ve çevresel etki dışlanmalıdır."
+        }
+      ]
+    },
+    {
+      "id": "pbx",
+      "name": "Dahili Telefon / Santral",
+      "shortName": "PBX",
+      "description": "PBX güç, dahili hat voltajı, çevir sesi, port kartı, patch panel ve trunk yönlendirme.",
+      "startNodeId": "pbx_symptom",
+      "accent": "sky",
+      "supported": true,
+      "commonSymptoms": [
+        "Çevir sesi yok",
+        "Dahili arama yok",
+        "Hat voltajı yok",
+        "Santral açılmıyor",
+        "Dış hat yönlendirmiyor"
+      ],
+      "faultPriors": [
+        {
+          "label": "Dahili hatta açık devre / kablo kopuk",
+          "probability": 30,
+          "basis": "3162 gibi tek dahili çalışmıyorsa önce uçtan uca süreklilik kontrol edilir."
+        },
+        {
+          "label": "Tip-ring kısa devre, nem veya ezilmiş kablo",
+          "probability": 18,
+          "basis": "Hat voltajı çöküyorsa veya port sürekli meşgulse kısa/nem ihtimali yüksektir."
+        },
+        {
+          "label": "Patch panel, Krone, priz veya modüler jak temassızlığı",
+          "probability": 16,
+          "basis": "Yerel dahili arızalarında gevşek bağlantı ve oksit sık görülür."
+        },
+        {
+          "label": "Telefon cihazı, spiral kablo veya adaptör arızası",
+          "probability": 12,
+          "basis": "Aynı hatta sağlam telefonla çapraz test hızlı ayrım sağlar."
+        },
+        {
+          "label": "PBX FXS portu veya dahili kart kanalı arızası",
+          "probability": 10,
+          "basis": "Kablo ve telefon sağlamken port değiştirme testi gerekir."
+        },
+        {
+          "label": "Abone yetkisi, yönlendirme veya santral konfigürasyonu",
+          "probability": 8,
+          "basis": "Çevir sesi var ama arama yapılamıyorsa yazılım kuralı incelenir."
+        },
+        {
+          "label": "Ring/battery besleme seviyesi veya santral güç sorunu",
+          "probability": 6,
+          "basis": "Birden fazla dahili etkileniyorsa ortak PBX güç/hat beslemesi ölçülür."
+        }
+      ]
+    },
+    {
+      "id": "sliding",
+      "name": "Otomatik Kayar Kapı",
+      "shortName": "Kayar Kapı",
+      "description": "Şebeke, 24V aksesuar, radar/fotosel, motor sürücü, limit/encoder ve mekanik kızak.",
+      "startNodeId": "sliding_symptom",
+      "accent": "fuchsia",
+      "supported": true,
+      "commonSymptoms": [
+        "Kapı açılmıyor",
+        "Sensör algılamıyor",
+        "Motor sürmüyor",
+        "Kapı yarıda kalıyor",
+        "Kapı sürekli açık"
+      ],
+      "faultPriors": [
+        {
+          "label": "Radar/fotosel hizalama, algılama alanı veya emniyet girişi",
+          "probability": 22,
+          "basis": "Kapı açılmıyor/sürekli açık şikayetinde sensör durumu ilk kontrol edilir."
+        },
+        {
+          "label": "Ray, teker, kayış veya mekanik sürtünme",
+          "probability": 18,
+          "basis": "Kapı yarıda kalıyorsa mekanik yük motor akımını yükseltebilir."
+        },
+        {
+          "label": "Motor sürücü, inverter veya kontrol kartı çıkışı",
+          "probability": 16,
+          "basis": "Komut var ama motor sürmüyorsa sürücü katı ölçülür."
+        },
+        {
+          "label": "24V aksesuar beslemesi veya sensör güç düşümü",
+          "probability": 13,
+          "basis": "Sensör LED kararsızsa aksesuar beslemesi kontrol edilir."
+        },
+        {
+          "label": "Limit, encoder veya pozisyon öğrenme sorunu",
+          "probability": 11,
+          "basis": "Yarım hareket ve tersleme durumunda konum bilgisi kontrol edilir."
+        },
+        {
+          "label": "Mod seçici, kilit, acil stop veya giriş kilitlemesi",
+          "probability": 10,
+          "basis": "Kapı komut almıyorsa mod ve güvenlik girişleri dışlanır."
+        },
+        {
+          "label": "Kontrol kartı besleme/regülatör arızası",
+          "probability": 10,
+          "basis": "Birden fazla alt sistem etkileniyorsa kart beslemesi ölçülür."
+        }
+      ]
+    },
+    {
+      "id": "support",
+      "name": "Besleme & Yardımcı Cihazlar",
+      "shortName": "Yardımcı",
+      "description": "12V/24V adaptör, SMPS, PoE, röle modülü, sigorta, kablo ve saha yardımcı ekipmanları.",
+      "startNodeId": "support_symptom",
+      "accent": "lime",
+      "supported": true,
+      "commonSymptoms": [
+        "Adaptör çıkışı yok",
+        "Yükte voltaj düşüyor",
+        "Röle kontak değiştirmiyor",
+        "PoE yok",
+        "Kablo/sigorta şüpheli"
+      ],
+      "faultPriors": [
+        {
+          "label": "SMPS/adaptör zayıf, ripple yüksek veya yükte çöküyor",
+          "probability": 27,
+          "basis": "Yardımcı cihazlarda yük altında voltaj kontrolü ilk ayrımı verir."
+        },
+        {
+          "label": "Kablo kopuk, sigorta atık veya klemens gevşek",
+          "probability": 18,
+          "basis": "Saha ekipmanında açık devre ve gevşek bağlantı yaygın kontrol sınıfıdır."
+        },
+        {
+          "label": "Yük kısa devre veya cihaz fazla akım çekiyor",
+          "probability": 15,
+          "basis": "Besleme düşüyorsa yükü ayırıp akım tüketimi karşılaştırılır."
+        },
+        {
+          "label": "Röle kontağı yanık, bobin arızalı veya NO/NC yanlış",
+          "probability": 13,
+          "basis": "Röle LED yanıyor ama kontak değişmiyorsa kontak/bobin ölçülür."
+        },
+        {
+          "label": "PoE enjektör/switch portu veya güç bütçesi",
+          "probability": 12,
+          "basis": "PoE çıkışı yoksa kaynak port ve toplam güç bütçesi kontrol edilir."
+        },
+        {
+          "label": "Konnektör oksit, nem veya polarite hatası",
+          "probability": 8,
+          "basis": "Dış ortam yardımcı ekipmanlarında temas ve polarite sık arıza üretir."
+        },
+        {
+          "label": "Voltaj seçimi, jumper veya çıkış ayarı yanlış",
+          "probability": 7,
+          "basis": "24V/12V karışıklığı ve trim ayarı özellikle servis sonrası görülür."
+        }
+      ]
+    },
+    {
+      "id": "general",
+      "name": "Genel Kart Teşhisi",
+      "shortName": "Kart",
+      "description": "Görsel hasar, giriş beslemesi, 5V/3.3V, reset, clock, EEPROM/SPI Flash ve firmware hattı.",
+      "startNodeId": "general_symptom",
+      "accent": "indigo",
+      "supported": true,
+      "commonSymptoms": [
+        "Kart hiç açılmıyor",
+        "Regülatör ısınıyor",
+        "MCU çalışmıyor",
+        "Hafıza okunmuyor",
+        "Görsel hasar var"
+      ],
+      "faultPriors": [
+        {
+          "label": "5V/3.3V regülatör rail düşük veya kısa devre",
+          "probability": 22,
+          "basis": "Genel kart teşhisinde ilk ayrım güç rail sağlığıdır."
+        },
+        {
+          "label": "Çatlak lehim, oksit, yanık iz veya mekanik hasar",
+          "probability": 18,
+          "basis": "Görsel inspeksiyon hızlı ve yüksek getirili ilk adımdır."
+        },
+        {
+          "label": "Kısa devre kondansatör, TVS, diyot veya yarıiletken",
+          "probability": 15,
+          "basis": "Düşük dirençli rail ve ısınma varsa kısa devre avı yapılır."
+        },
+        {
+          "label": "Reset, kristal/oscillator veya boot pin sorunu",
+          "probability": 13,
+          "basis": "Besleme normal ama MCU çalışmıyorsa saat/reset kontrol edilir."
+        },
+        {
+          "label": "EEPROM/SPI Flash, firmware veya veri bozulması",
+          "probability": 12,
+          "basis": "MCU boot ediyor ama sistem davranışı bozuksa hafıza hattı incelenir."
+        },
+        {
+          "label": "Giriş koruma, ters polarite veya sigorta hattı",
+          "probability": 10,
+          "basis": "Hiç açılmayan kartta girişten regülatöre kadar takip edilir."
+        },
+        {
+          "label": "Konnektör, ribbon kablo veya saha bağlantısı",
+          "probability": 10,
+          "basis": "Kart sağlamken çevre bağlantıları arızayı taklit edebilir."
+        }
+      ]
+    }
+  ],
+  "nodes": {
+    "ups_symptom": {
+      "id": "ups_symptom",
+      "type": "symptom",
+      "device": "ups",
+      "title": "UPS Belirti Sınıflandırması",
+      "prompt": "Cihazın ana şikayetine en yakın belirtiyi seçin. Bu seçim ilk olasılık skorlarını oluşturur.",
+      "options": [
+        {
+          "label": "Hiç açılmıyor",
+          "next": "ups_battery_voltage",
+          "scoreDelta": {
+            "input_protection_fault": 20,
+            "rail_short": 18,
+            "mcu_boot": 10
+          }
+        },
+        {
+          "label": "Akü şarj etmiyor",
+          "next": "ups_battery_voltage",
+          "scoreDelta": {
+            "battery_degraded": 20,
+            "charger_fault": 22
+          }
+        },
+        {
+          "label": "Yük bağlanınca kapanıyor",
+          "next": "ups_battery_voltage",
+          "scoreDelta": {
+            "battery_degraded": 18,
+            "capacitor_esr": 14,
+            "mosfet_short": 8
+          }
+        },
+        {
+          "label": "Sigorta attırıyor",
+          "next": "ups_input_fuse",
+          "scoreDelta": {
+            "input_protection_fault": 26,
+            "mosfet_short": 22,
+            "rail_short": 12
+          }
+        }
+      ]
+    },
+    "ups_battery_voltage": {
+      "id": "ups_battery_voltage",
+      "type": "measurement",
+      "device": "ups",
+      "category": "Akü ve Şarj",
+      "title": "Akü Voltajı",
+      "prompt": "Akü uçlarındaki DC voltajı ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Cihaz enerjisiz, akü bağlı",
+      "probeBlack": "Akü - terminali",
+      "probeRed": "Akü + terminali",
+      "expected": {
+        "min": 11.8,
+        "max": 13.2
+      },
+      "danger": "low",
+      "hint": "12V kurşun asit akü 10.5V altındaysa derin deşarj kabul edilir. Şarj almayan akü yük altında hızla çöker.",
+      "imageUrl": "/measurement-placeholder.svg",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 10.5
+          },
+          "label": "Derin deşarj / hücre arızası",
+          "next": "ups_charge_voltage",
+          "scoreDelta": {
+            "battery_degraded": 36,
+            "charger_fault": 8
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 10.5,
+            "max": 11.79
+          },
+          "label": "Akü zayıf",
+          "next": "ups_charge_voltage",
+          "scoreDelta": {
+            "battery_degraded": 24,
+            "charger_fault": 10
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 11.8,
+            "max": 13.2
+          },
+          "label": "Akü voltajı normal",
+          "next": "ups_charge_voltage",
+          "scoreDelta": {
+            "battery_degraded": -8
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 13.2
+          },
+          "label": "Akü yüzey şarjı veya şarj regülasyonu yüksek",
+          "next": "ups_charge_voltage",
+          "scoreDelta": {
+            "charger_fault": 18
+          }
+        }
+      ],
+      "fallbackNext": "ups_charge_voltage"
+    },
+    "ups_charge_voltage": {
+      "id": "ups_charge_voltage",
+      "type": "measurement",
+      "device": "ups",
+      "category": "Akü ve Şarj",
+      "title": "Şarj Voltajı",
+      "prompt": "Adaptör/şebeke bağlıyken akü şarj hattını ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili, akü bağlı",
+      "probeBlack": "Akü - / sistem GND",
+      "probeRed": "Şarj çıkışı veya akü + terminali",
+      "expected": {
+        "min": 13.4,
+        "max": 14.4
+      },
+      "danger": "medium",
+      "hint": "Düşük değer adaptör, sigorta, diyot veya şarj regülatörü arızasına; yüksek değer aküye zarar verecek feedback problemine işaret eder.",
+      "imageUrl": "/measurement-placeholder.svg",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 12.8
+          },
+          "label": "Şarj çıkışı düşük",
+          "next": "ups_input_fuse",
+          "scoreDelta": {
+            "charger_fault": 34,
+            "input_protection_fault": 12
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 13.4,
+            "max": 14.4
+          },
+          "label": "Şarj voltajı normal",
+          "next": "ups_5v_rail",
+          "scoreDelta": {
+            "charger_fault": -8
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 14.4
+          },
+          "label": "Şarj voltajı yüksek",
+          "next": "ups_5v_rail",
+          "scoreDelta": {
+            "charger_fault": 30,
+            "battery_degraded": 8
+          }
+        }
+      ],
+      "fallbackNext": "ups_5v_rail"
+    },
+    "ups_input_fuse": {
+      "id": "ups_input_fuse",
+      "type": "component_test",
+      "device": "ups",
+      "category": "Giriş Koruma",
+      "title": "Sigorta ve Giriş Koruma Sürekliliği",
+      "prompt": "Giriş sigortası, NTC ve ters polarite koruma hattında süreklilik var mı?",
+      "meterMode": "Continuity / Ohm",
+      "powerState": "Enerjisiz, kondansatörler boşaltılmış",
+      "probeBlack": "Sigorta giriş tarafı",
+      "probeRed": "Sigorta çıkış tarafı",
+      "danger": "medium",
+      "yesLabel": "Süreklilik var",
+      "noLabel": "Açık devre",
+      "unknownLabel": "Test edemiyorum",
+      "nextYes": "ups_5v_rail",
+      "nextNo": "ups_result_input_stage",
+      "nextUnknown": "ups_visual_power",
+      "scoreYes": {
+        "input_protection_fault": -8
+      },
+      "scoreNo": {
+        "input_protection_fault": 38,
+        "mosfet_short": 10
+      },
+      "scoreUnknown": {
+        "input_protection_fault": 8
+      }
+    },
+    "ups_5v_rail": {
+      "id": "ups_5v_rail",
+      "type": "measurement",
+      "device": "ups",
+      "category": "Dijital Besleme",
+      "title": "5V Regülatör Hattı",
+      "prompt": "MCU veya röle sürücü beslemesindeki 5V hattını ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "GND",
+      "probeRed": "7805/LDO çıkışı veya MCU VCC test noktası",
+      "expected": {
+        "min": 4.8,
+        "max": 5.2
+      },
+      "danger": "medium",
+      "hint": "5V düşükse önce hatta düşük direnç/kısa devre var mı kontrol edin; sonra regülatör giriş voltajını ölçün.",
+      "imageUrl": "/measurement-placeholder.svg",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 1
+          },
+          "label": "5V hattı neredeyse sıfır",
+          "next": "ups_5v_resistance",
+          "scoreDelta": {
+            "rail_short": 40,
+            "input_protection_fault": 8
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 1,
+            "max": 4.79
+          },
+          "label": "5V hattı düşük",
+          "next": "ups_5v_resistance",
+          "scoreDelta": {
+            "rail_short": 26,
+            "capacitor_esr": 16,
+            "charger_fault": 8
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 4.8,
+            "max": 5.2
+          },
+          "label": "5V hattı normal",
+          "next": "ups_load_drop",
+          "scoreDelta": {
+            "rail_short": -12
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 5.2
+          },
+          "label": "5V hattı yüksek",
+          "next": "ups_result_regulator",
+          "scoreDelta": {
+            "rail_short": 10,
+            "mcu_boot": 14
+          }
+        }
+      ],
+      "fallbackNext": "ups_load_drop"
+    },
+    "ups_5v_resistance": {
+      "id": "ups_5v_resistance",
+      "type": "measurement",
+      "device": "ups",
+      "category": "Dijital Besleme",
+      "title": "5V Hattı Direnç Testi",
+      "prompt": "Enerjisiz kartta 5V ile GND arasındaki direnci ölçün.",
+      "unit": "Ω",
+      "meterMode": "Ohm",
+      "powerState": "Enerjisiz",
+      "probeBlack": "GND",
+      "probeRed": "5V hattı",
+      "expected": {
+        "min": 100,
+        "max": 100000
+      },
+      "danger": "low",
+      "hint": "20 ohm altı genellikle kısa devre veya hatta bağlı bozuk IC/kondansatör anlamına gelir.",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 20
+          },
+          "label": "Çok düşük direnç",
+          "next": "ups_result_rail_short",
+          "scoreDelta": {
+            "rail_short": 46
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 20,
+            "max": 99
+          },
+          "label": "Şüpheli düşük direnç",
+          "next": "ups_visual_power",
+          "scoreDelta": {
+            "rail_short": 24,
+            "capacitor_esr": 8
+          }
+        },
+        {
+          "when": {
+            "operator": ">=",
+            "value": 100
+          },
+          "label": "Kısa devre görünmüyor",
+          "next": "ups_result_regulator",
+          "scoreDelta": {
+            "rail_short": -10,
+            "charger_fault": 10
+          }
+        }
+      ],
+      "fallbackNext": "ups_visual_power"
+    },
+    "ups_load_drop": {
+      "id": "ups_load_drop",
+      "type": "measurement",
+      "device": "ups",
+      "category": "Yük Testi",
+      "title": "Yük Altında 12V Düşümü",
+      "prompt": "Cihaza tipik yük bağlayın ve 12V hattındaki en düşük değeri ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage / Min-Max",
+      "powerState": "Enerjili ve yük bağlı",
+      "probeBlack": "GND",
+      "probeRed": "12V çıkış veya akü destek hattı",
+      "expected": {
+        "min": 11.2,
+        "max": 13.8
+      },
+      "danger": "medium",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 10.8
+          },
+          "label": "Yükte ağır voltaj çökmesi",
+          "next": "ups_visual_power",
+          "scoreDelta": {
+            "battery_degraded": 24,
+            "capacitor_esr": 28,
+            "mosfet_short": 10
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 11.2,
+            "max": 13.8
+          },
+          "label": "Yük testi normal",
+          "next": "ups_relay_click",
+          "scoreDelta": {
+            "battery_degraded": -8,
+            "capacitor_esr": -8
+          }
+        }
+      ],
+      "fallbackNext": "ups_visual_power"
+    },
+    "ups_visual_power": {
+      "id": "ups_visual_power",
+      "type": "inspection",
+      "device": "ups",
+      "category": "Görsel İnceleme",
+      "title": "Güç Katı Görsel Kontrol",
+      "prompt": "Şişmiş kondansatör, kararmış direnç, çatlak lehim, yanık MOSFET veya oksitlenmiş klemens görüyor musunuz?",
+      "imageUrl": "/measurement-placeholder.svg",
+      "yesLabel": "Hasar var",
+      "noLabel": "Belirgin hasar yok",
+      "unknownLabel": "Emin değilim",
+      "nextYes": "ups_result_visual_rework",
+      "nextNo": "ups_relay_click",
+      "nextUnknown": "ups_relay_click",
+      "scoreYes": {
+        "capacitor_esr": 28,
+        "mosfet_short": 18,
+        "input_protection_fault": 12
+      },
+      "scoreNo": {
+        "capacitor_esr": -4
+      },
+      "scoreUnknown": {
+        "capacitor_esr": 4
+      }
+    },
+    "ups_relay_click": {
+      "id": "ups_relay_click",
+      "type": "question_boolean",
+      "device": "ups",
+      "category": "Çıkış Kontrol",
+      "title": "Röle Tetikleme Kontrolü",
+      "prompt": "Cihaz açılışta veya çıkış aktif edildiğinde röle klik sesi veriyor mu?",
+      "yesLabel": "Röle çekiyor",
+      "noLabel": "Röle çekmiyor",
+      "unknownLabel": "Duyamıyorum",
+      "nextYes": "ups_result_output_verify",
+      "nextNo": "ups_result_relay_driver",
+      "nextUnknown": "ups_result_scope_required",
+      "scoreYes": {
+        "relay_driver": -10,
+        "motor_output": 14
+      },
+      "scoreNo": {
+        "relay_driver": 34,
+        "mcu_boot": 12
+      },
+      "scoreUnknown": {
+        "relay_driver": 8
+      }
+    },
+    "barrier_symptom": {
+      "id": "barrier_symptom",
+      "type": "symptom",
+      "device": "barrier",
+      "title": "Bariyer Belirti Sınıflandırması",
+      "prompt": "Bariyer kartındaki ana belirtiyi seçin.",
+      "options": [
+        {
+          "label": "Kart açılıyor ama motor dönmüyor",
+          "next": "barrier_24v_input",
+          "scoreDelta": {
+            "motor_output": 22,
+            "relay_driver": 12,
+            "photo_sensor": 8
+          }
+        },
+        {
+          "label": "Kumanda algılanmıyor",
+          "next": "barrier_receiver_5v",
+          "scoreDelta": {
+            "remote_receiver": 30,
+            "mcu_boot": 8
+          }
+        },
+        {
+          "label": "Fotosel / emniyet hatası var",
+          "next": "barrier_photo_input",
+          "scoreDelta": {
+            "photo_sensor": 34
+          }
+        },
+        {
+          "label": "Kart hiç açılmıyor",
+          "next": "barrier_24v_input",
+          "scoreDelta": {
+            "input_protection_fault": 24,
+            "rail_short": 18,
+            "mcu_boot": 12
+          }
+        }
+      ]
+    },
+    "barrier_24v_input": {
+      "id": "barrier_24v_input",
+      "type": "measurement",
+      "device": "barrier",
+      "category": "Giriş Besleme",
+      "title": "24V / Ana Besleme Girişi",
+      "prompt": "Bariyer kartının ana besleme girişindeki DC voltajı ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "GND / -VIN",
+      "probeRed": "+VIN / 24V klemens",
+      "expected": {
+        "min": 22,
+        "max": 28
+      },
+      "danger": "medium",
+      "hint": "Nice/Egeteta kartlarda motor gücü ayrı trafo veya SMPS üzerinden gelebilir. Besleme düşükse önce harici kaynak kontrol edilir.",
+      "imageUrl": "/measurement-placeholder.svg",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 20
+          },
+          "label": "Ana besleme düşük/yok",
+          "next": "barrier_result_input_supply",
+          "scoreDelta": {
+            "input_protection_fault": 36,
+            "charger_fault": 12
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 22,
+            "max": 28
+          },
+          "label": "Ana besleme normal",
+          "next": "barrier_logic_5v",
+          "scoreDelta": {
+            "input_protection_fault": -10
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 28
+          },
+          "label": "Besleme yüksek",
+          "next": "barrier_logic_5v",
+          "scoreDelta": {
+            "input_protection_fault": 18,
+            "mcu_boot": 10
+          }
+        }
+      ],
+      "fallbackNext": "barrier_logic_5v"
+    },
+    "barrier_logic_5v": {
+      "id": "barrier_logic_5v",
+      "type": "measurement",
+      "device": "barrier",
+      "category": "Kontrol Beslemesi",
+      "title": "5V Lojik Besleme",
+      "prompt": "Mikrodenetleyici veya alıcı modül üzerindeki 5V hattını ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "GND",
+      "probeRed": "5V regülatör çıkışı",
+      "expected": {
+        "min": 4.8,
+        "max": 5.2
+      },
+      "danger": "medium",
+      "imageUrl": "/measurement-placeholder.svg",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 4.6
+          },
+          "label": "Lojik besleme düşük",
+          "next": "barrier_result_logic_supply",
+          "scoreDelta": {
+            "rail_short": 34,
+            "mcu_boot": 12
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 4.8,
+            "max": 5.2
+          },
+          "label": "Lojik besleme normal",
+          "next": "barrier_photo_input",
+          "scoreDelta": {
+            "rail_short": -10
+          }
+        }
+      ],
+      "fallbackNext": "barrier_photo_input"
+    },
+    "barrier_photo_input": {
+      "id": "barrier_photo_input",
+      "type": "question_boolean",
+      "device": "barrier",
+      "category": "Emniyet Girişleri",
+      "title": "Fotosel / Stop Girişi",
+      "prompt": "Fotosel, stop veya emniyet girişi aktif arıza durumunda mı? Kart üzerindeki emniyet LED'i hata gösteriyor mu?",
+      "yesLabel": "Emniyet hatası var",
+      "noLabel": "Emniyet girişi normal",
+      "unknownLabel": "Kontrol edemiyorum",
+      "nextYes": "barrier_result_photo_sensor",
+      "nextNo": "barrier_relay_output",
+      "nextUnknown": "barrier_relay_output",
+      "scoreYes": {
+        "photo_sensor": 42,
+        "motor_output": 8
+      },
+      "scoreNo": {
+        "photo_sensor": -12
+      },
+      "scoreUnknown": {
+        "photo_sensor": 8
+      }
+    },
+    "barrier_relay_output": {
+      "id": "barrier_relay_output",
+      "type": "question_boolean",
+      "device": "barrier",
+      "category": "Motor Sürme",
+      "title": "Motor Rölesi / Kontaktör Tetiklemesi",
+      "prompt": "Aç/Kapat komutu verildiğinde motor rölesi veya kontaktör çekiyor mu?",
+      "yesLabel": "Röle çekiyor",
+      "noLabel": "Röle çekmiyor",
+      "unknownLabel": "Duyamıyorum",
+      "nextYes": "barrier_motor_voltage",
+      "nextNo": "barrier_result_relay_driver",
+      "nextUnknown": "barrier_result_scope_required",
+      "scoreYes": {
+        "relay_driver": -10,
+        "motor_output": 18
+      },
+      "scoreNo": {
+        "relay_driver": 36,
+        "mcu_boot": 10
+      },
+      "scoreUnknown": {
+        "relay_driver": 8
+      }
+    },
+    "barrier_motor_voltage": {
+      "id": "barrier_motor_voltage",
+      "type": "question_boolean",
+      "device": "barrier",
+      "category": "Motor Çıkışı",
+      "title": "Motor Çıkış Tipi",
+      "prompt": "Motor veya kontrol kartı etiketine göre çıkış 230V AC sınıfında mı? Ölçüm aralığı seçilen motor tipine göre uygulanır.",
+      "yesLabel": "230V AC motor",
+      "noLabel": "24V DC motor",
+      "unknownLabel": "Etiket / şema yok",
+      "nextYes": "barrier_motor_voltage_ac",
+      "nextNo": "barrier_motor_voltage_dc",
+      "nextUnknown": "barrier_result_motor_reference"
+    },
+    "barrier_motor_voltage_dc": {
+      "id": "barrier_motor_voltage_dc",
+      "type": "measurement",
+      "device": "barrier",
+      "category": "24V DC Motor Çıkışı",
+      "title": "24V DC Motor Çıkış Voltajı",
+      "prompt": "Aç/Kapat komutu sırasında DC motor çıkış klemenslerindeki voltajı ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili, komut verilirken",
+      "probeBlack": "Motor - çıkışı",
+      "probeRed": "Motor + çıkışı",
+      "expected": {
+        "min": 18,
+        "max": 30
+      },
+      "danger": "medium",
+      "hint": "Komut sırasında polarite yön değiştirebilir. Hareketli mekanizmadan uzak durun.",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 10
+          },
+          "label": "Motor çıkışında voltaj yok",
+          "next": "barrier_result_output_stage",
+          "scoreDelta": {
+            "motor_output": 36,
+            "relay_driver": 12
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 18,
+            "max": 30
+          },
+          "label": "24V DC motor çıkışı normal",
+          "next": "barrier_result_motor_or_mechanics",
+          "scoreDelta": {
+            "motor_output": 18,
+            "relay_driver": -8
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 32
+          },
+          "label": "DC motor çıkışı anormal yüksek",
+          "next": "barrier_result_output_stage",
+          "scoreDelta": {
+            "motor_output": 34
+          }
+        }
+      ],
+      "fallbackNext": "barrier_result_output_stage"
+    },
+    "barrier_motor_voltage_ac": {
+      "id": "barrier_motor_voltage_ac",
+      "type": "measurement",
+      "device": "barrier",
+      "category": "230V AC Motor Çıkışı",
+      "title": "230V AC Motor Çıkış Voltajı",
+      "prompt": "Aç/Kapat komutu sırasında AC motor çıkış klemenslerindeki voltajı yalnızca uygun CAT sınıfı ölçü aletiyle ölçün.",
+      "unit": "V",
+      "meterMode": "AC Voltage",
+      "powerState": "Enerjili, komut verilirken",
+      "probeBlack": "Motor N / ortak çıkış",
+      "probeRed": "Motor aç veya kapat faz çıkışı",
+      "expected": {
+        "min": 200,
+        "max": 250
+      },
+      "danger": "high",
+      "hint": "Şebeke seviyesidir. İzole prob, tek-el çalışma tekniği ve uygun CAT sınıfı multimetre olmadan ölçmeyin.",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 80
+          },
+          "label": "AC motor çıkışında voltaj yok",
+          "next": "barrier_result_output_stage",
+          "scoreDelta": {
+            "motor_output": 36,
+            "relay_driver": 12
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 200,
+            "max": 250
+          },
+          "label": "230V AC motor çıkışı normal",
+          "next": "barrier_result_motor_or_mechanics",
+          "scoreDelta": {
+            "motor_output": 18,
+            "relay_driver": -8
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 260
+          },
+          "label": "AC motor çıkışı anormal yüksek",
+          "next": "barrier_result_output_stage",
+          "scoreDelta": {
+            "motor_output": 34
+          }
+        }
+      ],
+      "fallbackNext": "barrier_result_output_stage"
+    },
+    "barrier_result_motor_reference": {
+      "id": "barrier_result_motor_reference",
+      "type": "result",
+      "device": "barrier",
+      "severity": "warning",
+      "title": "Motor Gerilim Referansı Gerekli",
+      "summary": "24V DC ve 230V AC motor çıkışları aynı ölçüm sınırıyla değerlendirilemez. Motor etiketi veya kart şeması doğrulanmadan enerjili çıkış ölçümü yapılmamalı.",
+      "components": [
+        "Motor etiketi",
+        "Kontrol kartı modeli",
+        "Üretici bağlantı şeması"
+      ],
+      "repair": "Motor ve kontrol kartı modelini kaydedin; üretici şemasından çıkış tipini doğrulayıp teşhisi yeniden başlatın.",
+      "verification": "Motor çıkış tipi ve nominal gerilim kesin olarak belirlenmiş olmalı."
+    },
+    "barrier_receiver_5v": {
+      "id": "barrier_receiver_5v",
+      "type": "measurement",
+      "device": "barrier",
+      "category": "RF Alıcı",
+      "title": "Alıcı Modül Beslemesi",
+      "prompt": "Kumanda alıcısı veya RF modül beslemesini ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "GND",
+      "probeRed": "RF alıcı VCC pini",
+      "expected": {
+        "min": 4.8,
+        "max": 5.2
+      },
+      "danger": "low",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 4.6
+          },
+          "label": "Alıcı beslemesi düşük/yok",
+          "next": "barrier_result_receiver_supply",
+          "scoreDelta": {
+            "remote_receiver": 28,
+            "rail_short": 16
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 4.8,
+            "max": 5.2
+          },
+          "label": "Alıcı beslemesi normal",
+          "next": "barrier_remote_led",
+          "scoreDelta": {
+            "remote_receiver": 8,
+            "rail_short": -8
+          }
+        }
+      ],
+      "fallbackNext": "barrier_remote_led"
+    },
+    "barrier_remote_led": {
+      "id": "barrier_remote_led",
+      "type": "question_boolean",
+      "device": "barrier",
+      "category": "RF Alıcı",
+      "title": "Kumanda LED / Data Aktivitesi",
+      "prompt": "Kumandaya basıldığında alıcı LED'i yanıyor veya data hattında aktivite görünüyor mu?",
+      "yesLabel": "Aktivite var",
+      "noLabel": "Aktivite yok",
+      "unknownLabel": "Ölçemiyorum",
+      "nextYes": "barrier_result_memory_or_config",
+      "nextNo": "barrier_result_remote_receiver",
+      "nextUnknown": "barrier_result_remote_receiver",
+      "scoreYes": {
+        "remote_receiver": -8,
+        "mcu_boot": 12
+      },
+      "scoreNo": {
+        "remote_receiver": 42
+      },
+      "scoreUnknown": {
+        "remote_receiver": 16
+      }
+    },
+    "ups_result_input_stage": {
+      "id": "ups_result_input_stage",
+      "type": "result",
+      "device": "ups",
+      "severity": "critical",
+      "title": "Giriş Koruma Katı Arızası",
+      "summary": "Sigorta veya giriş koruma hattı açık devre. Sigortayı tek başına değiştirmeden önce köprü diyot, giriş MOSFET'i, TVS diyot ve ana kondansatör kısa devre testini yapın.",
+      "components": [
+        "F1 giriş sigortası",
+        "BR1 köprü diyot",
+        "TVS/D varistör",
+        "Q1 giriş MOSFET",
+        "NTC"
+      ],
+      "repair": "Kısa devre kaynağı bulunmadan sigorta değişimi tekrarlı arızaya sebep olur. Akım sınırlamalı güç kaynağı ile hattı kontrollü yükseltin.",
+      "verification": "Onarım sonrası boşta ve yük altında giriş akımını, şarj voltajını ve 5V hattını tekrar ölçün."
+    },
+    "ups_result_rail_short": {
+      "id": "ups_result_rail_short",
+      "type": "result",
+      "device": "ups",
+      "severity": "critical",
+      "title": "5V Hattında Kısa Devre",
+      "summary": "5V ile GND arasında çok düşük direnç var. Regülatör çıkış kondansatörü, MCU, RF/alarm modülü veya kısa devre yapan çevre IC öncelikli şüpheli.",
+      "components": [
+        "U3 5V regülatör",
+        "C14/C18 çıkış kondansatörleri",
+        "MCU VCC hattı",
+        "Röle sürücü entegresi"
+      ],
+      "repair": "Hattı bölerek izole edin. Önce çıkış kondansatörlerini ve regülatörü kaldırmadan termal/kısa devre kontrolü yapın.",
+      "verification": "Direnç 100 ohm üzerine çıktıktan sonra akım sınırlamalı besleme ile 5V hattını doğrulayın."
+    },
+    "ups_result_regulator": {
+      "id": "ups_result_regulator",
+      "type": "result",
+      "device": "ups",
+      "severity": "warning",
+      "title": "Regülatör veya Geri Besleme Arızası",
+      "summary": "Hatta belirgin kısa devre görünmüyor fakat regülatör çıkışı normal değil. Giriş voltajı, feedback dirençleri ve regülatör ısınması kontrol edilmeli.",
+      "components": [
+        "U3 LDO/DC-DC",
+        "Feedback dirençleri",
+        "Giriş/çıkış kondansatörleri"
+      ],
+      "repair": "Regülatör girişinde yeterli voltaj varsa regülatörü ve çevre kondansatörlerini değiştirin. Feedback bölücüyü değer dışına çıkma açısından ölçün.",
+      "verification": "5V hattı 4.8-5.2V aralığında sabit kalmalı."
+    },
+    "ups_result_visual_rework": {
+      "id": "ups_result_visual_rework",
+      "type": "result",
+      "device": "ups",
+      "severity": "warning",
+      "title": "Görsel Hasarlı Güç Katı",
+      "summary": "Gözle görülen hasar güç katında yaşlanma veya aşırı akım izine işaret ediyor. ESR yükselmiş kondansatörler ve çatlak lehimler yükte çökme yapar.",
+      "components": [
+        "Elektrolitik kondansatörler",
+        "Röle lehimleri",
+        "Klemensler",
+        "Güç dirençleri"
+      ],
+      "repair": "ESR ölçümü yapın, şişmiş kondansatörleri düşük ESR eşdeğerleriyle değiştirin ve yüksek akım yollarını yeniden lehimleyin.",
+      "verification": "Yük altında ripple ve voltaj düşümü ölçümü tekrarlanmalı."
+    },
+    "ups_result_output_verify": {
+      "id": "ups_result_output_verify",
+      "type": "result",
+      "device": "ups",
+      "severity": "info",
+      "title": "Çıkış Yolu veya Harici Yük Kontrolü",
+      "summary": "Besleme ve röle tetiklemesi büyük ölçüde normal. Sorun çıkış kontağı, klemens, bağlı yük veya kablolamada olabilir.",
+      "components": [
+        "Röle kontakları",
+        "Çıkış klemensi",
+        "Harici yük kablosu",
+        "Akü konnektörü"
+      ],
+      "repair": "Röle kontağı üzerinden voltaj düşümü ve çıkış sürekliliğini ölçün. Harici yükü ayırıp tekrar deneyin.",
+      "verification": "Nominal yükle minimum 10 dakika kararlı çalışma testi yapın."
+    },
+    "ups_result_relay_driver": {
+      "id": "ups_result_relay_driver",
+      "type": "result",
+      "device": "ups",
+      "severity": "warning",
+      "title": "Röle Sürücü Hattı Arızası",
+      "summary": "Röle çekmiyor. Bobin beslemesi, sürücü transistörü, flyback diyot ve MCU çıkış pini kontrol edilmeli.",
+      "components": [
+        "Röle bobini",
+        "Q röle sürücü transistörü",
+        "Flyback diyot",
+        "MCU GPIO"
+      ],
+      "repair": "Bobin direncini ölçün. Bobin beslemesi varsa transistör base/gate tetiklemesini kontrol edin.",
+      "verification": "Komut verildiğinde bobin uçlarında nominal gerilim görülmeli."
+    },
+    "ups_result_scope_required": {
+      "id": "ups_result_scope_required",
+      "type": "result",
+      "device": "ups",
+      "severity": "info",
+      "title": "Ek Ölçüm Ekipmanı Gerekli",
+      "summary": "Röle veya kontrol sinyali işitsel olarak doğrulanamadı. Osiloskop/lojik prob ile sürücü sinyali takip edilmeli.",
+      "components": [
+        "MCU çıkışı",
+        "Sürücü transistörü",
+        "Röle bobini"
+      ],
+      "repair": "Sinyal yolunu MCU pininden röle bobinine kadar takip edin.",
+      "verification": "Komut anında sürücü girişinde lojik seviye değişimi görülmeli."
+    },
+    "barrier_result_input_supply": {
+      "id": "barrier_result_input_supply",
+      "type": "result",
+      "device": "barrier",
+      "severity": "critical",
+      "title": "Bariyer Ana Besleme Arızası",
+      "summary": "24V ana besleme yok veya çok düşük. Harici trafo/SMPS, giriş sigortası, klemens ve ters polarite koruması öncelikli kontrol edilmeli.",
+      "components": [
+        "24V SMPS/trafo",
+        "Giriş sigortası",
+        "Klemens",
+        "Ters polarite diyodu"
+      ],
+      "repair": "Kartı yükten ayırarak beslemeyi ölçün. Besleme kart dışında düzeliyorsa kart üzerinde kısa devre aranmalı.",
+      "verification": "Motor komutu sırasında 24V hattı 22V altına düşmemeli."
+    },
+    "barrier_result_logic_supply": {
+      "id": "barrier_result_logic_supply",
+      "type": "result",
+      "device": "barrier",
+      "severity": "critical",
+      "title": "Lojik Besleme Çöküyor",
+      "summary": "5V lojik hat normal değil. MCU, RF alıcı, fotosel girişi veya regülatör çıkışında kısa/aşırı yük olabilir.",
+      "components": [
+        "5V regülatör",
+        "RF alıcı modülü",
+        "MCU",
+        "Giriş optokuplörleri"
+      ],
+      "repair": "5V-GND direnç testini yapın, RF alıcıyı ve harici girişleri izole ederek hattın toparlanıp toparlanmadığını kontrol edin.",
+      "verification": "5V hattı komut ve röle anında 4.8V altına inmemeli."
+    },
+    "barrier_result_photo_sensor": {
+      "id": "barrier_result_photo_sensor",
+      "type": "result",
+      "device": "barrier",
+      "severity": "warning",
+      "title": "Fotosel / Emniyet Girişi Arızası",
+      "summary": "Emniyet girişi aktif arıza durumunda. Bariyer motoru güvenlik nedeniyle sürülmüyor olabilir.",
+      "components": [
+        "Fotosel beslemesi",
+        "Stop girişi",
+        "Emniyet optokuplörü",
+        "Klemens ve kablo"
+      ],
+      "repair": "Fotosel beslemesini, NC/NO kontakt durumunu ve giriş optokuplörünü kontrol edin. Kablo kopukluğu veya yanlış köprülemeyi arayın.",
+      "verification": "Emniyet LED'i normal duruma dönmeden motor komutu verilmemeli."
+    },
+    "barrier_result_relay_driver": {
+      "id": "barrier_result_relay_driver",
+      "type": "result",
+      "device": "barrier",
+      "severity": "warning",
+      "title": "Motor Röle Sürücü Arızası",
+      "summary": "Komut var fakat röle/kontaktör çekmiyor. Sürücü transistörü, röle bobini, flyback diyot ve MCU çıkışı kontrol edilmeli.",
+      "components": [
+        "Motor rölesi",
+        "Sürücü MOSFET/transistör",
+        "Flyback diyot",
+        "MCU çıkış pini"
+      ],
+      "repair": "Bobin direncini ve bobin beslemesini ölçün. Sürücü girişinde komut yoksa MCU/fotosel kilidi tekrar kontrol edilmeli.",
+      "verification": "Komut sırasında bobin uçlarında nominal gerilim olmalı."
+    },
+    "barrier_result_output_stage": {
+      "id": "barrier_result_output_stage",
+      "type": "result",
+      "device": "barrier",
+      "severity": "critical",
+      "title": "Motor Çıkış Katı Arızası",
+      "summary": "Röle çekiyor fakat motor çıkışında voltaj yok. Röle kontağı, kontaktör yolu, triac/MOSFET çıkışı veya klemens hattı arızalı olabilir.",
+      "components": [
+        "Röle kontakları",
+        "Kontaktör",
+        "Triac/MOSFET çıkış",
+        "Motor klemensi"
+      ],
+      "repair": "Röle giriş ve çıkış kontaklarında voltajı karşılaştırın. Kontak yanığı veya klemens oksidasyonunu kontrol edin.",
+      "verification": "Motor çıkışında komut süresince nominal voltaj görülmeli."
+    },
+    "barrier_result_motor_or_mechanics": {
+      "id": "barrier_result_motor_or_mechanics",
+      "type": "result",
+      "device": "barrier",
+      "severity": "info",
+      "title": "Kart Çıkışı Var, Motor/Mekanik Kontrol",
+      "summary": "Kart motor çıkışını veriyor. Sorun motor kondansatörü, motor sargısı, limit switch veya mekanik sıkışmada olabilir.",
+      "components": [
+        "Motor kondansatörü",
+        "Motor sargısı",
+        "Limit switch",
+        "Redüktör/mekanik kol"
+      ],
+      "repair": "Motoru karttan ayırıp sargı ve kondansatör ölçümü yapın. Mekanik sıkışma ve limit switch durumunu kontrol edin.",
+      "verification": "Karttan bağımsız motor testi ve limit switch doğrulaması yapılmalı."
+    },
+    "barrier_result_receiver_supply": {
+      "id": "barrier_result_receiver_supply",
+      "type": "result",
+      "device": "barrier",
+      "severity": "warning",
+      "title": "RF Alıcı Besleme Arızası",
+      "summary": "Alıcı modül beslemesi yok veya düşük. Kumanda algılanmaması bu nedenle oluşuyor olabilir.",
+      "components": [
+        "RF alıcı VCC",
+        "5V regülatör",
+        "Alıcı soketi",
+        "Anten bağlantısı"
+      ],
+      "repair": "Alıcıyı sökerek 5V hattını tekrar ölçün. Alıcı kısa devre yapıyorsa modül değişimi gerekir.",
+      "verification": "Alıcı takılıyken 5V hattı kararlı kalmalı."
+    },
+    "barrier_result_remote_receiver": {
+      "id": "barrier_result_remote_receiver",
+      "type": "result",
+      "device": "barrier",
+      "severity": "info",
+      "title": "Kumanda Alıcı / Anten Arızası",
+      "summary": "Alıcı beslemesi var fakat kumanda aktivitesi yok. RF alıcı modülü, anten, kumanda pili veya öğrenme hafızası şüpheli.",
+      "components": [
+        "RF alıcı modül",
+        "Anten",
+        "Kumanda pili",
+        "EEPROM/öğrenme hafızası"
+      ],
+      "repair": "Bilinen sağlam kumanda ile deneyin, anten lehimini kontrol edin ve mümkünse alıcı data pinini osiloskopla izleyin.",
+      "verification": "Kumandaya basıldığında alıcı data hattında puls görülmeli."
+    },
+    "barrier_result_memory_or_config": {
+      "id": "barrier_result_memory_or_config",
+      "type": "result",
+      "device": "barrier",
+      "severity": "info",
+      "title": "Alıcı Aktivitesi Var, Hafıza/Konfigürasyon Kontrolü",
+      "summary": "Alıcı kumandayı görüyor ancak kart komutu işlemiyor. Öğrenme hafızası, dip switch/adresleme veya MCU yazılım durumu kontrol edilmeli.",
+      "components": [
+        "EEPROM",
+        "Learn butonu",
+        "Dip switch",
+        "MCU giriş pini"
+      ],
+      "repair": "Kumandayı yeniden tanıtın, hafıza silme/öğrenme prosedürünü uygulayın ve data pininin MCU'ya ulaştığını kontrol edin.",
+      "verification": "Tanıtılmış kumanda ile komut LED'i ve röle tepkisi doğrulanmalı."
+    },
+    "barrier_result_scope_required": {
+      "id": "barrier_result_scope_required",
+      "type": "result",
+      "device": "barrier",
+      "severity": "info",
+      "title": "Motor Sinyali İçin Ek Ölçüm Gerekli",
+      "summary": "Röle sesi doğrulanamadı. Komut anında MCU çıkışı ve sürücü gate/base sinyali osiloskop veya lojik prob ile izlenmeli.",
+      "components": [
+        "MCU çıkışı",
+        "Sürücü transistörü",
+        "Röle bobini"
+      ],
+      "repair": "Emniyet girişleri normal ise sürücü sinyal zincirini takip edin.",
+      "verification": "Komut anında sürücü girişinde belirgin lojik değişim olmalı."
+    },
+    "fire_symptom": {
+      "id": "fire_symptom",
+      "type": "symptom",
+      "device": "fire_panel",
+      "title": "Yangın Paneli Belirti Sınıflandırması",
+      "prompt": "Panel üzerindeki ana arıza belirtisini seçin. Zone, siren, akü ve panel beslemesi ayrı prosedürlere yönlendirilir.",
+      "options": [
+        {
+          "label": "Zone arızası",
+          "next": "fire_zone_resistance",
+          "scoreDelta": {
+            "zone_loop_fault": 34,
+            "rail_short": 6
+          }
+        },
+        {
+          "label": "Siren çıkışı yok",
+          "next": "fire_siren_voltage",
+          "scoreDelta": {
+            "siren_output_fault": 34,
+            "panel_battery_fault": 8
+          }
+        },
+        {
+          "label": "Panel resetliyor",
+          "next": "fire_panel_24v",
+          "scoreDelta": {
+            "panel_battery_fault": 20,
+            "rail_short": 18,
+            "mcu_boot": 12
+          }
+        },
+        {
+          "label": "Akü hatası",
+          "next": "fire_battery_voltage",
+          "scoreDelta": {
+            "panel_battery_fault": 36,
+            "charger_fault": 12
+          }
+        }
+      ]
+    },
+    "fire_zone_resistance": {
+      "id": "fire_zone_resistance",
+      "type": "measurement",
+      "device": "fire_panel",
+      "category": "Zone Hattı",
+      "title": "Zone Döngü Direnci",
+      "prompt": "Panel enerjisini kesip ilgili zone hattının klemensinden hat direncini ölçün.",
+      "unit": "Ω",
+      "meterMode": "Ohm",
+      "powerState": "Enerjisiz, zone hattı panelden ayrılmış",
+      "probeBlack": "Zone - klemensi",
+      "probeRed": "Zone + klemensi",
+      "expected": {
+        "min": 2200,
+        "max": 6800
+      },
+      "danger": "low",
+      "hint": "Birçok konvansiyonel panelde EOL direnci 2.2K, 4.7K veya 6.8K olabilir. Panel tipine göre referans alın.",
+      "imageUrl": "/measurement-placeholder.svg",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 500
+          },
+          "label": "Zone hattı kısa devreye yakın",
+          "next": "fire_result_zone_short",
+          "scoreDelta": {
+            "zone_loop_fault": 42
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 2200,
+            "max": 6800
+          },
+          "label": "EOL direnci normal aralıkta",
+          "next": "fire_zone_alarm_led",
+          "scoreDelta": {
+            "zone_loop_fault": -10
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 20000
+          },
+          "label": "Zone hattı açık devre",
+          "next": "fire_result_zone_open",
+          "scoreDelta": {
+            "zone_loop_fault": 42
+          }
+        }
+      ],
+      "fallbackNext": "fire_zone_alarm_led"
+    },
+    "fire_zone_alarm_led": {
+      "id": "fire_zone_alarm_led",
+      "type": "question_boolean",
+      "device": "fire_panel",
+      "category": "Zone Hattı",
+      "title": "Dedektör / Buton Alarm Durumu",
+      "prompt": "Zone üzerindeki dedektör, buton veya izolatörde alarm/arıza LED'i sürekli yanıyor mu?",
+      "yesLabel": "LED arıza/alarmda",
+      "noLabel": "LED normal",
+      "unknownLabel": "Sahaya erişemiyorum",
+      "nextYes": "fire_result_field_device",
+      "nextNo": "fire_panel_24v",
+      "nextUnknown": "fire_result_zone_trace",
+      "scoreYes": {
+        "zone_loop_fault": 28
+      },
+      "scoreNo": {
+        "zone_loop_fault": -6,
+        "mcu_boot": 8
+      },
+      "scoreUnknown": {
+        "zone_loop_fault": 10
+      }
+    },
+    "fire_panel_24v": {
+      "id": "fire_panel_24v",
+      "type": "measurement",
+      "device": "fire_panel",
+      "category": "Panel Beslemesi",
+      "title": "Panel 24V Besleme",
+      "prompt": "Panel ana 24V sistem beslemesini ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "Panel GND",
+      "probeRed": "24V AUX veya ana besleme test noktası",
+      "expected": {
+        "min": 21.5,
+        "max": 28.5
+      },
+      "danger": "medium",
+      "hint": "Panel resetliyorsa 24V hattındaki çökme, akü/SMPS veya siren hattındaki kısa devreyi gösterebilir.",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 20
+          },
+          "label": "Panel 24V hattı düşük",
+          "next": "fire_battery_voltage",
+          "scoreDelta": {
+            "panel_battery_fault": 32,
+            "rail_short": 14
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 21.5,
+            "max": 28.5
+          },
+          "label": "Panel 24V normal",
+          "next": "fire_result_panel_logic",
+          "scoreDelta": {
+            "panel_battery_fault": -8
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 28.5
+          },
+          "label": "Panel beslemesi yüksek",
+          "next": "fire_result_charger_high",
+          "scoreDelta": {
+            "charger_fault": 26,
+            "panel_battery_fault": 12
+          }
+        }
+      ],
+      "fallbackNext": "fire_result_panel_logic"
+    },
+    "fire_battery_voltage": {
+      "id": "fire_battery_voltage",
+      "type": "measurement",
+      "device": "fire_panel",
+      "category": "Akü Hattı",
+      "title": "Panel Akü Voltajı",
+      "prompt": "Panel akü uçlarındaki voltajı ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Panel enerjili veya akü izole ölçüm",
+      "probeBlack": "Akü -",
+      "probeRed": "Akü +",
+      "expected": {
+        "min": 24,
+        "max": 27.6
+      },
+      "danger": "medium",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 22
+          },
+          "label": "Panel aküsü zayıf/deşarj",
+          "next": "fire_result_battery",
+          "scoreDelta": {
+            "panel_battery_fault": 42,
+            "battery_degraded": 18
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 24,
+            "max": 27.6
+          },
+          "label": "Akü voltajı normal",
+          "next": "fire_panel_24v",
+          "scoreDelta": {
+            "panel_battery_fault": -10
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 28
+          },
+          "label": "Şarj voltajı yüksek",
+          "next": "fire_result_charger_high",
+          "scoreDelta": {
+            "charger_fault": 34,
+            "panel_battery_fault": 12
+          }
+        }
+      ],
+      "fallbackNext": "fire_panel_24v"
+    },
+    "fire_siren_voltage": {
+      "id": "fire_siren_voltage",
+      "type": "measurement",
+      "device": "fire_panel",
+      "category": "Siren Çıkışı",
+      "title": "Alarm Anında Siren Çıkış Voltajı",
+      "prompt": "Alarm testi sırasında siren çıkış klemensinde voltaj var mı ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Alarm testi aktif",
+      "probeBlack": "Siren -",
+      "probeRed": "Siren +",
+      "expected": {
+        "min": 21,
+        "max": 28
+      },
+      "danger": "medium",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 5
+          },
+          "label": "Siren çıkışı yok",
+          "next": "fire_siren_fuse",
+          "scoreDelta": {
+            "siren_output_fault": 40
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 21,
+            "max": 28
+          },
+          "label": "Siren çıkış voltajı var",
+          "next": "fire_result_siren_field",
+          "scoreDelta": {
+            "siren_output_fault": 12
+          }
+        }
+      ],
+      "fallbackNext": "fire_siren_fuse"
+    },
+    "fire_siren_fuse": {
+      "id": "fire_siren_fuse",
+      "type": "component_test",
+      "device": "fire_panel",
+      "category": "Siren Çıkışı",
+      "title": "Siren Sigortası / PTC Kontrolü",
+      "prompt": "Siren çıkışı sigortası veya PTC hattında süreklilik var mı?",
+      "meterMode": "Continuity / Ohm",
+      "powerState": "Enerjisiz",
+      "probeBlack": "Siren koruma elemanı giriş",
+      "probeRed": "Siren koruma elemanı çıkış",
+      "danger": "low",
+      "yesLabel": "Süreklilik var",
+      "noLabel": "Açık devre",
+      "unknownLabel": "Test edemiyorum",
+      "nextYes": "fire_result_siren_driver",
+      "nextNo": "fire_result_siren_fuse",
+      "nextUnknown": "fire_result_siren_driver",
+      "scoreYes": {
+        "siren_output_fault": 18
+      },
+      "scoreNo": {
+        "siren_output_fault": 42,
+        "rail_short": 8
+      },
+      "scoreUnknown": {
+        "siren_output_fault": 10
+      }
+    },
+    "cctv_symptom": {
+      "id": "cctv_symptom",
+      "type": "symptom",
+      "device": "cctv",
+      "title": "Kamera / CCTV Belirti Sınıflandırması",
+      "prompt": "Kamera arızasının ana belirtisini seçin. Besleme, PoE, IR ve video/ağ hattı ayrı ölçüm yoluna alınır.",
+      "options": [
+        {
+          "label": "Görüntü yok",
+          "next": "cctv_supply_voltage",
+          "scoreDelta": {
+            "poe_power_fault": 24,
+            "video_link_fault": 18,
+            "rail_short": 8
+          }
+        },
+        {
+          "label": "PoE besleme yok",
+          "next": "cctv_poe_voltage",
+          "scoreDelta": {
+            "poe_power_fault": 36,
+            "input_protection_fault": 10
+          }
+        },
+        {
+          "label": "IR çalışmıyor",
+          "next": "cctv_ir_voltage",
+          "scoreDelta": {
+            "ir_led_fault": 36,
+            "poe_power_fault": 8
+          }
+        },
+        {
+          "label": "Ağda görünmüyor",
+          "next": "cctv_supply_voltage",
+          "scoreDelta": {
+            "video_link_fault": 28,
+            "mcu_boot": 12
+          }
+        }
+      ]
+    },
+    "cctv_supply_voltage": {
+      "id": "cctv_supply_voltage",
+      "type": "measurement",
+      "device": "cctv",
+      "category": "Kamera Beslemesi",
+      "title": "12V Kamera Besleme Voltajı",
+      "prompt": "Kamera girişindeki DC beslemeyi ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "DC jack - / GND",
+      "probeRed": "DC jack + / 12V",
+      "expected": {
+        "min": 11.4,
+        "max": 12.8
+      },
+      "danger": "low",
+      "hint": "IR açıldığında zayıf adaptörlerde voltaj düşümü belirginleşir.",
+      "imageUrl": "/measurement-placeholder.svg",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 10.5
+          },
+          "label": "Kamera beslemesi düşük",
+          "next": "cctv_input_resistance",
+          "scoreDelta": {
+            "poe_power_fault": 34,
+            "rail_short": 12
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 11.4,
+            "max": 12.8
+          },
+          "label": "Besleme normal",
+          "next": "cctv_link_activity",
+          "scoreDelta": {
+            "poe_power_fault": -8
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 13.2
+          },
+          "label": "Besleme yüksek",
+          "next": "cctv_result_overvoltage",
+          "scoreDelta": {
+            "poe_power_fault": 26,
+            "mcu_boot": 14
+          }
+        }
+      ],
+      "fallbackNext": "cctv_link_activity"
+    },
+    "cctv_poe_voltage": {
+      "id": "cctv_poe_voltage",
+      "type": "measurement",
+      "device": "cctv",
+      "category": "PoE",
+      "title": "PoE Hat Voltajı",
+      "prompt": "PoE switch/enjektör çıkışında hat voltajını ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "PoE port aktif",
+      "probeBlack": "RJ45 DC - çiftleri",
+      "probeRed": "RJ45 DC + çiftleri",
+      "expected": {
+        "min": 44,
+        "max": 57
+      },
+      "danger": "medium",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 40
+          },
+          "label": "PoE voltajı yok/düşük",
+          "next": "cctv_result_poe_source",
+          "scoreDelta": {
+            "poe_power_fault": 42
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 44,
+            "max": 57
+          },
+          "label": "PoE kaynağı normal",
+          "next": "cctv_supply_voltage",
+          "scoreDelta": {
+            "poe_power_fault": -8
+          }
+        }
+      ],
+      "fallbackNext": "cctv_supply_voltage"
+    },
+    "cctv_input_resistance": {
+      "id": "cctv_input_resistance",
+      "type": "measurement",
+      "device": "cctv",
+      "category": "Kamera Beslemesi",
+      "title": "Kamera Giriş Direnci",
+      "prompt": "Enerjisiz kamerada 12V girişi ile GND arasındaki direnci ölçün.",
+      "unit": "Ω",
+      "meterMode": "Ohm",
+      "powerState": "Enerjisiz",
+      "probeBlack": "GND",
+      "probeRed": "12V giriş",
+      "expected": {
+        "min": 80,
+        "max": 100000
+      },
+      "danger": "low",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 20
+          },
+          "label": "Girişte kısa devre",
+          "next": "cctv_result_input_short",
+          "scoreDelta": {
+            "rail_short": 42,
+            "poe_power_fault": 16
+          }
+        },
+        {
+          "when": {
+            "operator": ">=",
+            "value": 80
+          },
+          "label": "Giriş kısa devre görünmüyor",
+          "next": "cctv_link_activity",
+          "scoreDelta": {
+            "rail_short": -8
+          }
+        }
+      ],
+      "fallbackNext": "cctv_link_activity"
+    },
+    "cctv_link_activity": {
+      "id": "cctv_link_activity",
+      "type": "question_boolean",
+      "device": "cctv",
+      "category": "Video / Ağ",
+      "title": "Link / Video Aktivitesi",
+      "prompt": "Switch portunda link LED'i yanıyor veya analog kamerada test monitöründe video senkronu görülüyor mu?",
+      "yesLabel": "Link/video var",
+      "noLabel": "Link/video yok",
+      "unknownLabel": "Test edemiyorum",
+      "nextYes": "cctv_result_config_or_sensor",
+      "nextNo": "cctv_result_link_fault",
+      "nextUnknown": "cctv_ir_voltage",
+      "scoreYes": {
+        "video_link_fault": -8,
+        "mcu_boot": 12
+      },
+      "scoreNo": {
+        "video_link_fault": 42,
+        "mcu_boot": 16
+      },
+      "scoreUnknown": {
+        "video_link_fault": 10
+      }
+    },
+    "cctv_ir_voltage": {
+      "id": "cctv_ir_voltage",
+      "type": "measurement",
+      "device": "cctv",
+      "category": "IR Aydınlatma",
+      "title": "IR LED Kartı Beslemesi",
+      "prompt": "Gece modunda IR LED kartına gelen voltajı ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili, gece modu tetiklenmiş",
+      "probeBlack": "IR kart GND",
+      "probeRed": "IR LED + hattı",
+      "expected": {
+        "min": 9,
+        "max": 12.8
+      },
+      "danger": "low",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 5
+          },
+          "label": "IR beslemesi yok",
+          "next": "cctv_result_ir_driver",
+          "scoreDelta": {
+            "ir_led_fault": 42
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 9,
+            "max": 12.8
+          },
+          "label": "IR beslemesi var",
+          "next": "cctv_result_ir_led_board",
+          "scoreDelta": {
+            "ir_led_fault": 22
+          }
+        }
+      ],
+      "fallbackNext": "cctv_result_ir_driver"
+    },
+    "access_symptom": {
+      "id": "access_symptom",
+      "type": "symptom",
+      "device": "access",
+      "title": "CACS / Erişim Kontrol Belirti Sınıflandırması",
+      "prompt": "Erişim kontrol arızasının ana belirtisini seçin. Okuyucu, röle/kilit ve haberleşme hattı ayrı ölçülür.",
+      "options": [
+        {
+          "label": "Kart okumuyor",
+          "next": "access_reader_voltage",
+          "scoreDelta": {
+            "reader_bus_fault": 34,
+            "rail_short": 8
+          }
+        },
+        {
+          "label": "Kilit çekmiyor",
+          "next": "access_lock_voltage",
+          "scoreDelta": {
+            "lock_output_fault": 34,
+            "relay_driver": 12
+          }
+        },
+        {
+          "label": "RS485 yok",
+          "next": "access_bus_voltage",
+          "scoreDelta": {
+            "reader_bus_fault": 34,
+            "mcu_boot": 8
+          }
+        },
+        {
+          "label": "Okuyucu beslemesi yok",
+          "next": "access_reader_voltage",
+          "scoreDelta": {
+            "reader_bus_fault": 22,
+            "rail_short": 18
+          }
+        },
+        {
+          "label": "Adaptör değişince çalışıyor / sistem kararsız",
+          "next": "access_adapter_loaded_voltage",
+          "scoreDelta": {
+            "access_psu_sag": 36,
+            "reader_bus_fault": 8,
+            "lock_output_fault": 8
+          }
+        }
+      ]
+    },
+    "access_adapter_loaded_voltage": {
+      "id": "access_adapter_loaded_voltage",
+      "type": "measurement",
+      "device": "access",
+      "category": "CACS Harici Besleme",
+      "title": "Eski Adaptör Yük Altı Voltajı",
+      "prompt": "Çıkardığınız eski adaptörü CACS panele tekrar bağlayın. Okuyucu/kilit komutu verilirken panel giriş klemensinde DC voltajı ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili, eski adaptör takılı, mümkünse kilit/okuyucu yükü aktif",
+      "probeBlack": "Panel GND / adaptör -",
+      "probeRed": "Panel +12V / adaptör +",
+      "expected": {
+        "min": 11.5,
+        "max": 13.8
+      },
+      "danger": "low",
+      "hint": "Adaptör boşta 12V gösterebilir. Önemli olan panel bağlıyken, röle/kilit/okuyucu akım çekerken voltajın çöküp çökmediğidir.",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 10.8
+          },
+          "label": "Yük altında ciddi voltaj çökmesi",
+          "next": "access_result_adapter_load_sag",
+          "scoreDelta": {
+            "access_psu_sag": 48,
+            "reader_bus_fault": 10,
+            "lock_output_fault": 10
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 10.8,
+            "max": 11.49
+          },
+          "label": "Sınırda/düşük yük altı besleme",
+          "next": "access_adapter_wiggle_reset",
+          "scoreDelta": {
+            "access_psu_sag": 34,
+            "reader_bus_fault": 8,
+            "lock_output_fault": 8
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 11.5,
+            "max": 13.8
+          },
+          "label": "Yük altında DC seviye normal",
+          "next": "access_adapter_wiggle_reset",
+          "scoreDelta": {
+            "access_psu_sag": 12
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 13.8
+          },
+          "label": "Adaptör regülasyonu yüksek",
+          "next": "access_result_adapter_regulation",
+          "scoreDelta": {
+            "access_psu_sag": 30
+          }
+        }
+      ],
+      "fallbackNext": "access_adapter_wiggle_reset"
+    },
+    "access_adapter_wiggle_reset": {
+      "id": "access_adapter_wiggle_reset",
+      "type": "question_boolean",
+      "device": "access",
+      "category": "CACS Harici Besleme",
+      "title": "Adaptör / Klemens Temassızlık Testi",
+      "prompt": "Eski adaptör bağlıyken DC jak, klemens veya kablo hafif oynatıldığında panel resetliyor, okuyucu sönüyor veya kilit komutunda voltaj anlık düşüyor mu?",
+      "yesLabel": "Evet, temas/ani düşüm var",
+      "noLabel": "Hayır, stabil görünüyor",
+      "unknownLabel": "Gözlemleyemiyorum",
+      "nextYes": "access_result_adapter_intermittent",
+      "nextNo": "access_reader_voltage",
+      "nextUnknown": "access_reader_voltage",
+      "scoreYes": {
+        "access_psu_sag": 44
+      },
+      "scoreNo": {
+        "access_psu_sag": -6,
+        "reader_bus_fault": 8
+      },
+      "scoreUnknown": {
+        "access_psu_sag": 10
+      }
+    },
+    "access_reader_voltage": {
+      "id": "access_reader_voltage",
+      "type": "question_boolean",
+      "device": "access",
+      "category": "Okuyucu Beslemesi",
+      "title": "Okuyucu Nominal Beslemesi",
+      "prompt": "Okuyucu etiketi veya bağlantı şemasında nominal besleme 12V olarak mı belirtilmiş?",
+      "yesLabel": "12V okuyucu",
+      "noLabel": "5V okuyucu",
+      "unknownLabel": "Etiket / şema yok",
+      "nextYes": "access_reader_voltage_12v",
+      "nextNo": "access_reader_voltage_5v",
+      "nextUnknown": "access_result_reader_reference"
+    },
+    "access_reader_voltage_5v": {
+      "id": "access_reader_voltage_5v",
+      "type": "measurement",
+      "device": "access",
+      "category": "5V Okuyucu Beslemesi",
+      "title": "5V Okuyucu Besleme Ölçümü",
+      "prompt": "Kart okuyucu klemensinde 5V besleme voltajını ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "GND",
+      "probeRed": "Reader +V",
+      "expected": {
+        "min": 4.75,
+        "max": 5.25
+      },
+      "danger": "low",
+      "hint": "Ölçümü okuyucu bağlıyken yapın; uzun kablo ve ince kesit yük altında düşüm oluşturabilir.",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 4.5
+          },
+          "label": "Okuyucu beslemesi yok/düşük",
+          "next": "access_reader_resistance",
+          "scoreDelta": {
+            "reader_bus_fault": 32,
+            "rail_short": 16
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 4.75,
+            "max": 5.25
+          },
+          "label": "5V okuyucu beslemesi normal",
+          "next": "access_wiegand_activity",
+          "scoreDelta": {
+            "reader_bus_fault": 8
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 5.5
+          },
+          "label": "5V okuyucu beslemesi anormal yüksek",
+          "next": "access_result_reader_supply",
+          "scoreDelta": {
+            "rail_short": 18,
+            "reader_bus_fault": 20
+          }
+        }
+      ],
+      "fallbackNext": "access_reader_resistance"
+    },
+    "access_reader_voltage_12v": {
+      "id": "access_reader_voltage_12v",
+      "type": "measurement",
+      "device": "access",
+      "category": "12V Okuyucu Beslemesi",
+      "title": "12V Okuyucu Besleme Ölçümü",
+      "prompt": "Kart okuyucu klemensinde 12V besleme voltajını ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "GND",
+      "probeRed": "Reader +V",
+      "expected": {
+        "min": 11,
+        "max": 13.8
+      },
+      "danger": "low",
+      "hint": "Ölçümü okuyucu bağlıyken yapın. Okuyucu LED'i yansa bile veri gönderirken voltaj çökebilir.",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 10.5
+          },
+          "label": "12V okuyucu beslemesi yok/düşük",
+          "next": "access_reader_resistance",
+          "scoreDelta": {
+            "reader_bus_fault": 32,
+            "rail_short": 16
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 11,
+            "max": 13.8
+          },
+          "label": "12V okuyucu beslemesi normal",
+          "next": "access_wiegand_activity",
+          "scoreDelta": {
+            "reader_bus_fault": 8
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 14.2
+          },
+          "label": "12V okuyucu beslemesi anormal yüksek",
+          "next": "access_result_reader_supply",
+          "scoreDelta": {
+            "rail_short": 18,
+            "reader_bus_fault": 20
+          }
+        }
+      ],
+      "fallbackNext": "access_reader_resistance"
+    },
+    "access_result_reader_reference": {
+      "id": "access_result_reader_reference",
+      "type": "result",
+      "device": "access",
+      "severity": "warning",
+      "title": "Okuyucu Besleme Referansı Gerekli",
+      "summary": "5V ve 12V okuyucular aynı aralıkta değerlendirilemez. Etiket veya üretici şeması doğrulanmadan besleme normal kabul edilmemeli.",
+      "components": [
+        "Okuyucu etiketi",
+        "Panel bağlantı şeması",
+        "Reader +V terminali"
+      ],
+      "repair": "Okuyucu modelini kaydedin ve üretici dokümanından nominal besleme ile akım ihtiyacını doğrulayın.",
+      "verification": "Okuyucu nominal voltajı kesin olarak belirlenmiş olmalı."
+    },
+    "access_reader_resistance": {
+      "id": "access_reader_resistance",
+      "type": "measurement",
+      "device": "access",
+      "category": "Okuyucu Beslemesi",
+      "title": "Okuyucu Hattı Kısa Devre Testi",
+      "prompt": "Okuyucuyu ayırıp besleme hattı ile GND arasındaki direnci ölçün.",
+      "unit": "Ω",
+      "meterMode": "Ohm",
+      "powerState": "Enerjisiz, okuyucu ayrılmış",
+      "probeBlack": "GND",
+      "probeRed": "Reader +V",
+      "expected": {
+        "min": 100,
+        "max": 100000
+      },
+      "danger": "low",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 30
+          },
+          "label": "Okuyucu hattında kısa devre",
+          "next": "access_result_reader_short",
+          "scoreDelta": {
+            "reader_bus_fault": 32,
+            "rail_short": 28
+          }
+        },
+        {
+          "when": {
+            "operator": ">=",
+            "value": 100
+          },
+          "label": "Kısa devre görünmüyor",
+          "next": "access_result_reader_supply",
+          "scoreDelta": {
+            "rail_short": -8,
+            "reader_bus_fault": 18
+          }
+        }
+      ],
+      "fallbackNext": "access_result_reader_supply"
+    },
+    "access_wiegand_activity": {
+      "id": "access_wiegand_activity",
+      "type": "question_boolean",
+      "device": "access",
+      "category": "Okuyucu Veri",
+      "title": "Wiegand/Data Aktivitesi",
+      "prompt": "Kart okutulduğunda D0/D1 veya RS485 hattında LED/lojik aktivite görülüyor mu?",
+      "yesLabel": "Aktivite var",
+      "noLabel": "Aktivite yok",
+      "unknownLabel": "Ölçemiyorum",
+      "nextYes": "access_result_config",
+      "nextNo": "access_result_reader_bus",
+      "nextUnknown": "access_bus_voltage",
+      "scoreYes": {
+        "reader_bus_fault": -8,
+        "mcu_boot": 10
+      },
+      "scoreNo": {
+        "reader_bus_fault": 42
+      },
+      "scoreUnknown": {
+        "reader_bus_fault": 12
+      }
+    },
+    "access_lock_voltage": {
+      "id": "access_lock_voltage",
+      "type": "measurement",
+      "device": "access",
+      "category": "Kilit Çıkışı",
+      "title": "Komut Anında Kilit Voltajı",
+      "prompt": "Kapı aç komutu verildiğinde kilit çıkış klemensinde voltaj ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili, kapı aç komutu aktif",
+      "probeBlack": "LOCK - / GND",
+      "probeRed": "LOCK +",
+      "expected": {
+        "min": 11,
+        "max": 13.8
+      },
+      "danger": "medium",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 5
+          },
+          "label": "Kilit çıkışı yok",
+          "next": "access_relay_click",
+          "scoreDelta": {
+            "lock_output_fault": 38,
+            "relay_driver": 16
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 11,
+            "max": 13.8
+          },
+          "label": "Kilit çıkış voltajı var",
+          "next": "access_result_lock_or_cable",
+          "scoreDelta": {
+            "lock_output_fault": 18,
+            "relay_driver": -8
+          }
+        }
+      ],
+      "fallbackNext": "access_relay_click"
+    },
+    "access_relay_click": {
+      "id": "access_relay_click",
+      "type": "question_boolean",
+      "device": "access",
+      "category": "Kilit Rölesi",
+      "title": "Kilit Rölesi Tetikleniyor mu?",
+      "prompt": "Kapı aç komutu sırasında röle klik sesi geliyor veya röle LED'i yanıyor mu?",
+      "yesLabel": "Röle tetikleniyor",
+      "noLabel": "Röle tetiklenmiyor",
+      "unknownLabel": "Emin değilim",
+      "nextYes": "access_result_lock_contact",
+      "nextNo": "access_result_relay_driver",
+      "nextUnknown": "access_result_relay_driver",
+      "scoreYes": {
+        "relay_driver": -8,
+        "lock_output_fault": 20
+      },
+      "scoreNo": {
+        "relay_driver": 34,
+        "mcu_boot": 12
+      },
+      "scoreUnknown": {
+        "relay_driver": 12
+      }
+    },
+    "access_bus_voltage": {
+      "id": "access_bus_voltage",
+      "type": "measurement",
+      "device": "access",
+      "category": "RS485 / Haberleşme",
+      "title": "RS485 A-B Diferansiyel Voltaj",
+      "prompt": "RS485 A ve B hatları arasındaki DC farkı ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "RS485 B",
+      "probeRed": "RS485 A",
+      "expected": {
+        "min": 0.1,
+        "max": 5
+      },
+      "danger": "low",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 0.05
+          },
+          "label": "RS485 hattı kısa/devre dışı olabilir",
+          "next": "access_result_rs485_bus",
+          "scoreDelta": {
+            "reader_bus_fault": 36
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 0.1,
+            "max": 5
+          },
+          "label": "RS485 bias/aktivite var",
+          "next": "access_result_config",
+          "scoreDelta": {
+            "reader_bus_fault": 8
+          }
+        }
+      ],
+      "fallbackNext": "access_result_rs485_bus"
+    },
+    "fire_result_zone_short": {
+      "id": "fire_result_zone_short",
+      "type": "result",
+      "device": "fire_panel",
+      "severity": "warning",
+      "title": "Zone Hattı Kısa Devre",
+      "summary": "Zone hattı beklenen EOL direncinin çok altında. Kablo ezilmesi, yanlış bağlantı, su/oksit veya kısa devre yapan saha cihazı şüpheli.",
+      "components": [
+        "Zone kablosu",
+        "Dedektör tabanı",
+        "Manuel buton",
+        "EOL direnci"
+      ],
+      "repair": "Zone hattını bölerek ölçün. Dedektör tabanlarını sırayla ayırıp direncin normale döndüğü noktayı bulun.",
+      "verification": "Panel zone normal durumuna dönmeli ve alarm testi sahadan doğrulanmalı."
+    },
+    "fire_result_zone_open": {
+      "id": "fire_result_zone_open",
+      "type": "result",
+      "device": "fire_panel",
+      "severity": "warning",
+      "title": "Zone Hattı Açık Devre",
+      "summary": "Zone hattı açık devre görünüyor. EOL direnci kopuk, kablo kesik veya klemens gevşek olabilir.",
+      "components": [
+        "EOL direnci",
+        "Zone klemensi",
+        "Dedektör tabanı",
+        "Hat kablosu"
+      ],
+      "repair": "EOL direncinin son cihazda olduğunu doğrulayın. Klemensleri ve dedektör tabanlarını süreklilik açısından kontrol edin.",
+      "verification": "Zone direnci panel referans değerine dönmeli."
+    },
+    "fire_result_field_device": {
+      "id": "fire_result_field_device",
+      "type": "result",
+      "device": "fire_panel",
+      "severity": "info",
+      "title": "Saha Cihazı Alarm/Arıza Durumunda",
+      "summary": "Zone hattı üzerindeki dedektör veya buton arıza/alarm durumunda kalmış olabilir.",
+      "components": [
+        "Dedektör",
+        "Manuel buton",
+        "İzolatör",
+        "Zone tabanı"
+      ],
+      "repair": "Kirli dedektörü temizleyin/değiştirin, buton reset durumunu ve taban bağlantılarını kontrol edin.",
+      "verification": "Saha cihazı reset sonrası panelde normal durum göstermeli."
+    },
+    "fire_result_zone_trace": {
+      "id": "fire_result_zone_trace",
+      "type": "result",
+      "device": "fire_panel",
+      "severity": "info",
+      "title": "Zone Hattı Sahada İzlenmeli",
+      "summary": "Saha erişimi olmadan zone arızası kesin ayrıştırılamadı. Hat bölerek ölçüm ve EOL doğrulaması gerekiyor.",
+      "components": [
+        "Zone hattı",
+        "EOL direnci",
+        "Saha cihazları"
+      ],
+      "repair": "Panelden başlayarak hattı bölümlere ayırın ve direnç değerini her bölümde tekrar ölçün.",
+      "verification": "Panel zone normal ve alarm durumlarını doğru algılamalı."
+    },
+    "fire_result_panel_logic": {
+      "id": "fire_result_panel_logic",
+      "type": "result",
+      "device": "fire_panel",
+      "severity": "critical",
+      "title": "Panel Lojik / Reset Arızası",
+      "summary": "Ana besleme normal fakat panel resetliyor veya kararsız. 5V/3.3V regülatör, reset entegresi, MCU kristali veya firmware hattı şüpheli.",
+      "components": [
+        "5V/3.3V regülatör",
+        "Reset entegresi",
+        "Kristal",
+        "MCU/flash"
+      ],
+      "repair": "Lojik regülatörleri ve reset hattını ölçün. Ripple yüksekse filtre kondansatörlerini ESR ile kontrol edin.",
+      "verification": "Panel minimum 30 dakika reset atmadan çalışmalı."
+    },
+    "fire_result_battery": {
+      "id": "fire_result_battery",
+      "type": "result",
+      "device": "fire_panel",
+      "severity": "warning",
+      "title": "Panel Akü Hattı Arızası",
+      "summary": "Akü voltajı düşük veya akü şarj tutmuyor. Panel aküsü, şarj sigortası ve şarj regülatörü kontrol edilmeli.",
+      "components": [
+        "2x12V akü",
+        "Akü sigortası",
+        "Şarj regülatörü",
+        "Akü kablosu"
+      ],
+      "repair": "Aküyü yük testine alın. Sağlam akü ile şarj voltajını tekrar ölçün.",
+      "verification": "Akü bağlıyken panel akü arızası vermemeli."
+    },
+    "fire_result_charger_high": {
+      "id": "fire_result_charger_high",
+      "type": "result",
+      "device": "fire_panel",
+      "severity": "critical",
+      "title": "Şarj Regülasyonu Yüksek",
+      "summary": "Panel akü/24V hattı yüksek ölçüldü. Feedback bölücü veya şarj regülatörü aküye zarar verebilir.",
+      "components": [
+        "Şarj regülatörü",
+        "Feedback dirençleri",
+        "Akü bağlantısı"
+      ],
+      "repair": "Aküyü korumak için uzun süre bağlı bırakmayın. Regülatör feedback değerlerini ve çıkış kondansatörlerini kontrol edin.",
+      "verification": "Şarj voltajı üretici referansına dönmeli."
+    },
+    "fire_result_siren_field": {
+      "id": "fire_result_siren_field",
+      "type": "result",
+      "device": "fire_panel",
+      "severity": "info",
+      "title": "Siren Çıkışı Var, Saha Siren Hattı Kontrol",
+      "summary": "Panel siren çıkışını veriyor. Siren cihazı, polarite, kablo kopukluğu veya hat sonu bağlantısı kontrol edilmeli.",
+      "components": [
+        "Siren",
+        "Siren kablosu",
+        "Polarite",
+        "Hat sonu direnç/diyot"
+      ],
+      "repair": "Siren uçlarında voltajı sahada ölçün ve bilinen sağlam siren ile test edin.",
+      "verification": "Alarm testinde siren sahada çalışmalı."
+    },
+    "fire_result_siren_fuse": {
+      "id": "fire_result_siren_fuse",
+      "type": "result",
+      "device": "fire_panel",
+      "severity": "critical",
+      "title": "Siren Sigortası / PTC Açık",
+      "summary": "Siren koruma hattı açık devre. Siren hattında kısa devre veya aşırı akım sonrası koruma elemanı açmış olabilir.",
+      "components": [
+        "Siren sigortası/PTC",
+        "Siren hattı",
+        "Çıkış diyodu"
+      ],
+      "repair": "Koruma elemanını değiştirmeden önce siren hattı direncini ve kısa devreyi kontrol edin.",
+      "verification": "Alarm testinde çıkış voltajı koruma üzerinden geçmeli."
+    },
+    "fire_result_siren_driver": {
+      "id": "fire_result_siren_driver",
+      "type": "result",
+      "device": "fire_panel",
+      "severity": "critical",
+      "title": "Siren Sürücü Katı Arızası",
+      "summary": "Koruma hattı sağlam olsa bile siren çıkışı üretilemiyor. MOSFET/röle sürücü, diyot veya MCU çıkışı şüpheli.",
+      "components": [
+        "Siren MOSFET/röle",
+        "Flyback diyot",
+        "MCU alarm çıkışı"
+      ],
+      "repair": "Alarm komutu sırasında sürücü gate/base sinyalini ve çıkış elemanı voltaj düşümünü ölçün.",
+      "verification": "Alarm anında siren çıkışında nominal voltaj oluşmalı."
+    },
+    "cctv_result_overvoltage": {
+      "id": "cctv_result_overvoltage",
+      "type": "result",
+      "device": "cctv",
+      "severity": "critical",
+      "title": "Kamera Aşırı Besleme Riski",
+      "summary": "Kamera giriş voltajı yüksek. Regülatör, görüntü işlemci veya IR sürücü hasar görmüş olabilir.",
+      "components": [
+        "Adaptör/PoE splitter",
+        "Giriş TVS",
+        "DC-DC regülatör",
+        "Ana SoC"
+      ],
+      "repair": "Doğru adaptör/PoE standardını kullanın. Kamera giriş koruması ve regülatör çıkışlarını kontrol edin.",
+      "verification": "Kamera nominal beslemede ağ/video çıktısı vermeli."
+    },
+    "cctv_result_poe_source": {
+      "id": "cctv_result_poe_source",
+      "type": "result",
+      "device": "cctv",
+      "severity": "critical",
+      "title": "PoE Kaynağı veya Hat Arızası",
+      "summary": "PoE voltajı yok/düşük. Switch portu, enjektör, kablo çifti veya kamera PoE PD katı şüpheli.",
+      "components": [
+        "PoE switch portu",
+        "RJ45 kablo",
+        "PoE PD entegresi",
+        "Manyetik trafo"
+      ],
+      "repair": "Bilinen sağlam PoE portuyla deneyin. Kablo çiftlerini ve RJ45 krimpi süreklilikle kontrol edin.",
+      "verification": "PoE portu kamera bağlıyken standarda uygun voltaj vermeli."
+    },
+    "cctv_result_input_short": {
+      "id": "cctv_result_input_short",
+      "type": "result",
+      "device": "cctv",
+      "severity": "critical",
+      "title": "Kamera Girişinde Kısa Devre",
+      "summary": "12V giriş-GND arasında düşük direnç var. TVS diyot, giriş kondansatörü veya DC-DC regülatör kısa devre olabilir.",
+      "components": [
+        "TVS diyot",
+        "Giriş kondansatörü",
+        "DC-DC regülatör",
+        "IR sürücü"
+      ],
+      "repair": "Akım sınırlamalı besleme ile ısınan komponenti bulun. TVS ve giriş kondansatörünü izole ederek ölçün.",
+      "verification": "Giriş direnci toparlandıktan sonra kamera nominal akım çekmeli."
+    },
+    "cctv_result_link_fault": {
+      "id": "cctv_result_link_fault",
+      "type": "result",
+      "device": "cctv",
+      "severity": "warning",
+      "title": "Video / Ağ Linki Yok",
+      "summary": "Besleme normal fakat link/video yok. RJ45/BNC hattı, manyetik trafo, PHY veya analog video sürücü şüpheli.",
+      "components": [
+        "RJ45/BNC konnektör",
+        "Ethernet manyetik",
+        "PHY entegresi",
+        "Video sürücü"
+      ],
+      "repair": "Kablo ve portu bilinen sağlam cihazla test edin. Kamera PHY ısınması ve kristal aktivitesini kontrol edin.",
+      "verification": "Switch link LED'i veya test monitörü görüntüsü oluşmalı."
+    },
+    "cctv_result_config_or_sensor": {
+      "id": "cctv_result_config_or_sensor",
+      "type": "result",
+      "device": "cctv",
+      "severity": "info",
+      "title": "Besleme ve Link Var, Konfigürasyon/Sensör Kontrol",
+      "summary": "Kamera beslemesi ve link/video aktivitesi var. IP çakışması, şifre/konfigürasyon, lens/sensör veya firmware kontrol edilmeli.",
+      "components": [
+        "IP konfigürasyonu",
+        "Lens/sensör kablosu",
+        "Firmware",
+        "NVR kanal ayarı"
+      ],
+      "repair": "Fabrika ayarı, ONVIF arama ve bilinen sağlam NVR/test monitörü ile doğrulama yapın.",
+      "verification": "Kamera ağda görünmeli ve canlı görüntü alınmalı."
+    },
+    "cctv_result_ir_driver": {
+      "id": "cctv_result_ir_driver",
+      "type": "result",
+      "device": "cctv",
+      "severity": "warning",
+      "title": "IR Sürücü / LDR Hattı Arızası",
+      "summary": "Gece modunda IR beslemesi gelmiyor. LDR, IR sürücü transistörü veya firmware gece modu tetiklemesi şüpheli.",
+      "components": [
+        "LDR",
+        "IR sürücü MOSFET",
+        "IR kart konnektörü",
+        "SoC kontrol pini"
+      ],
+      "repair": "LDR'yi karartıp sürücü gate/base sinyalini ölçün. IR kart konnektörünü ve kablosunu kontrol edin.",
+      "verification": "Karanlıkta IR LED'ler akım çekmeli ve görüntü siyah-beyaz moda geçmeli."
+    },
+    "cctv_result_ir_led_board": {
+      "id": "cctv_result_ir_led_board",
+      "type": "result",
+      "device": "cctv",
+      "severity": "info",
+      "title": "IR Kart Besleniyor, LED Kartı Şüpheli",
+      "summary": "IR kartına voltaj geliyor ancak aydınlatma yok. LED dizisi, seri direnç veya kart lehimleri arızalı olabilir.",
+      "components": [
+        "IR LED dizisi",
+        "Seri dirençler",
+        "IR kart lehimleri",
+        "Konnektör"
+      ],
+      "repair": "IR LED dizisini diyot modunda kontrol edin ve kopuk seri elemanları ölçün.",
+      "verification": "Gece modunda IR ışık kamera/telefon kamerasıyla görülebilmeli."
+    },
+    "access_result_adapter_load_sag": {
+      "id": "access_result_adapter_load_sag",
+      "type": "result",
+      "device": "access",
+      "severity": "warning",
+      "title": "Adaptör Boşta Sağlam, Yük Altında Çöküyor",
+      "summary": "Eski adaptör cihazdan ayrıyken normal voltaj gösterebilir; fakat panel, okuyucu veya kilit akım çektiğinde voltaj düşüyorsa adaptörün akım kapasitesi, kurumuş kondansatörü veya koruma devresi zayıflamış olabilir.",
+      "components": [
+        "Harici 12V adaptör",
+        "Adaptör çıkış kondansatörü",
+        "Panel giriş klemensi",
+        "Kilit/okuyucu yük hattı",
+        "DC jak veya kablo ucu"
+      ],
+      "repair": "Adaptörü nominal voltaja ve yeterli akım kapasitesine sahip yeni adaptörle değiştirin. Eski adaptörü yalnız boşta değil, 1A civarı dummy load veya gerçek panel yükü altında test edin.",
+      "verification": "Panel giriş voltajı kilit komutu sırasında 11.5V altına düşmemeli ve okuyucu LED'i sönmemeli."
+    },
+    "access_result_adapter_intermittent": {
+      "id": "access_result_adapter_intermittent",
+      "type": "result",
+      "device": "access",
+      "severity": "warning",
+      "title": "Adaptör / Klemens Temassızlığı veya Anlık Kesinti",
+      "summary": "Adaptör multimetrede normal görünmesine rağmen kablo, DC jak, klemens veya lehim noktası hareketle anlık kesinti yapıyor olabilir. Bu durum özellikle panel reseti, okuyucu sönmesi ve rastgele kapı açmama şeklinde görülür.",
+      "components": [
+        "Adaptör kablosu",
+        "DC jak",
+        "Panel giriş klemensi",
+        "Giriş lehimleri",
+        "Kablo uç yüksüğü"
+      ],
+      "repair": "Adaptör kablosunu ve panel giriş klemensini yenileyin/sıkın. Giriş lehimlerini büyüteçle kontrol edin. Mümkünse DC jak yerine vidalı klemensli besleme kullanın.",
+      "verification": "Kablo oynatma ve kilit komutu sırasında panel reset atmamalı; giriş voltajı sabit kalmalı."
+    },
+    "access_result_adapter_regulation": {
+      "id": "access_result_adapter_regulation",
+      "type": "result",
+      "device": "access",
+      "severity": "warning",
+      "title": "Adaptör Regülasyonu Hatalı veya Voltaj Yüksek",
+      "summary": "Panel girişinde beklenenin üzerinde voltaj görülüyor. Bu durum okuyucu, röle veya kontrol kartı regülatörlerinde ısınma ve kararsızlık oluşturabilir.",
+      "components": [
+        "Harici adaptör",
+        "Panel giriş regülatörü",
+        "Reader besleme hattı",
+        "Koruma diyodu/TVS"
+      ],
+      "repair": "Adaptörü nominal değerle değiştirin. Panel giriş regülatörü ve koruma elemanlarında ısınma/hasar kontrolü yapın.",
+      "verification": "Panel giriş voltajı cihaz çalışırken üretici nominal aralığında kalmalı."
+    },
+    "access_result_reader_short": {
+      "id": "access_result_reader_short",
+      "type": "result",
+      "device": "access",
+      "severity": "critical",
+      "title": "Okuyucu Besleme Hattında Kısa Devre",
+      "summary": "Okuyucu hattı düşük direnç gösteriyor. Okuyucu cihazı, kablo ezilmesi veya kart üzerindeki okuyucu besleme regülatörü şüpheli.",
+      "components": [
+        "Okuyucu kablosu",
+        "Reader +V regülatörü",
+        "TVS/koruma diyodu",
+        "Okuyucu modül"
+      ],
+      "repair": "Okuyucuyu ve kabloyu ayırıp kart çıkışını ayrı ölçün. Kısa kart üzerinde kalıyorsa koruma/regülatör hattına odaklanın.",
+      "verification": "Okuyucu bağlıyken besleme düşmemeli."
+    },
+    "access_result_reader_supply": {
+      "id": "access_result_reader_supply",
+      "type": "result",
+      "device": "access",
+      "severity": "warning",
+      "title": "Okuyucu Besleme Regülatörü Arızası",
+      "summary": "Kısa devre görünmüyor ama okuyucu beslemesi yok. Sigorta/PTC, regülatör veya klemens hattı arızalı olabilir.",
+      "components": [
+        "Reader PTC/sigorta",
+        "5V/12V regülatör",
+        "Klemens",
+        "Koruma diyodu"
+      ],
+      "repair": "Reader çıkış koruma elemanını ve regülatör giriş/çıkışını ölçün.",
+      "verification": "Okuyucu VCC nominal değere dönmeli."
+    },
+    "access_result_reader_bus": {
+      "id": "access_result_reader_bus",
+      "type": "result",
+      "device": "access",
+      "severity": "warning",
+      "title": "Okuyucu Veri Hattı Arızası",
+      "summary": "Besleme var fakat veri aktivitesi yok. D0/D1, RS485 A/B, kablo veya okuyucu çıkışı arızalı olabilir.",
+      "components": [
+        "D0/D1 hatları",
+        "RS485 transceiver",
+        "Okuyucu",
+        "Kablo ekranı/topraklama"
+      ],
+      "repair": "Bilinen sağlam okuyucu ile deneyin. Veri hatlarını pull-up ve osiloskop/lojik prob ile kontrol edin.",
+      "verification": "Kart okutulduğunda kontrol kartında data LED'i veya log kaydı oluşmalı."
+    },
+    "access_result_config": {
+      "id": "access_result_config",
+      "type": "result",
+      "device": "access",
+      "severity": "info",
+      "title": "Donanım Aktivitesi Var, Yetki/Konfigürasyon Kontrol",
+      "summary": "Okuyucu veya bus aktivitesi var. Kart yetkisi, panel konfigürasyonu, saat dilimi veya anti-passback ayarları kontrol edilmeli.",
+      "components": [
+        "Yetki tanımı",
+        "Saat dilimi",
+        "Panel adresi",
+        "Anti-passback ayarı"
+      ],
+      "repair": "Kullanıcı yetkisini ve panel olay kayıtlarını kontrol edin. Test kartı ile yeniden deneme yapın.",
+      "verification": "Geçerli kart okutulduğunda olay kaydı ve röle komutu oluşmalı."
+    },
+    "access_result_lock_or_cable": {
+      "id": "access_result_lock_or_cable",
+      "type": "result",
+      "device": "access",
+      "severity": "info",
+      "title": "Kilit Çıkışı Var, Kilit/Kablo Kontrol",
+      "summary": "Kilit çıkışında voltaj var. Manyetik kilit, elektrikli karşılık, diyot polaritesi veya kablo kopukluğu kontrol edilmeli.",
+      "components": [
+        "Manyetik kilit",
+        "Elektrikli karşılık",
+        "Koruma diyodu",
+        "Kilit kablosu"
+      ],
+      "repair": "Kilit uçlarında gerilim ve akım ölçün. Kilidi harici besleme ile test edin.",
+      "verification": "Kapı aç komutunda kilit mekanik olarak serbest kalmalı."
+    },
+    "access_result_lock_contact": {
+      "id": "access_result_lock_contact",
+      "type": "result",
+      "device": "access",
+      "severity": "warning",
+      "title": "Röle Çekiyor, Kontak/Çıkış Yolu Arızası",
+      "summary": "Röle tetikleniyor ancak kilit çıkışında voltaj oluşmuyor. Röle kontağı, NO/NC bağlantısı veya klemens yolu hatalı olabilir.",
+      "components": [
+        "Röle kontağı",
+        "NO/NC/COM bağlantısı",
+        "Klemens",
+        "Kilit besleme köprüsü"
+      ],
+      "repair": "COM-NO/NC kontak sürekliliğini komut sırasında ölçün. Kilit beslemesinin COM hattına geldiğini doğrulayın.",
+      "verification": "Komutla röle kontağı doğru çıkışı anahtarlamalı."
+    },
+    "access_result_relay_driver": {
+      "id": "access_result_relay_driver",
+      "type": "result",
+      "device": "access",
+      "severity": "warning",
+      "title": "Kilit Röle Sürücü Arızası",
+      "summary": "Röle tetiklenmiyor. Röle bobini, sürücü transistörü, flyback diyot veya MCU çıkışı şüpheli.",
+      "components": [
+        "Röle bobini",
+        "Sürücü transistörü",
+        "Flyback diyot",
+        "MCU röle çıkışı"
+      ],
+      "repair": "Komut sırasında bobin gerilimini ve sürücü base/gate sinyalini ölçün.",
+      "verification": "Geçerli komut geldiğinde röle bobini nominal gerilim almalı."
+    },
+    "access_result_rs485_bus": {
+      "id": "access_result_rs485_bus",
+      "type": "result",
+      "device": "access",
+      "severity": "warning",
+      "title": "RS485 Haberleşme Hattı Arızası",
+      "summary": "RS485 A/B hattında beklenen bias veya aktivite yok. Transceiver, hat sonlandırması, adresleme veya kablo kısa devresi şüpheli.",
+      "components": [
+        "RS485 transceiver",
+        "A/B kablosu",
+        "120Ω sonlandırma",
+        "Panel adresleme"
+      ],
+      "repair": "Hat sonlandırmasını, A/B polaritesini ve transceiver beslemesini kontrol edin. Tek cihazla izole test yapın.",
+      "verification": "Bus üzerinde kararlı bias ve komut sırasında diferansiyel aktivite görülmeli."
+    },
+    "uvis_symptom": {
+      "id": "uvis_symptom",
+      "type": "symptom",
+      "device": "uvis",
+      "title": "UVIS Belirti Sınıflandırması",
+      "prompt": "Araç altı görüntüleme sistemindeki ana belirtiyi seçin. Güç, kamera barı, tetik sensörü ve yazılım akışı ayrı değerlendirilir.",
+      "options": [
+        {
+          "label": "PC/NVR/monitör açılmıyor",
+          "next": "uvis_control_power_ok",
+          "scoreDelta": {
+            "uvis_control_power": 36,
+            "input_protection_fault": 10
+          }
+        },
+        {
+          "label": "Kamera görüntüsü yok",
+          "next": "uvis_camera_power_voltage",
+          "scoreDelta": {
+            "uvis_network_fault": 24,
+            "poe_power_fault": 12,
+            "uvis_software_fault": 8
+          }
+        },
+        {
+          "label": "Araç geçince kayıt başlamıyor",
+          "next": "uvis_trigger_detected",
+          "scoreDelta": {
+            "uvis_trigger_fault": 36,
+            "uvis_software_fault": 12
+          }
+        },
+        {
+          "label": "Görüntü var ama kalite/kayıt kötü",
+          "next": "uvis_network_link",
+          "scoreDelta": {
+            "uvis_software_fault": 28,
+            "uvis_network_fault": 12
+          }
+        }
+      ]
+    },
+    "uvis_control_power_ok": {
+      "id": "uvis_control_power_ok",
+      "type": "question_boolean",
+      "device": "uvis",
+      "category": "Kontrol Ünitesi",
+      "title": "PC/NVR/Monitör Güç Durumu",
+      "prompt": "Kontrol bilgisayarı, NVR/işlemci ünitesi, monitör ve güç dağıtımı normal açılıyor mu?",
+      "imageUrl": "/measurement-placeholder.svg",
+      "yesLabel": "Kontrol ünitesi açık",
+      "noLabel": "Açılmıyor",
+      "unknownLabel": "Kontrol edemiyorum",
+      "nextYes": "uvis_camera_power_voltage",
+      "nextNo": "uvis_result_control_power",
+      "nextUnknown": "uvis_camera_power_voltage",
+      "scoreYes": {
+        "uvis_control_power": -10
+      },
+      "scoreNo": {
+        "uvis_control_power": 44,
+        "input_protection_fault": 12
+      },
+      "scoreUnknown": {
+        "uvis_control_power": 8
+      }
+    },
+    "uvis_camera_power_voltage": {
+      "id": "uvis_camera_power_voltage",
+      "type": "measurement",
+      "device": "uvis",
+      "category": "Kamera Barı",
+      "title": "Kamera / Aydınlatma Barı Beslemesi",
+      "prompt": "Kamera veya aydınlatma barı girişindeki DC voltajı ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "Bar GND / - giriş",
+      "probeRed": "Bar +12V / + giriş",
+      "expected": {
+        "min": 11.5,
+        "max": 13.8
+      },
+      "danger": "low",
+      "hint": "Dış ortam konnektörleri su/oksit nedeniyle yükte voltajı çökertebilir.",
+      "imageUrl": "/measurement-placeholder.svg",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 10.5
+          },
+          "label": "Kamera barı beslemesi düşük/yok",
+          "next": "uvis_result_camera_power",
+          "scoreDelta": {
+            "uvis_control_power": 12,
+            "poe_power_fault": 24,
+            "rail_short": 12
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 11.5,
+            "max": 13.8
+          },
+          "label": "Kamera barı beslemesi normal",
+          "next": "uvis_trigger_detected",
+          "scoreDelta": {
+            "uvis_control_power": -6
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 14
+          },
+          "label": "Kamera barı beslemesi yüksek",
+          "next": "uvis_result_camera_power",
+          "scoreDelta": {
+            "uvis_control_power": 22,
+            "video_link_fault": 8
+          }
+        }
+      ],
+      "fallbackNext": "uvis_trigger_detected"
+    },
+    "uvis_trigger_detected": {
+      "id": "uvis_trigger_detected",
+      "type": "question_boolean",
+      "device": "uvis",
+      "category": "Tetik Sensörü",
+      "title": "Loop / Fotosel / Tetik Algılama",
+      "prompt": "Araç geçişinde loop, fotosel veya tetik sensörü kontrol ünitesine algılama sinyali gönderiyor mu?",
+      "yesLabel": "Tetik geliyor",
+      "noLabel": "Tetik yok",
+      "unknownLabel": "Ölçemiyorum",
+      "nextYes": "uvis_network_link",
+      "nextNo": "uvis_result_trigger",
+      "nextUnknown": "uvis_network_link",
+      "scoreYes": {
+        "uvis_trigger_fault": -10
+      },
+      "scoreNo": {
+        "uvis_trigger_fault": 44
+      },
+      "scoreUnknown": {
+        "uvis_trigger_fault": 10
+      }
+    },
+    "uvis_network_link": {
+      "id": "uvis_network_link",
+      "type": "question_boolean",
+      "device": "uvis",
+      "category": "Ağ / Video",
+      "title": "Kamera Ağ Linki",
+      "prompt": "Kamera/işlemci ile switch, NVR veya PC arasında ethernet link LED’i veya IP erişimi var mı?",
+      "yesLabel": "Link/IP var",
+      "noLabel": "Link yok",
+      "unknownLabel": "Ağ testim yok",
+      "nextYes": "uvis_image_stream",
+      "nextNo": "uvis_result_network",
+      "nextUnknown": "uvis_result_network",
+      "scoreYes": {
+        "uvis_network_fault": -8
+      },
+      "scoreNo": {
+        "uvis_network_fault": 42
+      },
+      "scoreUnknown": {
+        "uvis_network_fault": 14
+      }
+    },
+    "uvis_image_stream": {
+      "id": "uvis_image_stream",
+      "type": "question_boolean",
+      "device": "uvis",
+      "category": "Yazılım / Kayıt",
+      "title": "Canlı Görüntü ve Kayıt Akışı",
+      "prompt": "Araç geçişinde yazılım üzerinde canlı görüntü, kayıt veya olay akışı oluşuyor mu?",
+      "yesLabel": "Akış var",
+      "noLabel": "Akış yok",
+      "unknownLabel": "Yazılıma erişemiyorum",
+      "nextYes": "uvis_result_calibration",
+      "nextNo": "uvis_result_software",
+      "nextUnknown": "uvis_result_software",
+      "scoreYes": {
+        "uvis_software_fault": 12
+      },
+      "scoreNo": {
+        "uvis_software_fault": 42,
+        "uvis_network_fault": 12
+      },
+      "scoreUnknown": {
+        "uvis_software_fault": 18
+      }
+    },
+    "uvis_result_control_power": {
+      "id": "uvis_result_control_power",
+      "type": "result",
+      "device": "uvis",
+      "severity": "critical",
+      "title": "UVIS Kontrol Güç Arızası",
+      "summary": "Ana kontrol PC/NVR/monitör veya güç dağıtımı açılmıyor. Sistem görüntü üretmeden önce kontrol ünitesi güç akışı doğrulanmalı.",
+      "components": [
+        "UPS/adaptör",
+        "PC/NVR PSU",
+        "Monitör beslemesi",
+        "Güç dağıtım sigortası"
+      ],
+      "repair": "220V dağıtım, adaptör/SMPS çıkışı ve sigortaları ayrı ayrı ölçün. PC/NVR PSU çıkışlarını yük altında kontrol edin.",
+      "verification": "Kontrol ünitesi ve monitör stabil açılmalı, yazılım servisleri başlamalı."
+    },
+    "uvis_result_camera_power": {
+      "id": "uvis_result_camera_power",
+      "type": "result",
+      "device": "uvis",
+      "severity": "critical",
+      "title": "Kamera / Aydınlatma Barı Besleme Arızası",
+      "summary": "Kamera veya LED bar beslemesi nominal değil. Dış ortam kablosu, su almış konnektör veya giriş koruma elemanı şüpheli.",
+      "components": [
+        "12V SMPS",
+        "Kamera barı konnektörü",
+        "LED sürücü",
+        "Giriş TVS/kondansatör"
+      ],
+      "repair": "Barı sistemden ayırıp beslemeyi tekrar ölçün. Konnektör oksidasyonu ve kablo ezilmesini kontrol edin.",
+      "verification": "Bar takılıyken voltaj 11.5V altına düşmemeli."
+    },
+    "uvis_result_trigger": {
+      "id": "uvis_result_trigger",
+      "type": "result",
+      "device": "uvis",
+      "severity": "warning",
+      "title": "UVIS Tetik Sensörü Arızası",
+      "summary": "Araç geçiş tetik sinyali gelmiyor. Loop dedektör, fotosel, manyetik sensör veya I/O modül hattı arızalı olabilir.",
+      "components": [
+        "Loop dedektör",
+        "Fotosel",
+        "I/O modülü",
+        "Tetik rölesi/kablo"
+      ],
+      "repair": "Sensör beslemesini, röle kontağını ve kontrol ünitesi giriş LED’ini takip edin.",
+      "verification": "Araç geçişinde yazılım olay kaydı tetiklenmeli."
+    },
+    "uvis_result_network": {
+      "id": "uvis_result_network",
+      "type": "result",
+      "device": "uvis",
+      "severity": "warning",
+      "title": "UVIS Ağ / Kablo Link Arızası",
+      "summary": "Kamera veya işlemci ile NVR/PC arasında link yok. Switch portu, RJ45 uçlama, PoE/enjektör veya IP ayarı şüpheli.",
+      "components": [
+        "RJ45 kablo",
+        "Switch portu",
+        "PoE/enjektör",
+        "Kamera IP ayarı"
+      ],
+      "repair": "Kablo tester ile hatları doğrulayın, bilinen sağlam portla deneyin ve IP çakışmasını kontrol edin.",
+      "verification": "Switch link LED’i yanmalı ve kamera ping/stream erişimi vermeli."
+    },
+    "uvis_result_software": {
+      "id": "uvis_result_software",
+      "type": "result",
+      "device": "uvis",
+      "severity": "info",
+      "title": "UVIS Yazılım / Stream Arızası",
+      "summary": "Ağ linki var ancak görüntü veya kayıt akışı oluşmuyor. Codec, lisans, servis, disk veya kanal ayarı kontrol edilmeli.",
+      "components": [
+        "UVIS yazılım servisi",
+        "NVR kanal lisansı",
+        "Disk/kayıt alanı",
+        "Codec/stream ayarı"
+      ],
+      "repair": "Yazılım servislerini, kayıt yolunu ve kamera stream URL’sini doğrulayın.",
+      "verification": "Araç geçişinde canlı görüntü ve kayıt dosyası oluşmalı."
+    },
+    "uvis_result_calibration": {
+      "id": "uvis_result_calibration",
+      "type": "result",
+      "device": "uvis",
+      "severity": "info",
+      "title": "UVIS Donanımı Çalışıyor, Kalibrasyon Kontrol",
+      "summary": "Temel akış çalışıyor. Şikayet kalite, hizalama veya kayıt senaryosu ise lens, aydınlatma, trigger gecikmesi ve disk sağlığı kontrol edilmeli.",
+      "components": [
+        "Lens/aydınlatma",
+        "Trigger gecikmesi",
+        "Kayıt profili",
+        "Disk sağlığı"
+      ],
+      "repair": "Lens temizliği, ışık hizası ve yazılım kalibrasyonunu yapın.",
+      "verification": "Test aracında görüntü net, kayıt tam ve olay zamanı doğru olmalı."
+    },
+    "pbx_symptom": {
+      "id": "pbx_symptom",
+      "type": "symptom",
+      "device": "pbx",
+      "title": "Santral Belirti Sınıflandırması",
+      "prompt": "Telefon/santral arızasının ana belirtisini seçin.",
+      "options": [
+        {
+          "label": "Santral açılmıyor",
+          "next": "pbx_power_present",
+          "scoreDelta": {
+            "pbx_power_fault": 38,
+            "input_protection_fault": 10
+          }
+        },
+        {
+          "label": "Dahili hatta çevir sesi yok",
+          "next": "pbx_extension_voltage",
+          "scoreDelta": {
+            "pbx_line_fault": 30,
+            "pbx_port_fault": 14
+          }
+        },
+        {
+          "label": "Dahili arama veya dış hat çalışmıyor",
+          "next": "pbx_dial_tone",
+          "scoreDelta": {
+            "pbx_config_fault": 28,
+            "pbx_line_fault": 10
+          }
+        },
+        {
+          "label": "Tek odada/tek portta sorun var",
+          "next": "pbx_extension_voltage",
+          "scoreDelta": {
+            "pbx_line_fault": 26,
+            "pbx_port_fault": 18
+          }
+        }
+      ]
+    },
+    "pbx_power_present": {
+      "id": "pbx_power_present",
+      "type": "question_boolean",
+      "device": "pbx",
+      "category": "Santral Gücü",
+      "title": "PBX Güç LED / Adaptör Durumu",
+      "prompt": "Santral/PBX cihazında güç LED’i yanıyor, adaptör/SMPS çıkışı ve sigorta sağlam görünüyor mu?",
+      "imageUrl": "/measurement-placeholder.svg",
+      "yesLabel": "Güç var",
+      "noLabel": "Güç yok",
+      "unknownLabel": "Ölçemiyorum",
+      "nextYes": "pbx_extension_voltage",
+      "nextNo": "pbx_result_power",
+      "nextUnknown": "pbx_extension_voltage",
+      "scoreYes": {
+        "pbx_power_fault": -8
+      },
+      "scoreNo": {
+        "pbx_power_fault": 42,
+        "input_protection_fault": 8
+      },
+      "scoreUnknown": {
+        "pbx_power_fault": 10
+      }
+    },
+    "pbx_extension_voltage": {
+      "id": "pbx_extension_voltage",
+      "type": "measurement",
+      "device": "pbx",
+      "category": "Dahili Hat",
+      "title": "Dahili Hat DC Voltajı",
+      "prompt": "Problemli dahili hat klemensinde ahize kapalıyken DC voltajı ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Santral açık, telefon ahizesi kapalı",
+      "probeBlack": "Dahili hat B / -",
+      "probeRed": "Dahili hat A / +",
+      "expected": {
+        "min": 24,
+        "max": 52
+      },
+      "danger": "low",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 12
+          },
+          "label": "Dahili hat voltajı yok/düşük",
+          "next": "pbx_result_line_voltage",
+          "scoreDelta": {
+            "pbx_line_fault": 42,
+            "pbx_port_fault": 18
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 24,
+            "max": 52
+          },
+          "label": "Dahili hat voltajı normal",
+          "next": "pbx_dial_tone",
+          "scoreDelta": {
+            "pbx_line_fault": -8
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 56
+          },
+          "label": "Hat voltajı anormal yüksek",
+          "next": "pbx_result_port_card",
+          "scoreDelta": {
+            "pbx_port_fault": 28
+          }
+        }
+      ],
+      "fallbackNext": "pbx_dial_tone"
+    },
+    "pbx_dial_tone": {
+      "id": "pbx_dial_tone",
+      "type": "question_boolean",
+      "device": "pbx",
+      "category": "Dahili Hat",
+      "title": "Test Telefonu ile Çevir Sesi",
+      "prompt": "Sağlam test telefonu bağlandığında problemli dahili hatta çevir sesi alınıyor mu?",
+      "yesLabel": "Çevir sesi var",
+      "noLabel": "Çevir sesi yok",
+      "unknownLabel": "Test telefonum yok",
+      "nextYes": "pbx_internal_call",
+      "nextNo": "pbx_result_port_or_phone",
+      "nextUnknown": "pbx_result_need_phone_tester",
+      "scoreYes": {
+        "pbx_line_fault": -8
+      },
+      "scoreNo": {
+        "pbx_line_fault": 24,
+        "pbx_port_fault": 22
+      },
+      "scoreUnknown": {
+        "pbx_line_fault": 8
+      }
+    },
+    "pbx_internal_call": {
+      "id": "pbx_internal_call",
+      "type": "question_boolean",
+      "device": "pbx",
+      "category": "Çağrı / Trunk",
+      "title": "Dahili Arama ve Ses İletimi",
+      "prompt": "İki dahili arasında arama yapıldığında zil ve ses iletimi normal mi?",
+      "yesLabel": "Dahili görüşme normal",
+      "noLabel": "Arama/ses sorunlu",
+      "unknownLabel": "Test edemiyorum",
+      "nextYes": "pbx_result_endpoint",
+      "nextNo": "pbx_result_config_trunk",
+      "nextUnknown": "pbx_result_config_trunk",
+      "scoreYes": {
+        "pbx_config_fault": 10
+      },
+      "scoreNo": {
+        "pbx_config_fault": 36,
+        "pbx_port_fault": 10
+      },
+      "scoreUnknown": {
+        "pbx_config_fault": 12
+      }
+    },
+    "pbx_result_power": {
+      "id": "pbx_result_power",
+      "type": "result",
+      "device": "pbx",
+      "severity": "critical",
+      "title": "Santral Ana Besleme Arızası",
+      "summary": "PBX güç LED’i yanmıyor veya adaptör/SMPS çıkışı yok. Besleme doğrulanmadan port/konfigürasyon kontrolüne geçilmemeli.",
+      "components": [
+        "Adaptör/SMPS",
+        "Giriş sigortası",
+        "Ters polarite koruması",
+        "Backup akü modülü"
+      ],
+      "repair": "Adaptör çıkışını yük altında ölçün, giriş sigortası ve regülatörleri kontrol edin.",
+      "verification": "Santral stabil açılmalı ve port kartları aktif görünmeli."
+    },
+    "pbx_result_line_voltage": {
+      "id": "pbx_result_line_voltage",
+      "type": "result",
+      "device": "pbx",
+      "severity": "warning",
+      "title": "Dahili Hat Voltajı Arızası",
+      "summary": "Dahili hat voltajı beklenen aralıkta değil. Port kartı, patch panel, kablo kısa devresi veya priz uçlaması şüpheli.",
+      "components": [
+        "Port kartı",
+        "Patch panel",
+        "RJ11/RJ45 uçlama",
+        "Telefon prizi"
+      ],
+      "repair": "Portu patch panelden ayırıp doğrudan ölçün. Kabloyu ve port kartını izole ederek karşılaştırın.",
+      "verification": "Ahize kapalı hat voltajı 24-52V aralığında olmalı."
+    },
+    "pbx_result_port_card": {
+      "id": "pbx_result_port_card",
+      "type": "result",
+      "device": "pbx",
+      "severity": "warning",
+      "title": "PBX Port Kartı Şüpheli",
+      "summary": "Hat voltajı anormal. Port koruma devresi, çıkış trafosu veya port kartı arızalı olabilir.",
+      "components": [
+        "Analog port kartı",
+        "Hat koruma elemanları",
+        "Port rölesi/trafo"
+      ],
+      "repair": "Aynı dahiliyi farklı porta taşıyıp kıyaslayın. Port kartı besleme ve koruma elemanlarını ölçün.",
+      "verification": "Sağlam portta çevir sesi ve zil normal alınmalı."
+    },
+    "pbx_result_port_or_phone": {
+      "id": "pbx_result_port_or_phone",
+      "type": "result",
+      "device": "pbx",
+      "severity": "info",
+      "title": "Port Yetkisi / Telefon Cihazı Arızası",
+      "summary": "Hat voltajı var ama çevir sesi yok. Abone tanımı, port yetkisi, telefon cihazı veya ahize kablosu kontrol edilmeli.",
+      "components": [
+        "Abone tanımı",
+        "Telefon cihazı",
+        "Ahize kablosu",
+        "Port ayarı"
+      ],
+      "repair": "Sağlam test telefonu ve farklı portla çapraz deneme yapın.",
+      "verification": "Test telefonunda çevir sesi alınmalı."
+    },
+    "pbx_result_config_trunk": {
+      "id": "pbx_result_config_trunk",
+      "type": "result",
+      "device": "pbx",
+      "severity": "info",
+      "title": "Santral Konfigürasyon / Trunk Arızası",
+      "summary": "Dahili veya dış hat yönlendirmesinde sorun var. Çevirme planı, trunk hattı, grup/yetki ayarı ve numaralandırma kontrol edilmeli.",
+      "components": [
+        "Çevirme planı",
+        "Trunk hattı",
+        "Abone yetkisi",
+        "Grup ayarı"
+      ],
+      "repair": "Santral olay kayıtlarını inceleyin, test aboneleriyle iç/dış arama senaryosunu doğrulayın.",
+      "verification": "Dahili arama, zil ve dış hat erişimi beklenen şekilde çalışmalı."
+    },
+    "pbx_result_endpoint": {
+      "id": "pbx_result_endpoint",
+      "type": "result",
+      "device": "pbx",
+      "severity": "info",
+      "title": "Santral Temel Fonksiyonları Normal",
+      "summary": "Temel PBX fonksiyonları çalışıyor. Sorun belirli oda, telefon, patch kablosu, zil seviyesi veya kullanıcı yetkisinde olabilir.",
+      "components": [
+        "Uç telefon",
+        "Patch kablosu",
+        "Priz",
+        "Kullanıcı yetkisi"
+      ],
+      "repair": "Sorunlu uç ekipmanı sağlam hatla çapraz deneyin.",
+      "verification": "Sorunlu noktada çevir sesi, zil ve ses iletimi doğrulanmalı."
+    },
+    "pbx_result_need_phone_tester": {
+      "id": "pbx_result_need_phone_tester",
+      "type": "result",
+      "device": "pbx",
+      "severity": "info",
+      "title": "Telefon Hat Test Ekipmanı Gerekli",
+      "summary": "Bu adım için sağlam analog telefon, hat test cihazı veya ton probu gerekir.",
+      "components": [
+        "Test telefonu",
+        "Ton probu",
+        "Patch panel etiketi"
+      ],
+      "repair": "Önce patch panel ve port etiketlerini doğrulayın, sonra test telefonu ile çevir sesi kontrol edin.",
+      "verification": "Test cihazı ile hat sürekliliği ve çevir sesi doğrulanmalı."
+    },
+    "sliding_symptom": {
+      "id": "sliding_symptom",
+      "type": "symptom",
+      "device": "sliding",
+      "title": "Kayar Kapı Belirti Sınıflandırması",
+      "prompt": "Otomatik kayar kapıdaki ana belirtiyi seçin.",
+      "options": [
+        {
+          "label": "Kapı hiç açılmıyor",
+          "next": "sliding_mains_check",
+          "scoreDelta": {
+            "sliding_drive_fault": 22,
+            "input_protection_fault": 18,
+            "sliding_sensor_fault": 10
+          }
+        },
+        {
+          "label": "Sensör algılamıyor",
+          "next": "sliding_aux_voltage",
+          "scoreDelta": {
+            "sliding_sensor_fault": 36,
+            "rail_short": 8
+          }
+        },
+        {
+          "label": "Motor komut alıyor ama hareket yok",
+          "next": "sliding_motor_output",
+          "scoreDelta": {
+            "sliding_drive_fault": 36,
+            "sliding_mechanical_fault": 12
+          }
+        },
+        {
+          "label": "Kapı yarıda kalıyor / sıkışıyor",
+          "next": "sliding_limit_encoder_check",
+          "scoreDelta": {
+            "sliding_mechanical_fault": 36,
+            "sliding_drive_fault": 10
+          }
+        }
+      ]
+    },
+    "sliding_mains_check": {
+      "id": "sliding_mains_check",
+      "type": "question_boolean",
+      "device": "sliding",
+      "category": "Ana Besleme",
+      "title": "Şebeke / Sigorta / Acil Stop",
+      "prompt": "Kayar kapı kontrol kartında şebeke girişi, ana sigorta ve acil stop hattı sağlam mı?",
+      "imageUrl": "/measurement-placeholder.svg",
+      "yesLabel": "Ana besleme sağlam",
+      "noLabel": "Besleme/emniyet yok",
+      "unknownLabel": "Ölçemiyorum",
+      "nextYes": "sliding_aux_voltage",
+      "nextNo": "sliding_result_mains",
+      "nextUnknown": "sliding_aux_voltage",
+      "scoreYes": {
+        "input_protection_fault": -8
+      },
+      "scoreNo": {
+        "input_protection_fault": 36,
+        "sliding_drive_fault": 12
+      },
+      "scoreUnknown": {
+        "input_protection_fault": 8
+      }
+    },
+    "sliding_aux_voltage": {
+      "id": "sliding_aux_voltage",
+      "type": "measurement",
+      "device": "sliding",
+      "category": "Aksesuar Besleme",
+      "title": "Radar / Fotosel 24V Besleme",
+      "prompt": "Radar, fotosel veya aksesuar besleme çıkışındaki DC voltajı ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "Aksesuar GND",
+      "probeRed": "+24V AUX",
+      "expected": {
+        "min": 21.6,
+        "max": 27.5
+      },
+      "danger": "medium",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 20
+          },
+          "label": "24V aksesuar beslemesi düşük/yok",
+          "next": "sliding_result_aux_psu",
+          "scoreDelta": {
+            "sliding_sensor_fault": 24,
+            "rail_short": 18
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 21.6,
+            "max": 27.5
+          },
+          "label": "24V aksesuar beslemesi normal",
+          "next": "sliding_sensor_trigger",
+          "scoreDelta": {
+            "rail_short": -8
+          }
+        }
+      ],
+      "fallbackNext": "sliding_sensor_trigger"
+    },
+    "sliding_sensor_trigger": {
+      "id": "sliding_sensor_trigger",
+      "type": "question_boolean",
+      "device": "sliding",
+      "category": "Sensör Girişleri",
+      "title": "Radar / Fotosel / Buton Tetikleme",
+      "prompt": "Radar, fotosel veya açma butonu tetiklendiğinde kontrol kartı giriş LED’i değişiyor mu?",
+      "yesLabel": "Giriş LED değişiyor",
+      "noLabel": "Algılama yok",
+      "unknownLabel": "Kontrol edemiyorum",
+      "nextYes": "sliding_motor_output",
+      "nextNo": "sliding_result_sensor",
+      "nextUnknown": "sliding_motor_output",
+      "scoreYes": {
+        "sliding_sensor_fault": -8
+      },
+      "scoreNo": {
+        "sliding_sensor_fault": 42
+      },
+      "scoreUnknown": {
+        "sliding_sensor_fault": 10
+      }
+    },
+    "sliding_motor_output": {
+      "id": "sliding_motor_output",
+      "type": "question_boolean",
+      "device": "sliding",
+      "category": "Motor Sürücü",
+      "title": "Motor Sürücü Çıkışı",
+      "prompt": "Aç/kapa komutunda motor sürücü çıkışında gerilim veya sürme sinyali oluşuyor mu?",
+      "yesLabel": "Sürücü çıkışı var",
+      "noLabel": "Çıkış yok",
+      "unknownLabel": "Ölçemiyorum",
+      "nextYes": "sliding_limit_encoder_check",
+      "nextNo": "sliding_result_control_card",
+      "nextUnknown": "sliding_result_control_card",
+      "scoreYes": {
+        "sliding_drive_fault": 12
+      },
+      "scoreNo": {
+        "sliding_drive_fault": 42
+      },
+      "scoreUnknown": {
+        "sliding_drive_fault": 14
+      }
+    },
+    "sliding_limit_encoder_check": {
+      "id": "sliding_limit_encoder_check",
+      "type": "question_boolean",
+      "device": "sliding",
+      "category": "Limit / Mekanik",
+      "title": "Limit Switch / Encoder / Mekanik Kızak",
+      "prompt": "Limit switch/encoder bilgisi kart tarafından doğru algılanıyor ve kapı elle rahat hareket ediyor mu?",
+      "yesLabel": "Limit/mekanik normal",
+      "noLabel": "Limit/mekanik sorunlu",
+      "unknownLabel": "Emin değilim",
+      "nextYes": "sliding_result_motor_calibration",
+      "nextNo": "sliding_result_mechanical_limit",
+      "nextUnknown": "sliding_result_mechanical_limit",
+      "scoreYes": {
+        "sliding_mechanical_fault": -8
+      },
+      "scoreNo": {
+        "sliding_mechanical_fault": 42
+      },
+      "scoreUnknown": {
+        "sliding_mechanical_fault": 14
+      }
+    },
+    "sliding_result_mains": {
+      "id": "sliding_result_mains",
+      "type": "result",
+      "device": "sliding",
+      "severity": "critical",
+      "title": "Kayar Kapı Ana Besleme / Emniyet Hattı Arızası",
+      "summary": "Şebeke, sigorta veya acil stop hattı kontrol kartını kilitliyor olabilir.",
+      "components": [
+        "Şebeke girişi",
+        "Ana sigorta",
+        "Acil stop",
+        "Kapı kilidi güvenlik kontağı"
+      ],
+      "repair": "Enerji kesilerek sigorta, klemens ve acil stop sürekliliği kontrol edilmeli.",
+      "verification": "Kart güç LED’i ve emniyet zinciri normal duruma dönmeli."
+    },
+    "sliding_result_aux_psu": {
+      "id": "sliding_result_aux_psu",
+      "type": "result",
+      "device": "sliding",
+      "severity": "warning",
+      "title": "Aksesuar 24V Besleme Arızası",
+      "summary": "Radar/fotosel aksesuar hattı normal değil. Kısa devre yapan sensör veya kart SMPS arızası olabilir.",
+      "components": [
+        "24V AUX regülatör",
+        "Radar",
+        "Fotosel",
+        "Kablo/klemens"
+      ],
+      "repair": "Sensörleri tek tek ayırıp 24V hattının toparlanıp toparlanmadığını kontrol edin.",
+      "verification": "Aksesuar bağlıyken 24V nominal kalmalı."
+    },
+    "sliding_result_sensor": {
+      "id": "sliding_result_sensor",
+      "type": "result",
+      "device": "sliding",
+      "severity": "warning",
+      "title": "Kayar Kapı Sensör Girişi Arızası",
+      "summary": "Radar, fotosel veya açma butonu kart tarafından algılanmıyor.",
+      "components": [
+        "Radar",
+        "Fotosel",
+        "Açma butonu",
+        "Giriş optokuplörü"
+      ],
+      "repair": "NO/NC ayarı, sensör beslemesi ve giriş LED hattını kontrol edin.",
+      "verification": "Sensör tetiklenince kart giriş LED’i değişmeli."
+    },
+    "sliding_result_control_card": {
+      "id": "sliding_result_control_card",
+      "type": "result",
+      "device": "sliding",
+      "severity": "critical",
+      "title": "Kayar Kapı Kontrol Kartı / Motor Sürücü Arızası",
+      "summary": "Komut geliyor ancak motor sürme çıkışı oluşmuyor. Sürücü elemanları veya kontrol kilitlemesi şüpheli.",
+      "components": [
+        "Motor sürücü IC",
+        "Röle/MOSFET/triac",
+        "Fren/lock enable",
+        "MCU çıkışı"
+      ],
+      "repair": "Komut anında sürücü giriş ve çıkışlarını ölçün. Emniyet kilitlemelerini kontrol edin.",
+      "verification": "Aç/kapa komutunda motor çıkışı oluşmalı."
+    },
+    "sliding_result_mechanical_limit": {
+      "id": "sliding_result_mechanical_limit",
+      "type": "result",
+      "device": "sliding",
+      "severity": "warning",
+      "title": "Limit / Encoder veya Mekanik Kızak Arızası",
+      "summary": "Kapı yarıda kalıyor veya pozisyon bilgisi yanlış. Limit switch, encoder, ray/kızak ve mekanik direnç kontrol edilmeli.",
+      "components": [
+        "Limit switch",
+        "Encoder",
+        "Ray/kızak",
+        "Motor kayışı"
+      ],
+      "repair": "Kapıyı enerjisiz elle hareket ettirin, limit/encoder sinyalini takip edin ve mekanik sıkışmayı giderin.",
+      "verification": "Kapı tam aç/kapa kalibrasyonunu hatasız tamamlamalı."
+    },
+    "sliding_result_motor_calibration": {
+      "id": "sliding_result_motor_calibration",
+      "type": "result",
+      "device": "sliding",
+      "severity": "info",
+      "title": "Sürücü ve Sensörler Normal, Kalibrasyon/Motor Kontrol",
+      "summary": "Temel giriş/çıkışlar çalışıyor. Sorun motor kondansatörü, hız/kuvvet ayarı veya kalibrasyon kaynaklı olabilir.",
+      "components": [
+        "Motor",
+        "Kondansatör",
+        "Hız/kuvvet ayarı",
+        "Kalibrasyon"
+      ],
+      "repair": "Motoru bağımsız test edin, otomatik öğrenme/kalibrasyon prosedürünü çalıştırın.",
+      "verification": "Kapı normal hızda, sıkışmadan ve güvenlik sensörleriyle uyumlu çalışmalı."
+    },
+    "support_symptom": {
+      "id": "support_symptom",
+      "type": "symptom",
+      "device": "support",
+      "title": "Yardımcı Cihaz Belirti Sınıflandırması",
+      "prompt": "Adaptör/SMPS/röle/kablo gibi yardımcı ekipmanın ana belirtisini seçin.",
+      "options": [
+        {
+          "label": "Nominal çıkış voltajı bilinmiyor",
+          "next": "support_result_identify_label",
+          "scoreDelta": {
+            "support_psu_fault": 12
+          }
+        },
+        {
+          "label": "Adaptör/SMPS çıkışı düşük veya yok",
+          "next": "support_output_voltage",
+          "scoreDelta": {
+            "support_psu_fault": 34
+          }
+        },
+        {
+          "label": "Yükte voltaj düşüyor",
+          "next": "support_load_drop",
+          "scoreDelta": {
+            "support_psu_fault": 36,
+            "capacitor_esr": 10
+          }
+        },
+        {
+          "label": "Röle/kontaktör çalışmıyor",
+          "next": "support_relay_contact",
+          "scoreDelta": {
+            "support_relay_fault": 34,
+            "relay_driver": 12
+          }
+        }
+      ]
+    },
+    "support_output_voltage": {
+      "id": "support_output_voltage",
+      "type": "measurement",
+      "device": "support",
+      "category": "Yardımcı Besleme",
+      "title": "12V Yardımcı Besleme Çıkışı",
+      "prompt": "12V yardımcı besleme/adaptör çıkışında yük bağlıyken voltajı ölçün. 24V cihazlarda beklenen değeri iki kat kıyaslayın.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Yük bağlı",
+      "probeBlack": "Çıkış -",
+      "probeRed": "Çıkış +",
+      "expected": {
+        "min": 11.5,
+        "max": 13.8
+      },
+      "danger": "low",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 11
+          },
+          "label": "Yardımcı besleme düşük/yok",
+          "next": "support_result_psu_fault",
+          "scoreDelta": {
+            "support_psu_fault": 42
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 11.5,
+            "max": 13.8
+          },
+          "label": "Besleme çıkışı normal",
+          "next": "support_load_drop",
+          "scoreDelta": {
+            "support_psu_fault": -8
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 14.2
+          },
+          "label": "Besleme çıkışı yüksek",
+          "next": "support_result_psu_fault",
+          "scoreDelta": {
+            "support_psu_fault": 32,
+            "rail_short": 8
+          }
+        }
+      ],
+      "fallbackNext": "support_load_drop"
+    },
+    "support_load_drop": {
+      "id": "support_load_drop",
+      "type": "question_boolean",
+      "device": "support",
+      "category": "Yük Testi",
+      "title": "Yükte Voltaj Düşümü",
+      "prompt": "Yük bağlanınca voltaj belirgin düşüyor veya bağlı cihaz reset atıyor mu?",
+      "yesLabel": "Yükte çöküyor",
+      "noLabel": "Yükte stabil",
+      "unknownLabel": "Test edemiyorum",
+      "nextYes": "support_result_psu_weak",
+      "nextNo": "support_relay_contact",
+      "nextUnknown": "support_relay_contact",
+      "scoreYes": {
+        "support_psu_fault": 42,
+        "capacitor_esr": 16
+      },
+      "scoreNo": {
+        "support_psu_fault": -8
+      },
+      "scoreUnknown": {
+        "support_psu_fault": 8
+      }
+    },
+    "support_relay_contact": {
+      "id": "support_relay_contact",
+      "type": "question_boolean",
+      "device": "support",
+      "category": "Röle / Kontaktör",
+      "title": "NO/NC Kontak Değişimi",
+      "prompt": "Röle/kontaktör tetiklenince NO/NC kontakları doğru şekilde değişiyor mu?",
+      "yesLabel": "Kontak değişiyor",
+      "noLabel": "Kontak değişmiyor",
+      "unknownLabel": "Ölçemiyorum",
+      "nextYes": "support_result_wiring_device",
+      "nextNo": "support_result_relay_driver",
+      "nextUnknown": "support_result_relay_driver",
+      "scoreYes": {
+        "support_relay_fault": -8
+      },
+      "scoreNo": {
+        "support_relay_fault": 42,
+        "relay_driver": 14
+      },
+      "scoreUnknown": {
+        "support_relay_fault": 14
+      }
+    },
+    "support_result_identify_label": {
+      "id": "support_result_identify_label",
+      "type": "result",
+      "device": "support",
+      "severity": "info",
+      "title": "Önce Nominal Değer Etiketi Belirlenmeli",
+      "summary": "Yardımcı cihazın 12V/24V/AC/PoE çalışma standardı belirlenmeden enerji verilmemeli.",
+      "components": [
+        "Cihaz etiketi",
+        "Sistem şeması",
+        "Klemens işaretleri"
+      ],
+      "repair": "Etiket, şema veya üretici dokümanı ile nominal voltajı doğrulayın.",
+      "verification": "Doğru nominal değer belirlendikten sonra ölçüm akışına dönün."
+    },
+    "support_result_psu_fault": {
+      "id": "support_result_psu_fault",
+      "type": "result",
+      "device": "support",
+      "severity": "warning",
+      "title": "Yardımcı Besleme Çıkışı Arızalı",
+      "summary": "Adaptör/SMPS çıkışı beklenen aralıkta değil. Çıkış kondansatörü, sigorta veya regülasyon arızası olabilir.",
+      "components": [
+        "Adaptör/SMPS",
+        "Çıkış kondansatörleri",
+        "Sigorta/PTC",
+        "Kablo"
+      ],
+      "repair": "Boşta ve yük altında ölçüm yapın, ripple/ESR ve kablo voltaj düşümünü kontrol edin.",
+      "verification": "Yük bağlıyken çıkış nominal aralıkta kalmalı."
+    },
+    "support_result_psu_weak": {
+      "id": "support_result_psu_weak",
+      "type": "result",
+      "device": "support",
+      "severity": "warning",
+      "title": "Besleme Yük Altında Çöküyor",
+      "summary": "Besleme boşta normal olsa da yükte çöküyor. Kapasite yetersiz, ESR yüksek veya bağlı cihaz aşırı akım çekiyor olabilir.",
+      "components": [
+        "SMPS kapasitesi",
+        "Elektrolitik kondansatör",
+        "Bağlı saha cihazı",
+        "Kablo kesiti"
+      ],
+      "repair": "Yükü ayırarak tekrar deneyin, akım tüketimini ve ripple değerini ölçün.",
+      "verification": "Nominal yükte reset veya voltaj çökmesi oluşmamalı."
+    },
+    "support_result_relay_driver": {
+      "id": "support_result_relay_driver",
+      "type": "result",
+      "device": "support",
+      "severity": "warning",
+      "title": "Yardımcı Röle / Kontaktör Arızası",
+      "summary": "Röle kontağı doğru değişmiyor. Bobin, sürücü transistoru, flyback diyot veya NO/NC kontağı arızalı olabilir.",
+      "components": [
+        "Röle bobini",
+        "Sürücü transistoru",
+        "Flyback diyot",
+        "NO/NC kontak"
+      ],
+      "repair": "Bobin gerilimini ve kontak sürekliliğini komut sırasında ölçün.",
+      "verification": "Komutla COM-NO/NC doğru değişmeli."
+    },
+    "support_result_wiring_device": {
+      "id": "support_result_wiring_device",
+      "type": "result",
+      "device": "support",
+      "severity": "info",
+      "title": "Yardımcı Cihaz Temel Olarak Çalışıyor",
+      "summary": "Besleme ve röle temel olarak çalışıyor. Sorun saha kablosu, uç cihaz, bağlantı standardı veya sistem konfigürasyonunda olabilir.",
+      "components": [
+        "Saha kablosu",
+        "Uç cihaz",
+        "Hat sonu direnci",
+        "Konfigürasyon"
+      ],
+      "repair": "Saha hattını uçtan uca test edin ve bağlı cihazı bağımsız deneyin.",
+      "verification": "Saha cihazı sistem komutuna doğru tepki vermeli."
+    },
+    "general_symptom": {
+      "id": "general_symptom",
+      "type": "symptom",
+      "device": "general",
+      "title": "Genel Kart Belirti Sınıflandırması",
+      "prompt": "Kart seviyesi teşhiste ilk gözlemi seçin.",
+      "options": [
+        {
+          "label": "Görsel hasar var",
+          "next": "general_visual_check",
+          "scoreDelta": {
+            "general_visual_damage": 38,
+            "capacitor_esr": 12,
+            "mosfet_short": 10
+          }
+        },
+        {
+          "label": "Kart hiç açılmıyor",
+          "next": "general_input_voltage",
+          "scoreDelta": {
+            "general_regulator_fault": 32,
+            "input_protection_fault": 16
+          }
+        },
+        {
+          "label": "Regülatör ısınıyor / 5V-3.3V şüpheli",
+          "next": "general_5v_rail",
+          "scoreDelta": {
+            "general_regulator_fault": 36,
+            "rail_short": 18
+          }
+        },
+        {
+          "label": "MCU çalışmıyor / firmware şüpheli",
+          "next": "general_reset_check",
+          "scoreDelta": {
+            "general_clock_memory_fault": 30,
+            "mcu_boot": 18
+          }
+        }
+      ]
+    },
+    "general_visual_check": {
+      "id": "general_visual_check",
+      "type": "inspection",
+      "device": "general",
+      "category": "Görsel İnceleme",
+      "title": "Yanık / Oksit / Çatlak Lehim Kontrolü",
+      "prompt": "Kart üzerinde yanık, çatlak, şişmiş kondansatör, oksit veya kopuk lehim var mı?",
+      "imageUrl": "/measurement-placeholder.svg",
+      "yesLabel": "Hasar var",
+      "noLabel": "Belirgin hasar yok",
+      "unknownLabel": "Emin değilim",
+      "nextYes": "general_result_visual_damage",
+      "nextNo": "general_input_voltage",
+      "nextUnknown": "general_input_voltage",
+      "scoreYes": {
+        "general_visual_damage": 42,
+        "capacitor_esr": 18,
+        "mosfet_short": 14
+      },
+      "scoreNo": {
+        "general_visual_damage": -8
+      },
+      "scoreUnknown": {
+        "general_visual_damage": 8
+      }
+    },
+    "general_input_voltage": {
+      "id": "general_input_voltage",
+      "type": "measurement",
+      "device": "general",
+      "category": "Giriş Beslemesi",
+      "title": "Kart DC Giriş Voltajı",
+      "prompt": "Kart DC giriş soketindeki voltajı ölçün. 12V sistem varsayılmıştır.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "GND / - giriş",
+      "probeRed": "+VIN / DC jack",
+      "expected": {
+        "min": 11.5,
+        "max": 13.8
+      },
+      "danger": "low",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 10.5
+          },
+          "label": "Giriş voltajı düşük/yok",
+          "next": "general_result_input_fault",
+          "scoreDelta": {
+            "general_regulator_fault": 26,
+            "input_protection_fault": 26
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 11.5,
+            "max": 13.8
+          },
+          "label": "Giriş voltajı normal",
+          "next": "general_5v_rail",
+          "scoreDelta": {
+            "input_protection_fault": -8
+          }
+        }
+      ],
+      "fallbackNext": "general_5v_rail"
+    },
+    "general_5v_rail": {
+      "id": "general_5v_rail",
+      "type": "measurement",
+      "device": "general",
+      "category": "Regülatörler",
+      "title": "5V Regülatör Çıkışı",
+      "prompt": "5V regülatör çıkışındaki voltajı ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "GND",
+      "probeRed": "5V test noktası / regülatör çıkışı",
+      "expected": {
+        "min": 4.75,
+        "max": 5.25
+      },
+      "danger": "low",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 4.5
+          },
+          "label": "5V hattı düşük",
+          "next": "general_result_5v_fault",
+          "scoreDelta": {
+            "general_regulator_fault": 38,
+            "rail_short": 20
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 4.75,
+            "max": 5.25
+          },
+          "label": "5V hattı normal",
+          "next": "general_3v3_rail",
+          "scoreDelta": {
+            "general_regulator_fault": -8
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 5.4
+          },
+          "label": "5V hattı yüksek",
+          "next": "general_result_5v_fault",
+          "scoreDelta": {
+            "general_regulator_fault": 36,
+            "mcu_boot": 12
+          }
+        }
+      ],
+      "fallbackNext": "general_3v3_rail"
+    },
+    "general_3v3_rail": {
+      "id": "general_3v3_rail",
+      "type": "measurement",
+      "device": "general",
+      "category": "Regülatörler",
+      "title": "3.3V Lojik Hattı",
+      "prompt": "MCU/lojik 3.3V hattındaki voltajı ölçün.",
+      "unit": "V",
+      "meterMode": "DC Voltage",
+      "powerState": "Enerjili",
+      "probeBlack": "GND",
+      "probeRed": "3.3V test noktası / MCU VCC",
+      "expected": {
+        "min": 3.15,
+        "max": 3.45
+      },
+      "danger": "low",
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 3
+          },
+          "label": "3.3V hattı düşük",
+          "next": "general_result_3v3_fault",
+          "scoreDelta": {
+            "general_regulator_fault": 36,
+            "rail_short": 18
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 3.15,
+            "max": 3.45
+          },
+          "label": "3.3V hattı normal",
+          "next": "general_reset_check",
+          "scoreDelta": {
+            "general_regulator_fault": -8
+          }
+        }
+      ],
+      "fallbackNext": "general_reset_check"
+    },
+    "general_reset_check": {
+      "id": "general_reset_check",
+      "type": "question_boolean",
+      "device": "general",
+      "category": "MCU Çekirdeği",
+      "title": "MCU Reset Hattı",
+      "prompt": "MCU reset pininde açılıştan sonra HIGH lojik seviye var mı?",
+      "yesLabel": "Reset HIGH",
+      "noLabel": "Reset düşük/kararsız",
+      "unknownLabel": "Osiloskop yok",
+      "nextYes": "general_clock_check",
+      "nextNo": "general_result_reset_fault",
+      "nextUnknown": "general_result_need_scope",
+      "scoreYes": {
+        "mcu_boot": -6
+      },
+      "scoreNo": {
+        "mcu_boot": 34,
+        "general_clock_memory_fault": 18
+      },
+      "scoreUnknown": {
+        "general_clock_memory_fault": 8
+      }
+    },
+    "general_clock_check": {
+      "id": "general_clock_check",
+      "type": "question_boolean",
+      "device": "general",
+      "category": "MCU Çekirdeği",
+      "title": "Kristal / Clock Sinyali",
+      "prompt": "Kristal veya osilatör hattında saat sinyali mevcut mu?",
+      "yesLabel": "Clock var",
+      "noLabel": "Clock yok",
+      "unknownLabel": "Ölçemiyorum",
+      "nextYes": "general_memory_detected",
+      "nextNo": "general_result_clock_fault",
+      "nextUnknown": "general_result_need_scope",
+      "scoreYes": {
+        "general_clock_memory_fault": -6
+      },
+      "scoreNo": {
+        "general_clock_memory_fault": 34,
+        "mcu_boot": 18
+      },
+      "scoreUnknown": {
+        "general_clock_memory_fault": 10
+      }
+    },
+    "general_memory_detected": {
+      "id": "general_memory_detected",
+      "type": "question_boolean",
+      "device": "general",
+      "category": "Hafıza / Firmware",
+      "title": "SPI Flash / EEPROM Okunabilirliği",
+      "prompt": "SPI Flash veya EEPROM programlayıcı ile okunabiliyor mu?",
+      "yesLabel": "Okunuyor",
+      "noLabel": "Okunmuyor",
+      "unknownLabel": "Programlayıcı yok",
+      "nextYes": "general_result_firmware_peripheral",
+      "nextNo": "general_result_memory_fault",
+      "nextUnknown": "general_result_need_programmer",
+      "scoreYes": {
+        "general_clock_memory_fault": 12
+      },
+      "scoreNo": {
+        "general_clock_memory_fault": 36
+      },
+      "scoreUnknown": {
+        "general_clock_memory_fault": 8
+      }
+    },
+    "general_result_visual_damage": {
+      "id": "general_result_visual_damage",
+      "type": "result",
+      "device": "general",
+      "severity": "warning",
+      "title": "Görsel Hasarlı Kart",
+      "summary": "Kart üzerinde yanık, oksit, çatlak lehim veya şişmiş kondansatör var. Güç vermeden önce kısa devre ve hat direnci kontrol edilmeli.",
+      "components": [
+        "Yanık komponentler",
+        "Elektrolitik kondansatörler",
+        "Klemens/lehimler",
+        "Oksitli bölgeler"
+      ],
+      "repair": "Hasarlı bölgeyi temizleyin, kısa devreyi izole edin ve aynı değer komponentle değiştirin.",
+      "verification": "Güç vermeden önce giriş ve regülatör hat dirençleri normal olmalı."
+    },
+    "general_result_input_fault": {
+      "id": "general_result_input_fault",
+      "type": "result",
+      "device": "general",
+      "severity": "critical",
+      "title": "Kart Giriş Besleme Arızası",
+      "summary": "DC giriş voltajı beklenen aralıkta değil. Adaptör, DC jack, giriş sigortası veya ters polarite koruması kontrol edilmeli.",
+      "components": [
+        "Adaptör",
+        "DC jack",
+        "Giriş sigortası",
+        "Ters polarite diyodu/MOSFET"
+      ],
+      "repair": "Kartı yükten ayırıp adaptörü ölçün. Giriş koruma hattında süreklilik ve kısa devre kontrolü yapın.",
+      "verification": "Kart girişinde nominal voltaj stabil görülmeli."
+    },
+    "general_result_5v_fault": {
+      "id": "general_result_5v_fault",
+      "type": "result",
+      "device": "general",
+      "severity": "critical",
+      "title": "5V Regülatör Hattı Arızası",
+      "summary": "5V hattı normal değil. Regülatör, feedback, bobin/diyot veya çıkış kondansatörlerinde arıza olabilir.",
+      "components": [
+        "5V regülatör",
+        "Feedback dirençleri",
+        "Bobin/diyot",
+        "Çıkış kondansatörleri"
+      ],
+      "repair": "Giriş voltajı varsa 5V-GND direnç ölçün; düşük dirençte hattı bölerek kısa devreyi bulun.",
+      "verification": "5V hattı 4.75-5.25V aralığında kalmalı."
+    },
+    "general_result_3v3_fault": {
+      "id": "general_result_3v3_fault",
+      "type": "result",
+      "device": "general",
+      "severity": "critical",
+      "title": "3.3V Lojik Hattı Arızası",
+      "summary": "3.3V lojik hattı düşük veya yok. LDO/buck çıkışı, decoupling kondansatörleri veya MCU/peripheral kısa devresi şüpheli.",
+      "components": [
+        "3.3V LDO",
+        "Decoupling kondansatörler",
+        "MCU VCC",
+        "Flash/EEPROM VCC"
+      ],
+      "repair": "3.3V hattındaki düşük direnci izole edin; ısınan komponenti akım sınırlamalı besleme ile bulun.",
+      "verification": "3.3V hattı açılış ve yükte kararlı kalmalı."
+    },
+    "general_result_reset_fault": {
+      "id": "general_result_reset_fault",
+      "type": "result",
+      "device": "general",
+      "severity": "warning",
+      "title": "Reset Hattı Arızası",
+      "summary": "Reset hattı HIGH seviyeye çıkmıyor veya kararsız. Reset IC, pull-up, buton veya watchdog devresi şüpheli.",
+      "components": [
+        "Reset IC",
+        "Pull-up direnci",
+        "Reset butonu",
+        "Watchdog hattı"
+      ],
+      "repair": "Reset pininde seviye ve açılış darbesini ölçün; hatta bağlı elemanları izole edin.",
+      "verification": "Reset hattı açılıştan sonra stabil HIGH olmalı."
+    },
+    "general_result_clock_fault": {
+      "id": "general_result_clock_fault",
+      "type": "result",
+      "device": "general",
+      "severity": "warning",
+      "title": "Clock / Kristal Arızası",
+      "summary": "Saat sinyali yok. Kristal, load kondansatörleri, oscillator enable hattı veya MCU clock pini arızalı olabilir.",
+      "components": [
+        "Kristal",
+        "Load kondansatörleri",
+        "Oscillator enable",
+        "MCU clock pinleri"
+      ],
+      "repair": "Osiloskop prob yükünü düşük tutarak ölçün; kristal ve kondansatörleri değerleriyle kontrol edin.",
+      "verification": "Clock hattında beklenen frekans stabil görülmeli."
+    },
+    "general_result_memory_fault": {
+      "id": "general_result_memory_fault",
+      "type": "result",
+      "device": "general",
+      "severity": "warning",
+      "title": "EEPROM / SPI Flash Okunamıyor",
+      "summary": "Hafıza entegresi okunamıyor. CS/CLK/MOSI/MISO, VCC veya entegre lehim/arıza durumu kontrol edilmeli.",
+      "components": [
+        "SPI Flash/EEPROM",
+        "CS/CLK/MOSI/MISO",
+        "VCC",
+        "Lehim bağlantıları"
+      ],
+      "repair": "Devre üzerinde okunmuyorsa entegreyi sökerek okuyun, dump yedeği alın.",
+      "verification": "Programlayıcı verify işlemi hatasız tamamlamalı."
+    },
+    "general_result_firmware_peripheral": {
+      "id": "general_result_firmware_peripheral",
+      "type": "result",
+      "device": "general",
+      "severity": "info",
+      "title": "Temel Kart Çekirdeği Normal, Firmware/Peripheral Kontrol",
+      "summary": "Güç, reset, clock ve hafıza erişimi normal. Arıza firmware, saha bağlantısı, sensör, röle sürücü veya haberleşme hattında olabilir.",
+      "components": [
+        "Firmware",
+        "Sensörler",
+        "Röle sürücü",
+        "Haberleşme hattı"
+      ],
+      "repair": "Firmware/yedek konfigürasyon, periferik pinleri ve saha bağlantılarını doğrulayın.",
+      "verification": "Kart fonksiyon testi tüm giriş/çıkışlarda başarılı olmalı."
+    },
+    "general_result_need_scope": {
+      "id": "general_result_need_scope",
+      "type": "result",
+      "device": "general",
+      "severity": "info",
+      "title": "Osiloskop / Lojik Prob Gerekli",
+      "summary": "Reset veya clock hattı multimetreyle güvenilir doğrulanamaz. Osiloskop veya lojik prob gerekir.",
+      "components": [
+        "Reset hattı",
+        "Clock hattı",
+        "MCU pinleri"
+      ],
+      "repair": "Sinyali doğrudan pinlerden düşük kapasitans probla ölçün.",
+      "verification": "Reset ve clock zamanlaması datasheet değerlerine uygun olmalı."
+    },
+    "general_result_need_programmer": {
+      "id": "general_result_need_programmer",
+      "type": "result",
+      "device": "general",
+      "severity": "info",
+      "title": "Programlayıcı Gerekli",
+      "summary": "EEPROM/SPI Flash doğrulaması için uygun programlayıcı ve klips/soket gerekir.",
+      "components": [
+        "Programlayıcı",
+        "SOIC klips/soket",
+        "Dump yedeği"
+      ],
+      "repair": "Yazma denemesinden önce dump yedeği alın ve verify yapın.",
+      "verification": "Okuma ve verify işlemleri tutarlı olmalı."
+    }
+  }
+}
