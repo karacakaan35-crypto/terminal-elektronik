@@ -11,13 +11,46 @@ test('diagnostic graph and score references are valid', () => {
   assert.deepEqual(validateDiagnostics(diagnostics), [])
 })
 
-test('PBX borderline low voltage follows the abnormal line-voltage branch', () => {
+test('PBX borderline low voltage follows the explicit abnormal line-voltage branch', () => {
   const result = evaluateMeasurement(diagnostics.nodes.pbx_extension_voltage, 20)
 
   assert.equal(result.passed, false)
-  assert.equal(result.inferred, true)
+  assert.equal(result.inferred, false)
   assert.equal(result.nextNodeId, 'pbx_result_line_voltage')
-  assert.match(result.label, /altında/)
+  assert.match(result.label, /düşük\/sınırda/)
+})
+
+test('PBX 24V idle reading remains valid for supported FXS hardware families', () => {
+  const result = evaluateMeasurement(diagnostics.nodes.pbx_extension_voltage, 24)
+
+  assert.equal(result.passed, true)
+  assert.equal(result.nextNodeId, 'pbx_offhook_response')
+})
+
+test('fire-panel EOL values are evaluated against the selected model reference', () => {
+  const mismatch = evaluateMeasurement(diagnostics.nodes.fire_zone_resistance_22k, 3000)
+  const nominal = evaluateMeasurement(diagnostics.nodes.fire_zone_resistance, 6800)
+
+  assert.equal(mismatch.passed, false)
+  assert.equal(mismatch.nextNodeId, 'fire_result_eol_mismatch')
+  assert.equal(nominal.passed, true)
+  assert.equal(nominal.nextNodeId, 'fire_zone_alarm_led')
+})
+
+test('Nice barrier flash codes route to the documented subsystem checks', () => {
+  const options = Object.fromEntries(diagnostics.nodes.barrier_flash_code.options.map((option) => [option.label, option.next]))
+
+  assert.equal(options['1 flaş: BlueBUS sistem hatası'], 'barrier_result_bluebus')
+  assert.equal(options['2 flaş: Fotosel aktif'], 'barrier_photo_alignment')
+  assert.equal(options['3 flaş: Motor kuvvet limiti'], 'barrier_mechanical_balance')
+  assert.equal(options['4 flaş: STOP girişi aktif'], 'barrier_stop_input')
+})
+
+test('professional dataset keeps broad profile, node, fault and source coverage', () => {
+  assert.equal(diagnostics.deviceProfiles.length, 10)
+  assert.ok(Object.keys(diagnostics.nodes).length >= 275)
+  assert.ok(Object.keys(diagnostics.faultCatalog).length >= 80)
+  assert.ok(Object.keys(diagnostics.sourceCatalog).length >= 12)
 })
 
 test('every out-of-range measurement resolves to an explicit or inferred abnormal rule', () => {

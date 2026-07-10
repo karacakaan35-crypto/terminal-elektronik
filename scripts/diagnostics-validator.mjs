@@ -41,7 +41,32 @@ export function validateDiagnostics(data) {
   const errors = []
   const nodes = data.nodes || {}
   const catalog = data.faultCatalog || {}
+  const sources = data.sourceCatalog || {}
   const profileIds = new Set((data.deviceProfiles || []).map((profile) => profile.id))
+  const inboundCounts = Object.fromEntries(Object.keys(nodes).map((nodeId) => [nodeId, 0]))
+
+  function validateSourceIds(owner, sourceIds, required = false) {
+    if (required && (!Array.isArray(sourceIds) || sourceIds.length === 0)) {
+      errors.push(`${owner}: at least one technical source is required`)
+      return
+    }
+
+    for (const sourceId of sourceIds || []) {
+      if (!sources[sourceId]) {
+        errors.push(`${owner}: unknown technical source ${sourceId}`)
+      }
+    }
+  }
+
+  for (const [sourceId, source] of Object.entries(sources)) {
+    if (!source.publisher || !source.title || !/^https:\/\//.test(source.url || '')) {
+      errors.push(`${sourceId}: source requires publisher, title and an HTTPS URL`)
+    }
+  }
+
+  if (Object.keys(sources).length < 8) {
+    errors.push(`sourceCatalog: expected at least 8 primary technical sources`)
+  }
 
   for (const [key, node] of Object.entries(nodes)) {
     if (node.id !== key) {
@@ -52,11 +77,45 @@ export function validateDiagnostics(data) {
       errors.push(`${key}: unknown device profile ${node.device}`)
     }
 
+    if (!node.title || !node.category || (node.type !== 'result' && !node.prompt)) {
+      errors.push(`${key}: title, category and prompt are required for diagnostic steps`)
+    }
+
+    validateSourceIds(key, node.sourceIds)
+
     for (const target of getNodeTargets(node)) {
       if (!target) {
         errors.push(`${key}: empty decision target`)
       } else if (!nodes[target]) {
         errors.push(`${key}: target node ${target} does not exist`)
+      } else {
+        inboundCounts[target] += 1
+
+        if (target === key) {
+          errors.push(`${key}: node cannot target itself`)
+        }
+
+        if (nodes[target].device !== node.device) {
+          errors.push(`${key}: cross-profile target ${target}`)
+        }
+      }
+    }
+
+    if (node.type === 'symptom') {
+      if (!Array.isArray(node.options) || node.options.length < 2) {
+        errors.push(`${key}: symptom selection requires at least two options`)
+      }
+
+      for (const option of node.options || []) {
+        if (!option.label || !option.next) {
+          errors.push(`${key}: every symptom option requires label and next`)
+        }
+      }
+    }
+
+    if (['question_boolean', 'inspection', 'component_test'].includes(node.type)) {
+      if (!node.yesLabel || !node.noLabel || !node.unknownLabel) {
+        errors.push(`${key}: all three decision labels are required`)
       }
     }
 
@@ -70,6 +129,30 @@ export function validateDiagnostics(data) {
       if (!Array.isArray(node.rules) || node.rules.length === 0) {
         errors.push(`${key}: measurement has no rules`)
       }
+
+      for (const field of ['unit', 'meterMode', 'powerState', 'probeBlack', 'probeRed', 'fallbackNext']) {
+        if (!node[field]) {
+          errors.push(`${key}: measurement field ${field} is required`)
+        }
+      }
+
+      for (const rule of node.rules || []) {
+        if (!rule.when?.operator || !rule.label || !rule.next) {
+          errors.push(`${key}: every measurement rule requires when, label and next`)
+        }
+      }
+    }
+
+    if (node.type === 'result') {
+      if (!node.summary || !node.repair || !node.verification || !Array.isArray(node.components) || node.components.length === 0) {
+        errors.push(`${key}: result requires summary, components, repair and verification`)
+      }
+    }
+  }
+
+  for (const [faultId, fault] of Object.entries(catalog)) {
+    if (!fault.label || !fault.componentGroup || !['info', 'warning', 'critical'].includes(fault.risk)) {
+      errors.push(`${faultId}: invalid fault catalog entry`)
     }
   }
 
@@ -77,6 +160,8 @@ export function validateDiagnostics(data) {
     if (!nodes[profile.startNodeId]) {
       errors.push(`${profile.id}: start node ${profile.startNodeId} does not exist`)
     }
+
+    validateSourceIds(profile.id, profile.sourceIds, true)
 
     const priors = data.faultPriorScores?.[profile.id]
     if (!priors) {
@@ -94,6 +179,80 @@ export function validateDiagnostics(data) {
         errors.push(`${profile.id}: initial score references missing fault ${faultId}`)
       }
     }
+
+    const displayPriors = profile.faultPriors || []
+    const displayTotal = displayPriors.reduce((sum, item) => sum + item.probability, 0)
+    if (displayTotal !== 100) {
+      errors.push(`${profile.id}: displayed fault priors total ${displayTotal}, expected 100`)
+    }
+
+    const displayIds = new Set(displayPriors.map((item) => item.faultId))
+    for (const [faultId, probability] of Object.entries(priors)) {
+      const displayPrior = displayPriors.find((item) => item.faultId === faultId)
+      if (!displayPrior) {
+        errors.push(`${profile.id}: displayed priors missing ${faultId}`)
+      } else if (displayPrior.probability !== probability || displayPrior.label !== catalog[faultId]?.label) {
+        errors.push(`${profile.id}: displayed prior ${faultId} is out of sync with score/catalog data`)
+      }
+    }
+
+    for (const faultId of displayIds) {
+      if (!priors[faultId]) {
+        errors.push(`${profile.id}: displayed prior ${faultId} is not in faultPriorScores`)
+      }
+    }
+
+    const profileNodes = Object.values(nodes).filter((node) => node.device === profile.id)
+    const decisionCount = profileNodes.filter((node) => node.type !== 'result').length
+    const measurementCount = profileNodes.filter((node) => node.type === 'measurement').length
+    const resultCount = profileNodes.filter((node) => node.type === 'result').length
+
+    if (decisionCount < 6 || measurementCount < 2 || resultCount < 4) {
+      errors.push(`${profile.id}: insufficient diagnostic depth (${decisionCount} decisions, ${measurementCount} measurements, ${resultCount} results)`)
+    }
+
+    const reachable = new Set()
+    const queue = [profile.startNodeId]
+    while (queue.length > 0) {
+      const nodeId = queue.shift()
+      if (!nodes[nodeId] || reachable.has(nodeId)) {
+        continue
+      }
+
+      reachable.add(nodeId)
+      queue.push(...getNodeTargets(nodes[nodeId]).filter(Boolean))
+    }
+
+    for (const node of profileNodes) {
+      if (!reachable.has(node.id)) {
+        errors.push(`${node.id}: node is unreachable from ${profile.id}`)
+      }
+    }
+
+    const visited = new Set()
+    const activePath = new Set()
+    let cycleReported = false
+
+    function visitForCycles(nodeId) {
+      if (cycleReported || visited.has(nodeId) || !nodes[nodeId]) {
+        return
+      }
+
+      if (activePath.has(nodeId)) {
+        errors.push(`${profile.id}: diagnostic graph contains a cycle at ${nodeId}`)
+        cycleReported = true
+        return
+      }
+
+      activePath.add(nodeId)
+      for (const target of getNodeTargets(nodes[nodeId]).filter(Boolean)) {
+        visitForCycles(target)
+      }
+      activePath.delete(nodeId)
+      visited.add(nodeId)
+    }
+
+    visitForCycles(profile.startNodeId)
   }
 
   for (const faultId of collectScoreIds(nodes)) {
@@ -102,21 +261,10 @@ export function validateDiagnostics(data) {
     }
   }
 
-  const reachable = new Set()
-  const queue = (data.deviceProfiles || []).map((profile) => profile.startNodeId)
-  while (queue.length > 0) {
-    const nodeId = queue.shift()
-    if (!nodes[nodeId] || reachable.has(nodeId)) {
-      continue
-    }
-
-    reachable.add(nodeId)
-    queue.push(...getNodeTargets(nodes[nodeId]).filter(Boolean))
-  }
-
   for (const nodeId of Object.keys(nodes)) {
-    if (!reachable.has(nodeId)) {
-      errors.push(`${nodeId}: node is unreachable from every device profile`)
+    const isStartNode = data.deviceProfiles?.some((profile) => profile.startNodeId === nodeId)
+    if (!isStartNode && inboundCounts[nodeId] === 0) {
+      errors.push(`${nodeId}: node has no inbound decision path`)
     }
   }
 

@@ -571,8 +571,8 @@ function ScorePanel({ selectedProfile, candidates, resultNode, notes, setNotes }
 
 function AssistantAvatar({ size = 'md' }) {
   const sizes = {
-    md: 'h-24 w-24 rounded-2xl',
-    lg: 'h-32 w-32 rounded-2xl',
+    md: 'h-14 w-14 rounded-xl sm:h-24 sm:w-24 sm:rounded-2xl',
+    lg: 'h-20 w-20 rounded-xl sm:h-32 sm:w-32 sm:rounded-2xl',
   }
 
   return (
@@ -900,14 +900,14 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Astra asistanını aç"
-          className="group flex items-center gap-3 rounded-2xl border border-cyan-200/30 bg-[#101521]/90 p-2.5 pr-4 text-left shadow-2xl shadow-black/40 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-cyan-100/70"
+          className="group flex items-center rounded-xl border border-cyan-200/30 bg-[#101521]/90 p-1.5 text-left shadow-2xl shadow-black/40 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-cyan-100/70 sm:gap-3 sm:rounded-2xl sm:p-2.5 sm:pr-4"
         >
           <AssistantAvatar />
           <span className="hidden sm:block">
             <span className="block text-sm font-black text-white">Astra'ya Sor</span>
             <span className="block text-xs text-zinc-500 group-hover:text-cyan-100">Teknik destek robotu</span>
           </span>
-          <MessageCircle className="h-5 w-5 text-cyan-100" aria-hidden="true" />
+          <MessageCircle className="hidden h-5 w-5 text-cyan-100 sm:block" aria-hidden="true" />
         </button>
       )}
     </div>
@@ -993,7 +993,7 @@ function ProcedureHeader({ node }) {
 
 function ProbeGuide({ node }) {
   const items = [
-    ['Multimetre', meterModeLabels[node.meterMode] || node.meterMode, Gauge],
+    ['Ölçüm Cihazı', meterModeLabels[node.meterMode] || node.meterMode, Gauge],
     ['Kart Durumu', node.powerState, Power],
     ['Siyah Prob', node.probeBlack, KeyRound],
     ['Kırmızı Prob', node.probeRed, Zap],
@@ -1010,6 +1010,46 @@ function ProbeGuide({ node }) {
           <div className="text-sm font-semibold leading-6 text-zinc-200">{value}</div>
         </div>
       ))}
+    </div>
+  )
+}
+
+function TestMethodPanel({ node }) {
+  const steps = node.testSteps || []
+  const stopConditions = node.stopConditions || []
+
+  if (steps.length === 0 && stopConditions.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="mt-5 border-y border-white/10 py-4">
+      {steps.length > 0 ? (
+        <div>
+          <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-wide text-zinc-500">
+            <ClipboardList className="h-4 w-4 text-cyan-200" aria-hidden="true" />
+            Test Prosedürü
+          </div>
+          <ol className="grid gap-2 text-sm leading-6 text-zinc-300 md:grid-cols-2">
+            {steps.map((step, index) => (
+              <li key={step} className="flex gap-3">
+                <span className="font-mono font-black text-cyan-200">{index + 1}.</span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
+
+      {stopConditions.length > 0 ? (
+        <div className={classNames('flex gap-3 text-sm leading-6 text-amber-100', steps.length > 0 && 'mt-4 border-t border-amber-300/15 pt-4')}>
+          <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+          <div>
+            <div className="font-black">Testi durdurun</div>
+            <div className="text-amber-100/75">{stopConditions.join(' • ')}</div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -1036,6 +1076,7 @@ function MeasurementNode({ node, onSubmit }) {
     <section className="glass-panel rounded-lg p-5">
       <ProcedureHeader node={node} />
       <ProbeGuide node={node} />
+      <TestMethodPanel node={node} />
 
       <div className={classNames('mt-5 grid gap-5', hasMeasurementImage && 'xl:grid-cols-[1fr_320px]')}>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -1087,6 +1128,7 @@ function ChoiceNode({ node, onAnswer }) {
     <section className="glass-panel rounded-lg p-5">
       <ProcedureHeader node={node} />
       {node.meterMode || node.powerState ? <ProbeGuide node={node} /> : null}
+      <TestMethodPanel node={node} />
 
       {hasMeasurementImage ? (
         <figure className="mt-5 overflow-hidden rounded-lg border border-white/10 bg-white/5">
@@ -1135,11 +1177,13 @@ function SymptomNode({ node, onSelect }) {
             className="group module-card rounded-lg p-4 pl-5 text-left transition hover:-translate-y-0.5 hover:border-rose-300/60"
           >
             <div className="mb-3 flex items-center justify-between gap-3">
-              <Badge tone="amber">BELIRTI</Badge>
+              <Badge tone="amber">{node.optionBadge || 'BELIRTI'}</Badge>
               <ChevronRight className="h-5 w-5 text-zinc-600 transition group-hover:text-rose-100" aria-hidden="true" />
             </div>
             <div className="text-lg font-black text-white">{option.label}</div>
-            <div className="mt-2 text-sm leading-6 text-zinc-500">Bu seçim arıza skorlarına ilk kanıt olarak eklenir.</div>
+            <div className="mt-2 text-sm leading-6 text-zinc-500">
+              {option.description || 'Bu seçim arıza skorlarına ilk kanıt olarak eklenir.'}
+            </div>
           </button>
         ))}
       </div>
