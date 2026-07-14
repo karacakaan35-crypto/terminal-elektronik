@@ -18,7 +18,7 @@ function createAssets() {
   }
 }
 
-test('hosted assistant status disables the unavailable local model', async () => {
+test('hosted assistant status disables Gemini when the API key is missing', async () => {
   const response = await worker.fetch(
     new Request('https://terminal.example/api/assistant/status'),
     { ASSETS: createAssets() },
@@ -26,43 +26,39 @@ test('hosted assistant status disables the unavailable local model', async () =>
 
   assert.equal(response.status, 200)
   assert.deepEqual(await response.json(), {
-    provider: 'browser',
+    provider: 'gemini',
     connected: false,
-    configuredModel: 'gemma4:e2b-it-qat',
+    configuredModel: 'gemini-3.1-flash-lite',
     modelAvailable: false,
     models: [],
   })
 })
-
-test('hosted assistant status proxies the configured Gemma bridge without exposing its token', async () => {
-  let authorization = ''
+test('hosted assistant status checks Gemini without exposing its API key', async () => {
+  let apiKey = ''
   const response = await worker.fetch(
     new Request('https://terminal.example/api/assistant/status', {
       headers: { 'CF-Connecting-IP': '198.51.100.7' },
     }),
     {
       ASSETS: createAssets(),
-      ASTRA_BRIDGE_URL: 'https://astra.example',
-      ASTRA_BRIDGE_TOKEN: 'server-secret',
-      ASTRA_BRIDGE_FETCH: async (_url, options) => {
-        authorization = options.headers.Authorization
-        return new Response(JSON.stringify({
-          provider: 'ollama-bridge',
-          connected: true,
-          configuredModel: 'gemma4',
-          modelAvailable: true,
-          models: ['gemma4:latest'],
-        }), { headers: { 'Content-Type': 'application/json' } })
+      GEMINI_API_KEY: 'server-secret',
+      GEMINI_FETCH: async (_url, options) => {
+        apiKey = options.headers['x-goog-api-key']
+        return new Response(JSON.stringify({ name: 'models/gemini-3.1-flash-lite' }), {
+          headers: { 'Content-Type': 'application/json' },
+        })
       },
     },
   )
 
   assert.equal(response.status, 200)
-  assert.equal(authorization, 'Bearer server-secret')
+  assert.equal(apiKey, 'server-secret')
   assert.equal((await response.json()).modelAvailable, true)
 })
 
-test('hosted assistant streams the bridge response and model header', async () => {
+test('hosted assistant returns the Gemini response and model header', async () => {
+  let requestBody
+  let apiKey = ''
   const response = await worker.fetch(
     new Request('https://terminal.example/api/assistant', {
       method: 'POST',
@@ -71,19 +67,21 @@ test('hosted assistant streams the bridge response and model header', async () =
     }),
     {
       ASSETS: createAssets(),
-      ASTRA_BRIDGE_URL: 'https://astra.example',
-      ASTRA_BRIDGE_TOKEN: 'server-secret',
-      ASTRA_BRIDGE_FETCH: async () => new Response('Bir fincan su ve kahveyi cezvede karıştır.', {
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-          'X-Assistant-Model': 'gemma4',
-        },
-      }),
+      GEMINI_API_KEY: 'server-secret',
+      GEMINI_FETCH: async (_url, options) => {
+        apiKey = options.headers['x-goog-api-key']
+        requestBody = JSON.parse(options.body)
+        return new Response(JSON.stringify({
+          candidates: [{ content: { parts: [{ text: 'Bir fincan su ve kahveyi cezvede karıştır.' }] } }],
+        }), { headers: { 'Content-Type': 'application/json' } })
+      },
     },
   )
 
   assert.equal(response.status, 200)
-  assert.equal(response.headers.get('X-Assistant-Model'), 'gemma4')
+  assert.equal(apiKey, 'server-secret')
+  assert.equal(requestBody.contents[0].role, 'user')
+  assert.equal(response.headers.get('X-Assistant-Model'), 'gemini-3.1-flash-lite')
   assert.match(await response.text(), /cezvede/)
 })
 

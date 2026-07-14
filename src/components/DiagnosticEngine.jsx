@@ -89,9 +89,13 @@ const meterModeLabels = {
   Continuity: 'Süreklilik',
 }
 
-const defaultAssistantModel = 'gemma4:e2b-it-qat'
+const defaultAssistantModel = 'gemini-3.1-flash-lite'
 
 function formatAssistantModel(model = defaultAssistantModel) {
+  if (model === 'gemini-3.1-flash-lite') {
+    return 'Gemini 3.1 Flash-Lite'
+  }
+
   if (model.startsWith('gemma4:e2b')) {
     return 'Gemma 4 E2B'
   }
@@ -713,7 +717,7 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
 
     if (!response.ok) {
       setModelStatus((previous) => ({ ...previous, checked: true, available: false }))
-      throw new Error(`Local model HTTP ${response.status}`)
+      throw new Error(`Assistant model HTTP ${response.status}`)
     }
 
     const modelName = response.headers.get('X-Assistant-Model') || modelStatus.model || defaultAssistantModel
@@ -742,7 +746,7 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
     }
 
     if (!reply.trim()) {
-      throw new Error('Local model returned an empty reply')
+      throw new Error('Assistant model returned an empty reply')
     }
 
     return reply
@@ -794,7 +798,7 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
         candidates,
       })
 
-      upsertAssistantMessage(responseId, `${reply}\n\nYerel model yanıt vermedi; hızlı yanıt gösterildi.`, 'HIZLI YEDEK')
+      upsertAssistantMessage(responseId, `${reply}\n\nDerin model yanıt vermedi; hızlı yanıt gösterildi.`, 'HIZLI YEDEK')
     } finally {
       if (activeResponseIdRef.current === responseId) {
         requestControllerRef.current = null
@@ -828,8 +832,8 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
                   {modelStatus.checked
                     ? modelStatus.available
                       ? `${formatAssistantModel(modelStatus.model)} hazır`
-                      : 'Yerel model çevrimdışı'
-                    : 'Yerel model kontrol ediliyor'}
+                      : 'Derin model çevrimdışı'
+                    : 'Derin model kontrol ediliyor'}
                 </p>
               </div>
             </div>
@@ -866,7 +870,7 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
             ))}
             {isThinking ? (
               <div className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-3 text-sm font-semibold text-cyan-100">
-                Astra Gemma4 yanıtını aktarıyor...
+                Astra derin yanıtı hazırlıyor...
               </div>
             ) : null}
           </div>

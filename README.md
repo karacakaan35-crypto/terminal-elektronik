@@ -38,11 +38,27 @@ Kalıcı statik yayın paketi için:
 npm run build:sites
 ```
 
-Bu sürüm bağlantı açıldığında doğrudan teşhis motorunu, PDF raporunu ve hızlı Astra yanıtlarını sunar. Derin Gemma4 modu yerel Ollama bağlantısı gerektirdiği için yalnız servis bilgisayarından sunulan sürümde etkinleşir.
+Bu sürüm bağlantı açıldığında doğrudan teşhis motorunu, PDF raporunu, hızlı Astra yanıtlarını ve Google AI Studio API ile çalışan derin Astra yanıtlarını sunar. API anahtarı yalnızca Sites sunucu ortamında tutulur ve tarayıcıya gönderilmez.
+
+## Google AI Studio ile Astra
+
+Codex Sites üzerindeki Astra iki çalışma modu sunar:
+
+- `Hızlı Yanıt`: Günlük ve sık saha sorularını cihaz üzerinde anında yanıtlar.
+- `Derin / Gemini 3.1 Flash-Lite`: Sites Worker üzerinden Google AI Studio API'yi kullanır.
+
+Sites ortamında kullanılan değerler:
+
+```text
+GEMINI_MODEL=gemini-3.1-flash-lite
+GEMINI_API_KEY=your-key
+```
+
+Aktif teşhis, işlem geçmişi ve teknisyen notları tarayıcıda taslak olarak saklanır. Derin yanıtlar servis bilgisayarı kapalıyken de çalışır; Google AI Studio kullanım sınırları geçerlidir.
 
 ## Yerel AI / Ollama
 
-Astra iki çalışma modu sunar:
+Servis bilgisayarında `npm run serve:local` ile açılan sürüm iki çalışma modu sunar:
 
 - `Hızlı Yanıt`: Günlük ve sık saha sorularını cihaz üzerinde anında yanıtlar.
 - `Derin / gemma4`: yerel servis sunucusu üzerinden Ollama modelini akışlı olarak kullanır; yanıt kullanıcı tarafından durdurulabilir.
