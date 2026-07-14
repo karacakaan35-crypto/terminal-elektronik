@@ -11,6 +11,7 @@ import {
   ClipboardList,
   Cpu,
   Download,
+  ExternalLink,
   Flame,
   Gauge,
   History,
@@ -87,6 +88,14 @@ const meterModeLabels = {
   Resistance: 'Direnç / Ohm',
   'Diode Mode': 'Diyot Modu',
   Continuity: 'Süreklilik',
+  'Oscilloscope / RS-485 analyzer': 'Osiloskop / RS-485 Analizörü',
+}
+
+const evidenceLabels = {
+  manufacturer: { label: 'Üretici kaynağı', tone: 'emerald' },
+  standard: { label: 'Standart kuruluşu', tone: 'cyan' },
+  engineering: { label: 'Mühendislik rehberi', tone: 'amber' },
+  heuristic: { label: 'Servis hipotezi', tone: 'red' },
 }
 
 const defaultAssistantModel = 'gemini-3.1-flash-lite'
@@ -252,7 +261,7 @@ function ProbabilityBar({ item, compact = false }) {
     <div className={compact ? 'space-y-1' : 'rounded-md border border-white/10 bg-white/5 p-3'}>
       <div className="flex items-start justify-between gap-3">
         <div className={classNames('font-semibold leading-5 text-zinc-200', compact ? 'text-xs' : 'text-sm')}>{item.label}</div>
-        <div className={classNames('shrink-0 font-mono font-black text-amber-100', compact ? 'text-xs' : 'text-lg')}>%{item.probability}</div>
+        <div className={classNames('shrink-0 font-mono font-black text-amber-100', compact ? 'text-xs' : 'text-lg')}>{item.probability} puan</div>
       </div>
       <div className={classNames('overflow-hidden rounded-full bg-black/30', compact ? 'mt-1 h-1.5' : 'mt-2 h-2')}>
         <div
@@ -278,9 +287,9 @@ function FaultPriorPanel({ profile, compact = false, limit }) {
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wide text-zinc-500">
           <Gauge className="h-4 w-4 text-amber-200" aria-hidden="true" />
-          Ön Tanı Oranları
+          Başlangıç Servis Ağırlıkları
         </div>
-        {!compact ? <Badge tone="amber">TOPLAM %100</Badge> : null}
+        {!compact ? <Badge tone="amber">NORMALİZE 100</Badge> : null}
       </div>
       <div className="space-y-2">
         {visiblePriors.map((item) => (
@@ -327,8 +336,13 @@ function ServiceIntake({ setServiceInfo, selectedProfileId, setSelectedProfileId
               Terminal <span className="gradient-word">Elektronik</span>
             </h1>
             <p className="mt-4 max-w-3xl text-base leading-7 text-zinc-300">
-              UPS, CACS, yangın paneli, kamera, bariyer ve santral arızalarında ölçüm sırası, olasılık skoru ve raporu tek ekranda toparlar.
+              UPS, CACS, yangın paneli, kamera, bariyer ve santral arızalarında ölçüm sırası, kanıta dayalı servis önceliği ve raporu tek ekranda toparlar.
             </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Badge tone="cyan">{Object.keys(diagnostics.sourceCatalog).length} TEKNİK KAYNAK</Badge>
+              <Badge tone="amber">AĞIRLIKLAR KALİBRE DEĞİL</Badge>
+              <Badge tone="emerald">İNCELEME {diagnostics.researchAudit?.reviewedAt}</Badge>
+            </div>
           </div>
 
           <div className="glass-panel rounded-lg p-4">
@@ -527,10 +541,10 @@ function ScorePanel({ selectedProfile, candidates, resultNode, notes, setNotes }
       <section className="soft-panel rounded-lg p-4">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <div className="text-sm font-black text-white">Genel Arıza Oranları</div>
-            <div className="mt-1 text-xs text-zinc-500">{selectedProfile?.shortName || 'Cihaz'} için başlangıç önceliği</div>
+            <div className="text-sm font-black text-white">Başlangıç Servis Ağırlıkları</div>
+            <div className="mt-1 text-xs text-zinc-500">{selectedProfile?.shortName || 'Cihaz'} için kalibre edilmemiş öncelik</div>
           </div>
-          <Badge tone="cyan">PRIOR</Badge>
+          <Badge tone="amber">OLASILIK DEĞİL</Badge>
         </div>
         <FaultPriorPanel profile={selectedProfile} />
       </section>
@@ -539,7 +553,7 @@ function ScorePanel({ selectedProfile, candidates, resultNode, notes, setNotes }
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm font-black text-white">
             <Gauge className="h-4 w-4 text-amber-300" aria-hidden="true" />
-            Canlı Tanı Dağılımı
+            Canlı Kanıt Dağılımı
           </div>
           <Badge tone="amber">NORMALİZE</Badge>
         </div>
@@ -549,7 +563,7 @@ function ScorePanel({ selectedProfile, candidates, resultNode, notes, setNotes }
             <div key={candidate.id} className="rounded-md border border-white/10 bg-white/5 p-3">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div className="text-sm font-bold leading-5 text-zinc-100">{candidate.label}</div>
-                <div className="font-mono text-lg font-black text-amber-100">%{candidate.probability}</div>
+                <div className="font-mono text-lg font-black text-amber-100">%{candidate.probability} pay</div>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-black/30">
                 <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-amber-300 to-red-400" style={{ width: `${candidate.probability}%` }} />
@@ -975,7 +989,7 @@ function WorkbenchShell({ selectedProfile, serviceInfo, currentNode, history, ca
             {[
               ['diagnostic', 'Teşhis'],
               ['history', 'Geçmiş'],
-              ['score', 'Skor'],
+              ['score', 'Kanıt'],
             ].map(([id, label]) => (
               <button
                 key={id}
@@ -1007,6 +1021,50 @@ function WorkbenchShell({ selectedProfile, serviceInfo, currentNode, history, ca
   )
 }
 
+function EvidencePanel({ node }) {
+  const evidence = evidenceLabels[node.evidence?.level] || evidenceLabels.heuristic
+  const sources = (node.sourceIds || []).map((sourceId) => diagnostics.sourceCatalog[sourceId]).filter(Boolean)
+  const thresholdLabel = node.thresholdPolicy === 'model_specific'
+    ? 'MODEL KILAVUZU ZORUNLU'
+    : node.thresholdPolicy === 'general_screening'
+      ? 'GENEL TARAMA ARALIĞI'
+      : null
+
+  return (
+    <section className="rounded-md border border-white/10 bg-white/[0.035] p-3" aria-label="Teknik dayanak ve kanıt seviyesi">
+      <div className="flex flex-wrap items-center gap-2">
+        <BookOpenCheck className="h-4 w-4 text-cyan-200" aria-hidden="true" />
+        <span className="text-xs font-black uppercase tracking-wide text-zinc-400">Teknik dayanak</span>
+        <Badge tone={evidence.tone}>{evidence.label}</Badge>
+        {thresholdLabel ? <Badge tone={node.thresholdPolicy === 'model_specific' ? 'red' : 'zinc'}>{thresholdLabel}</Badge> : null}
+        <span className="font-mono text-[11px] text-zinc-600">{node.evidence?.reviewedAt}</span>
+      </div>
+
+      <p className="mt-2 text-xs leading-5 text-zinc-500">{node.evidence?.statement}</p>
+
+      {sources.length > 0 ? (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {sources.map((source) => (
+            <a
+              key={source.url}
+              href={source.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded border border-cyan-300/20 bg-cyan-300/5 px-2.5 py-1.5 text-xs font-semibold text-cyan-100 transition hover:border-cyan-200/50 hover:bg-cyan-300/10"
+              title={source.scope}
+            >
+              {source.publisher}: {source.title}
+              <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-2 text-xs font-semibold text-amber-100">Doğrudan model kaynağı yok; ölçüm sonucunu tek başına parça değişim kararı olarak kullanmayın.</div>
+      )}
+    </section>
+  )
+}
+
 function ProcedureHeader({ node }) {
   const danger = node.danger ? dangerStyles[node.danger] : 'border-zinc-700 bg-zinc-900 text-zinc-300'
   const categoryLabel = node.category || nodeTypeLabels[node.type] || 'Teşhis'
@@ -1030,6 +1088,7 @@ function ProcedureHeader({ node }) {
         <h1 className="text-3xl font-black text-white">{node.title}</h1>
         <p className="mt-3 text-lg leading-8 text-zinc-300">{node.prompt}</p>
       </div>
+      <EvidencePanel node={node} />
     </div>
   )
 }
@@ -1042,13 +1101,15 @@ function ProbeGuide({ node }) {
     ['Kırmızı Prob', node.probeRed, Zap],
   ].filter(([, value]) => value)
 
-  const meterSymbol = /ohm|resistance|continuity/i.test(node.meterMode || '')
-    ? 'Ω'
-    : /diode/i.test(node.meterMode || '')
-      ? '◁|'
-      : /ac/i.test(node.meterMode || '') && !/dc/i.test(node.meterMode || '')
-        ? 'V∿'
-        : 'V⎓'
+  const meterSymbol = /oscilloscope|analyzer/i.test(node.meterMode || '')
+    ? 'ΔV'
+    : /ohm|resistance|continuity/i.test(node.meterMode || '')
+      ? 'Ω'
+      : /diode/i.test(node.meterMode || '')
+        ? '◁|'
+        : /ac/i.test(node.meterMode || '') && !/dc/i.test(node.meterMode || '')
+          ? 'V∿'
+          : 'V⎓'
   const isDeenergized = /enerjisiz|enerji kesilmiş|kondansatörler boşaltılmış/i.test(node.powerState || '')
   const expected = node.expected
     ? `${node.expected.min} – ${node.expected.max} ${node.unit || ''}`.trim()
@@ -1315,11 +1376,13 @@ function ResultNode({ node, history, candidates, selectedProfile, onDownloadPdf,
           </div>
           <div className="rounded-md border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-center">
             <div className="font-mono text-3xl font-black text-amber-100">%{candidates[0]?.probability || 0}</div>
-            <div className="text-xs text-zinc-500">üst olasılık</div>
+            <div className="text-xs text-zinc-500">en yüksek kanıt payı</div>
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <EvidencePanel node={node} />
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-3">
           <ReportBlock icon={Layers3} title="Kontrol Edilecekler" items={node.components} />
           <ReportBlock icon={Wrench} title="Onarım Önerisi" text={node.repair} />
           <ReportBlock icon={BookOpenCheck} title="Doğrulama" text={node.verification} />

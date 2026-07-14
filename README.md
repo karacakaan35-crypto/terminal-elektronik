@@ -40,6 +40,12 @@ npm run build:sites
 
 Bu sürüm bağlantı açıldığında doğrudan teşhis motorunu, PDF raporunu, hızlı Astra yanıtlarını ve Google AI Studio API ile çalışan derin Astra yanıtlarını sunar. API anahtarı yalnızca Sites sunucu ortamında tutulur ve tarayıcıya gönderilmez.
 
+## Tanı Verisi ve Doğruluk
+
+Tanı veri seti v4; 10 cihaz profili, 279 karar/sonuç düğümü, 83 arıza sınıfı ve 24 teknik kaynak içerir. Her adım kaynak seviyesini (`üretici`, `standart kuruluşu`, `mühendislik rehberi` veya `servis hipotezi`) ve ölçüm eşiğinin model özel mi genel tarama mı olduğunu gösterir.
+
+Başlangıç servis ağırlıkları gerçek saha arıza oranı değildir. Toplamı 100'e normalize edilmiş, kapatılmış iş emri verisiyle henüz kalibre edilmemiş öncelik puanlarıdır. Model etiketi ve üretici servis kılavuzu her zaman uygulamadaki genel eşikten önce gelir.
+
 ## Google AI Studio ile Astra
 
 Codex Sites üzerindeki Astra iki çalışma modu sunar:

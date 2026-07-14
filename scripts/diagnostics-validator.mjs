@@ -42,6 +42,9 @@ export function validateDiagnostics(data) {
   const nodes = data.nodes || {}
   const catalog = data.faultCatalog || {}
   const sources = data.sourceCatalog || {}
+  const allowedEvidenceLevels = new Set(['manufacturer', 'standard', 'engineering', 'heuristic'])
+  const allowedSourceTypes = new Set(['manufacturer', 'standards-body', 'engineering-guide'])
+  const allowedThresholdPolicies = new Set(['model_specific', 'general_screening'])
   const profileIds = new Set((data.deviceProfiles || []).map((profile) => profile.id))
   const inboundCounts = Object.fromEntries(Object.keys(nodes).map((nodeId) => [nodeId, 0]))
 
@@ -61,6 +64,10 @@ export function validateDiagnostics(data) {
   for (const [sourceId, source] of Object.entries(sources)) {
     if (!source.publisher || !source.title || !/^https:\/\//.test(source.url || '')) {
       errors.push(`${sourceId}: source requires publisher, title and an HTTPS URL`)
+    }
+
+    if (!allowedSourceTypes.has(source.sourceType) || !source.scope || !/^\d{4}-\d{2}-\d{2}$/.test(source.retrievedAt || '')) {
+      errors.push(`${sourceId}: source requires a valid sourceType, scope and retrievedAt date`)
     }
   }
 
@@ -82,6 +89,10 @@ export function validateDiagnostics(data) {
     }
 
     validateSourceIds(key, node.sourceIds)
+
+    if (!allowedEvidenceLevels.has(node.evidence?.level) || !node.evidence?.statement || !/^\d{4}-\d{2}-\d{2}$/.test(node.evidence?.reviewedAt || '')) {
+      errors.push(`${key}: evidence level, statement and reviewedAt date are required`)
+    }
 
     for (const target of getNodeTargets(node)) {
       if (!target) {
@@ -120,6 +131,10 @@ export function validateDiagnostics(data) {
     }
 
     if (node.type === 'measurement') {
+      if (!allowedThresholdPolicies.has(node.thresholdPolicy)) {
+        errors.push(`${key}: measurement requires model_specific or general_screening thresholdPolicy`)
+      }
+
       if (!node.expected || !Number.isFinite(node.expected.min) || !Number.isFinite(node.expected.max)) {
         errors.push(`${key}: invalid expected measurement range`)
       } else if (node.expected.min > node.expected.max) {
@@ -163,6 +178,10 @@ export function validateDiagnostics(data) {
 
     validateSourceIds(profile.id, profile.sourceIds, true)
 
+    if (profile.priorModel?.type !== 'heuristic_service_priority' || profile.priorModel?.calibrated !== false) {
+      errors.push(`${profile.id}: priorModel must explicitly identify uncalibrated heuristic service priorities`)
+    }
+
     const priors = data.faultPriorScores?.[profile.id]
     if (!priors) {
       errors.push(`${profile.id}: faultPriorScores entry is missing`)
@@ -187,6 +206,12 @@ export function validateDiagnostics(data) {
     }
 
     const displayIds = new Set(displayPriors.map((item) => item.faultId))
+    for (const item of displayPriors) {
+      if (item.weightType !== 'heuristic_service_priority' || item.calibrated !== false || item.evidenceLevel !== 'low') {
+        errors.push(`${profile.id}: displayed prior ${item.faultId} must be an uncalibrated low-evidence service weight`)
+      }
+      validateSourceIds(`${profile.id}.${item.faultId}`, item.sourceIds, true)
+    }
     for (const [faultId, probability] of Object.entries(priors)) {
       const displayPrior = displayPriors.find((item) => item.faultId === faultId)
       if (!displayPrior) {
@@ -261,6 +286,31 @@ export function validateDiagnostics(data) {
     }
   }
 
+  if (data.researchAudit?.priorCalibration !== 'uncalibrated_heuristic' || !/^\d{4}-\d{2}-\d{2}$/.test(data.researchAudit?.reviewedAt || '')) {
+    errors.push('researchAudit: reviewedAt and uncalibrated_heuristic priorCalibration are required')
+  }
+
+  const measurements = Object.values(nodes).filter((node) => node.type === 'measurement')
+  const expectedCoverage = {
+    profileCount: profileIds.size,
+    nodeCount: Object.keys(nodes).length,
+    faultCount: Object.keys(catalog).length,
+    sourceCount: Object.keys(sources).length,
+    measurementCount: measurements.length,
+    sourcedMeasurementCount: measurements.filter((node) => node.sourceIds?.length > 0).length,
+    modelSpecificMeasurementCount: measurements.filter((node) => node.thresholdPolicy === 'model_specific').length,
+    heuristicNodeCount: Object.values(nodes).filter((node) => node.evidence?.level === 'heuristic').length,
+  }
+  for (const [field, expectedValue] of Object.entries(expectedCoverage)) {
+    if (data.researchAudit?.coverage?.[field] !== expectedValue) {
+      errors.push(`researchAudit.coverage.${field}: expected ${expectedValue}`)
+    }
+  }
+
+  if (!/gerçek arıza olasılığı|saha istatistiği/i.test(data.probabilityDisclaimer || '')) {
+    errors.push('probabilityDisclaimer: must state that service weights are not field failure probabilities')
+  }
+
   for (const nodeId of Object.keys(nodes)) {
     const isStartNode = data.deviceProfiles?.some((profile) => profile.startNodeId === nodeId)
     if (!isStartNode && inboundCounts[nodeId] === 0) {
@@ -279,6 +329,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     console.error(errors.join('\n'))
     process.exitCode = 1
   } else {
-    console.log(`Diagnostics valid: ${Object.keys(data.nodes).length} nodes, ${Object.keys(data.faultCatalog).length} faults.`)
+    const measurementNodes = Object.values(data.nodes).filter((node) => node.type === 'measurement')
+    const sourcedMeasurements = measurementNodes.filter((node) => node.sourceIds?.length > 0).length
+    console.log(`Diagnostics valid: ${Object.keys(data.nodes).length} nodes, ${Object.keys(data.faultCatalog).length} faults, ${Object.keys(data.sourceCatalog).length} sources, ${sourcedMeasurements}/${measurementNodes.length} sourced measurements.`)
   }
 }

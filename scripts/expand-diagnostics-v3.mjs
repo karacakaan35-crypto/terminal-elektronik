@@ -79,9 +79,9 @@ function result(config) {
   }
 }
 
-data.version = '3.0.0'
+data.version = '4.0.0'
 data.diagnosticMethodology = {
-  evidencePolicy: 'Başlangıç oranları saha önceliğidir; canlı olasılık yalnız seçilen belirti ve ölçüm kanıtlarıyla güncellenir.',
+  evidencePolicy: 'Başlangıç puanları kalibre edilmiş arıza olasılığı değil, normalize edilmiş servis önceliğidir; canlı kanıt yalnız göreli sıralamayı günceller.',
   measurementPolicy: 'Üretici model etiketi ve servis kılavuzu, uygulamadaki genel aralıklardan önce gelir.',
   isolationPolicy: 'Bilinen sağlam kablo, yük, port veya modülle A/B karşılaştırması yapılmadan kart değişimi önerilmez.',
   safetyPolicy: 'Şebeke, hareketli mekanizma ve yangın güvenliği devrelerinde yalnız yetkili teknisyen ve uygun kategori ölçü aletiyle işlem yapılır.',
@@ -158,17 +158,99 @@ data.sourceCatalog = {
     title: 'Automatic sliding door errors and troubleshooting resources',
     url: 'https://www.geze.com/en/products-solutions/sliding_doors/automatic_sliding_doors/slimdrive/slimdrive_slt_fr/p_89301',
   },
+  yuasa_vrla: {
+    publisher: 'GS Yuasa',
+    title: 'SWL series AGM VRLA technical data sheet',
+    url: 'https://www.gs-yuasa.eu/uk/datasheet/index/download/?sku=SWL3300-12%2FI%2FFR%2FBulk',
+  },
+  nice_mlbar_manual: {
+    publisher: 'Nice',
+    title: 'M/L-Bar electromechanical barrier instruction manual',
+    url: 'https://www.niceforyou.com/sites/default/files/upload/manuals/IS0647A03EN.pdf',
+  },
+  notifier_nfs_supra: {
+    publisher: 'Notifier by Honeywell',
+    title: 'NFS Supra conventional fire panel installation manual',
+    url: 'https://www.notifier.es/documentacion/notifier/manuales/HLSI-MN-025-I_NFS%20Supra%20Series.pdf',
+  },
+  notifier_eol_legacy: {
+    publisher: 'Notifier by Honeywell',
+    title: 'AFP-300/AFP-400 installation manual — model-specific EOL values',
+    url: 'https://www.notifier.es/documentacion/notifier/manualesobs/50253SP.pdf',
+  },
+  axis_poe_power: {
+    publisher: 'Axis Communications',
+    title: 'Typical and maximum power consumption in Axis cameras',
+    url: 'https://whitepapers.axis.com/en-us/typical-and-maximum-power-consumption-in-axis-cameras',
+  },
+  sia_osdp_checklist: {
+    publisher: 'Security Industry Association',
+    title: 'OSDP implementation checklist',
+    url: 'https://www.securityindustry.org/2026/02/10/implementing-osdp-access-control-follow-this-simple-checklist/',
+  },
+  hikvision_uvss: {
+    publisher: 'Hikvision',
+    title: 'Portable Under Vehicle Surveillance System user manual',
+    url: 'https://us-legacy.hikvision.com/en/system/files_force/um_mv_uvss_111717na_0.pdf?download=1',
+  },
+  dormakaba_esa100: {
+    publisher: 'dormakaba',
+    title: 'ESA100 automatic sliding door owner and safety manual',
+    url: 'https://my.dormakaba.com/medias/DL0741-010-ESA100-OWN.pdf?context=bWFzdGVyfGltYWdlc3wxNjMyOTJ8YXBwbGljYXRpb24vcGRmfGltYWdlcy9oNWUvaDM4Lzg5ODg1NzAzMjA5MjYucGRmfGM5N2MwM2M2YjcxNDMyNjk2MTdlNTJjYzM1M2ZlYTQ3ZDY5ZTVmYjI3OGExMWVkN2MwMDU3ZDI0NThjNjI1Y2Q',
+  },
+  ti_rs485: {
+    publisher: 'Texas Instruments',
+    title: 'The RS-485 Design Guide',
+    url: 'https://www.ti.com/lit/an/slla272d/slla272d.pdf',
+  },
+  microchip_poe: {
+    publisher: 'Microchip Technology',
+    title: 'Power over Ethernet standards overview',
+    url: 'https://developerhelp.microchip.com/xwiki/bin/view/applications/ethernet/poe/standards/',
+  },
+}
+
+const sourceMetadata = {
+  apc_ups: ['manufacturer', 'UPS belirti ve temel sorun giderme akışı'],
+  keysight_power: ['engineering-guide', 'Yük altında besleme ve DC/DC doğrulama yöntemi'],
+  fluke_dc_supply: ['engineering-guide', 'Multimetre ve osiloskopla güç kaynağı ölçümü'],
+  ti_power_transient: ['engineering-guide', 'Yük geçişi, çıkış kondansatörü ve transient davranışı'],
+  nice_mlbar: ['manufacturer', 'Nice M/L-Bar hata kodları ve saha teşhisi'],
+  nice_mlbar_manual: ['manufacturer', 'Nice M/L-Bar girişler, öğrenme, encoder ve emniyet zinciri'],
+  ctec_fire: ['manufacturer', 'C-TEC FP/CFP panel besleme ve 6.8 kΩ EOL değerleri'],
+  notifier_nfs_supra: ['manufacturer', 'Notifier NFS Supra 4.7 kΩ EOL ve zone bağlantısı'],
+  notifier_eol_legacy: ['manufacturer', 'Notifier model/modül bazlı 2.2/4.7/47 kΩ EOL farklılıkları'],
+  axis_network: ['manufacturer', 'IP kamera ağ yolu ve bağlantı sorun giderme'],
+  axis_image: ['manufacturer', 'Kamera görüntü ve IR yansıma sorun giderme'],
+  axis_poe_power: ['manufacturer', 'PoE güç bütçesi, tipik/maksimum tüketim ve kablo kaybı'],
+  hid_signo: ['manufacturer', 'HID Signo okuyucu kablolama ve ilk çalışma kontrolü'],
+  paxton_net2: ['manufacturer', 'Net2 erişim kontrol uygulama ve sorun giderme notları'],
+  sia_osdp_checklist: ['standards-body', 'OSDP RS-485 kablo, adres, güç, Secure Channel ve devreye alma'],
+  hikvision_uvss: ['manufacturer', 'UVSS bileşen, ağ, kamera ve kontrol sistemi işletimi'],
+  cisco_fxs: ['manufacturer', 'FXS/FXO port işlevi ve analog port sorun giderme'],
+  cisco_fxs_voltage: ['manufacturer', 'FXS idle ve ringing gerilimleri'],
+  dormakaba_sliding: ['manufacturer', 'Otomatik kayar kapı aktivasyon ve emniyet testi'],
+  dormakaba_esa100: ['manufacturer', 'ESA100 günlük sensör ve güvenli kapanma testi'],
+  geze_sliding: ['manufacturer', 'GEZE kayar kapı ürün ve servis referansı'],
+  yuasa_vrla: ['manufacturer', '12V VRLA float/boost gerilimi, sıcaklık ve yük özellikleri'],
+  ti_rs485: ['engineering-guide', 'RS-485 diferansiyel sürücü ve alıcı eşikleri, kablo ve sonlandırma'],
+  microchip_poe: ['engineering-guide', 'IEEE 802.3af/at/bt PSE voltaj ve güç sınıfları'],
+}
+
+for (const [sourceId, source] of Object.entries(data.sourceCatalog)) {
+  const [sourceType, scope] = sourceMetadata[sourceId] || ['manufacturer', 'Üretici teknik referansı']
+  Object.assign(source, { sourceType, scope, retrievedAt: '2026-07-15' })
 }
 
 const profileSources = {
-  ups: ['apc_ups', 'keysight_power', 'ti_power_transient'],
-  barrier: ['nice_mlbar', 'fluke_dc_supply'],
-  fire_panel: ['ctec_fire', 'fluke_dc_supply'],
-  cctv: ['axis_network', 'axis_image', 'keysight_power'],
-  access: ['hid_signo', 'paxton_net2', 'keysight_power'],
-  uvis: ['axis_network', 'axis_image', 'keysight_power'],
+  ups: ['apc_ups', 'yuasa_vrla', 'keysight_power', 'ti_power_transient'],
+  barrier: ['nice_mlbar', 'nice_mlbar_manual', 'fluke_dc_supply'],
+  fire_panel: ['ctec_fire', 'notifier_nfs_supra', 'notifier_eol_legacy', 'fluke_dc_supply'],
+  cctv: ['axis_network', 'axis_image', 'axis_poe_power', 'microchip_poe', 'keysight_power'],
+  access: ['hid_signo', 'paxton_net2', 'sia_osdp_checklist', 'ti_rs485', 'keysight_power'],
+  uvis: ['hikvision_uvss', 'axis_network', 'axis_image', 'keysight_power'],
   pbx: ['cisco_fxs', 'cisco_fxs_voltage'],
-  sliding: ['dormakaba_sliding', 'geze_sliding'],
+  sliding: ['dormakaba_sliding', 'dormakaba_esa100', 'geze_sliding'],
   support: ['keysight_power', 'fluke_dc_supply', 'ti_power_transient'],
   general: ['ti_power_transient', 'fluke_dc_supply', 'keysight_power'],
 }
@@ -528,7 +610,7 @@ nodes.fire_impairment_confirm = question({
 
 nodes.fire_eol_reference = symptom({
   id: 'fire_eol_reference', device: 'fire_panel', category: 'Zone Sonlandırma', title: 'Panelin Nominal EOL Değerini Seçin', optionBadge: 'EOL',
-  prompt: 'EOL değeri panel modeli ve kılavuzundan doğrulanmalıdır; 2.2K ile 6.8K arasındaki her değer otomatik olarak normal değildir.', sourceIds: ['ctec_fire'],
+  prompt: 'EOL değeri panel modeli ve kılavuzundan doğrulanmalıdır; 2.2K ile 6.8K arasındaki her değer otomatik olarak normal değildir.', sourceIds: ['ctec_fire', 'notifier_nfs_supra', 'notifier_eol_legacy'],
   options: [
     { label: '2.2 kΩ direnç', description: 'Nominal değerin yaklaşık ±%10 bandı değerlendirilir.', next: 'fire_zone_resistance_22k', scoreDelta: { fire_eol_mismatch: 6 } },
     { label: '4.7 kΩ direnç', description: 'Nominal değerin yaklaşık ±%10 bandı değerlendirilir.', next: 'fire_zone_resistance_47k', scoreDelta: { fire_eol_mismatch: 6 } },
@@ -1755,20 +1837,218 @@ nodes.general_result_input_reference = result({
 
 Object.assign(data.nodes, nodes)
 
+data.probabilityDisclaimer = 'Bu değerler gerçek arıza olasılığı veya saha istatistiği değildir. Toplamı 100’e normalize edilmiş servis öncelik ağırlıklarıdır; kapatılmış iş emri verisiyle kalibre edilmemiştir.'
+data.researchAudit = {
+  reviewedAt: '2026-07-15',
+  datasetGrain: 'Bir kayıt, bir cihaz ailesindeki tek teşhis adımı veya sonuç düğümüdür.',
+  priorCalibration: 'uncalibrated_heuristic',
+  evidencePolicy: 'Üretici/model kılavuzu en yüksek önceliktedir; genel mühendislik eşikleri yalnız tarama amacı taşır.',
+  sourcePolicy: 'Kaynak bağlantısı yalnız ilgili üretici, standart kuruluşu veya ölçüm yöntemini yayımlayan teknik kuruma verilir.',
+  limitations: ['Başlangıç servis ağırlıkları kapatılmış iş emri verisiyle kalibre edilmemiştir.', 'Model-özel eşiklerde cihaz etiketi ve üretici servis kılavuzu uygulamadaki değerden önce gelir.'],
+}
+
+data.nodes.ups_battery_voltage.sourceIds = ['yuasa_vrla']
+
+Object.assign(data.nodes.ups_charge_voltage, {
+  title: '12V VRLA Float / Şarj Gerilimi',
+  expected: { min: 13.4, max: 13.9 },
+  hint: 'Genel float tarama aralığıdır. GS Yuasa örnek blokta 20°C için 13.65V belirtilir; boost/cyclic aşaması ve sıcaklık kompanzasyonu model kılavuzundan doğrulanmalıdır.',
+  sourceIds: ['yuasa_vrla'],
+  rules: [
+    { when: { operator: '<', value: 12.8 }, label: 'Şarj çıkışı belirgin düşük', next: 'ups_input_fuse', scoreDelta: { charger_fault: 34, input_protection_fault: 12 } },
+    { when: { operator: 'between', min: 12.8, max: 13.39 }, label: 'Float gerilimi düşük/sınırda', next: 'ups_5v_rail', scoreDelta: { charger_fault: 18 } },
+    { when: { operator: 'between', min: 13.4, max: 13.9 }, label: 'Genel float aralığında', next: 'ups_5v_rail', scoreDelta: { charger_fault: -8 } },
+    { when: { operator: 'between', min: 13.91, max: 14.6 }, label: 'Boost/cyclic şarj olabilir; model ve şarj aşamasını doğrulayın', next: 'ups_5v_rail', scoreDelta: { charger_fault: 4 } },
+    { when: { operator: '>', value: 14.6 }, label: '12V VRLA için aşırı şarj şüphesi', next: 'ups_5v_rail', scoreDelta: { charger_fault: 32, battery_degraded: 10 } },
+  ],
+})
+
+Object.assign(data.nodes.fire_zone_resistance, {
+  title: '6.8 kΩ Zone EOL — C-TEC FP/CFP',
+  hint: 'Yalnız panel etiketi veya C-TEC FP/CFP kılavuzu 6.8 kΩ gösteriyorsa kullanın; bazı C-TEC zone devreleri kapasitif EOL kullanır.',
+  sourceIds: ['ctec_fire'],
+})
+Object.assign(data.nodes.fire_zone_resistance_22k, {
+  title: '2.2 kΩ EOL — Yalnız Model Kılavuzuyla',
+  hint: '2.2 kΩ evrensel zone değeri değildir. Notifier belgeleri farklı çıkış/modüllerde farklı EOL değerleri kullanıldığını gösterir; panel/model şeması doğrulanmadan bu seçeneği kullanmayın.',
+  sourceIds: ['notifier_eol_legacy'],
+})
+Object.assign(data.nodes.fire_zone_resistance_47k, {
+  title: '4.7 kΩ Zone EOL — Notifier NFS Supra',
+  hint: 'Notifier NFS Supra için 4.7 kΩ veya kılavuzda belirtilen kapasitif EOL kullanılır. Başka panelde üretici değerini seçin.',
+  sourceIds: ['notifier_nfs_supra'],
+})
+Object.assign(data.nodes.cctv_poe_voltage, {
+  sourceIds: ['axis_poe_power', 'microchip_poe'],
+  hint: 'Voltaj tek başına PoE sınıfını veya kullanılabilir gücü kanıtlamaz; port bütçesi, kamera maksimum tüketimi ve kablo kaybını birlikte doğrulayın.',
+})
+Object.assign(data.nodes.access_bus_voltage, {
+  title: 'OSDP / RS-485 Diferansiyel Aktivite Ön Kontrolü',
+  prompt: 'Kart okutma veya OSDP sorgusu sırasında, izole diferansiyel prob ya da RS-485 analizörüyle A-B diferansiyel salınımını Vpp olarak kaydedin.',
+  unit: 'Vpp',
+  meterMode: 'Oscilloscope / RS-485 analyzer',
+  powerState: 'Okuyucu ve kontrolör enerjili; haberleşme tetikleniyor',
+  probeBlack: 'İzole diferansiyel prob - / RS-485 B',
+  probeRed: 'İzole diferansiyel prob + / RS-485 A',
+  expected: { min: 0.4, max: 12 },
+  hint: 'Diferansiyel aktivite geçerli OSDP çerçevesini kanıtlamaz. Adres, baud, kablo, sonlandırma ve Secure Channel ayrıca doğrulanmalıdır.',
+  testSteps: ['Topraklı standart osiloskop probunu doğrudan A-B arasına bağlamayın; izole diferansiyel prob veya RS-485 analizörü kullanın.', 'Kart okutma ve kontrolör sorgusu sırasında A-B dalga biçimini yakalayın.', 'Bükümlü çift, A/B yönü, benzersiz adres, baud hızı ve Secure Channel durumunu yazılımdan doğrulayın.'],
+  stopConditions: ['İzole diferansiyel ölçüm veya RS-485 analizörü yok', 'Hat üzerinde beklenmeyen yüksek ortak-mod gerilim var'],
+  rules: [
+    { when: { operator: '<', value: 0.2 }, label: 'Diferansiyel aktivite yok veya hat kısa/sabit', next: 'access_result_rs485_bus', scoreDelta: { reader_bus_fault: 36, access_rs485_fault: 28 } },
+    { when: { operator: 'between', min: 0.2, max: 0.39 }, label: 'Diferansiyel genlik alıcı eşiğine çok yakın; marj yetersiz', next: 'access_result_rs485_bus', scoreDelta: { reader_bus_fault: 28, access_rs485_fault: 32 } },
+    { when: { operator: 'between', min: 0.4, max: 12 }, label: 'Diferansiyel aktivite görülüyor; OSDP çerçevesini analiz edin', next: 'access_result_config', scoreDelta: { reader_bus_fault: -6, access_rs485_fault: 8 } },
+    { when: { operator: '>', value: 12 }, label: 'Prob referansı, kablolama veya ortak-mod gerilim anormal', next: 'access_result_rs485_bus', scoreDelta: { reader_bus_fault: 30, access_rs485_fault: 30 } },
+  ],
+  sourceIds: ['sia_osdp_checklist', 'ti_rs485'],
+})
+for (const nodeId of ['uvis_camera_power_voltage', 'uvis_illumination_output_percent']) {
+  data.nodes[nodeId].sourceIds = [...new Set([...(data.nodes[nodeId].sourceIds || []), 'hikvision_uvss'])]
+}
+data.nodes.sliding_aux_voltage.sourceIds = []
+for (const nodeId of ['sliding_safety_function_test', 'sliding_result_safety']) {
+  data.nodes[nodeId].sourceIds = [...new Set([...(data.nodes[nodeId].sourceIds || []), 'dormakaba_esa100'])]
+}
+
+Object.assign(data.nodes.fire_battery_voltage, {
+  title: '24V VRLA Akü Grubu Float Gerilimi',
+  prompt: 'İki adet 12V VRLA bloktan oluşan akü grubunu panel şebekede ve şarj kararlı durumdayken ölçün; blok sıcaklıklarını ve tek tek voltajlarını da kaydedin.',
+  powerState: 'Panel şebekede, aküler bağlı, şarj kararlı ve sıcaklık kaydedilmiş',
+  expected: { min: 26.8, max: 27.8 },
+  hint: 'İki blok için genel float taramasıdır. Kapasiteyi kanıtlamaz; panel üreticisinin sıcaklık kompanzasyonu ve akü modeli önceliklidir.',
+  testSteps: ['Şişme, ısınma, sızıntı ve pabuç oksidasyonunu kontrol edin.', 'Grup toplamını ve her 12V bloğu aynı anda ayrı kaydedin.', 'Şebeke kesme/yük testi yalnız bina sorumlusu onayı ve panel üreticisi prosedürüyle yapılmalıdır.'],
+  stopConditions: ['Aktif alarm veya tahliye durumu var', 'Akü şişmiş, ısınıyor veya sızdırıyor', 'Panelin geçici devre dışı kalması yetkilendirilmedi'],
+  sourceIds: ['ctec_fire', 'yuasa_vrla'],
+  rules: [
+    { when: { operator: '<', value: 25.6 }, label: 'Akü grubu float seviyesi belirgin düşük', next: 'fire_result_battery', scoreDelta: { panel_battery_fault: 42, charger_fault: 18 } },
+    { when: { operator: 'between', min: 25.6, max: 26.79 }, label: 'Float seviyesi düşük/sınırda; blok ve şarj ayrımı gerekli', next: 'fire_result_battery', scoreDelta: { panel_battery_fault: 28, charger_fault: 20 } },
+    { when: { operator: 'between', min: 26.8, max: 27.8 }, label: 'Genel 24V VRLA float aralığında; kapasite henüz doğrulanmadı', next: 'fire_panel_24v', scoreDelta: { panel_battery_fault: -8 } },
+    { when: { operator: 'between', min: 27.81, max: 29.2 }, label: 'Boost/cyclic veya sıcaklık kompanzasyonu olabilir; panel kılavuzunu doğrulayın', next: 'fire_panel_24v', scoreDelta: { charger_fault: 8 } },
+    { when: { operator: '>', value: 29.2 }, label: 'Akü grubu aşırı şarj şüphesi', next: 'fire_result_charger_high', scoreDelta: { charger_fault: 38, panel_battery_fault: 16 } },
+  ],
+})
+
+Object.assign(data.nodes.ups_result_rail_short, {
+  title: '5V Rayında Düşük Direnç Şüphesi',
+  summary: '5V-GND direnci düşük ve sabit görünüyor; ancak kart topolojisi, kondansatör şarjı ve yarıiletken yolları bilinmeden bu değer tek başına kısa devre kanıtı değildir.',
+  repair: 'İki polaritede ve zaman içinde ölçün, sağlam kartla karşılaştırın ve hattı bölerek daraltın. Rayın güvenli maksimum voltajı bilinmeden güç enjekte etmeyin.',
+  verification: 'Akım sınırlı doğrulamada anormal ısınma olmamalı; 5V rayı yükte kararlı kalmalı ve kartın normal akım tüketimi model referansıyla uyuşmalıdır.',
+})
+Object.assign(data.nodes.cctv_result_input_short, {
+  title: 'Kamera Girişinde Düşük Direnç Şüphesi',
+  summary: '12V giriş-GND ölçümü düşük ve sabit görünüyor; giriş kapasitörleri ile koruma/çevirici topolojisi ayrılmadan kesin kısa devre kararı verilemez.',
+  repair: 'İki polaritede diyot/direnç davranışını, zamanla yükselmeyi ve sağlam kamera referansını karşılaştırın. Güvenli akım limiti bilinmeden enjeksiyon yapmayın.',
+  verification: 'Kamera etiket akımı içinde açılmalı, girişte anormal ısınma olmamalı ve IR/PTZ yükünde besleme çökmemelidir.',
+})
+Object.assign(data.nodes.access_result_reader_short, {
+  title: 'Okuyucu Besleme Hattında Düşük Direnç Şüphesi',
+  summary: 'Okuyucu ayrıyken hat düşük direnç gösteriyor; kablo, koruma elemanı ve kontrolör çıkışı ayrı ölçülmeden kesin kısa devre kararı verilemez.',
+  repair: 'Okuyucuyu, saha kablosunu ve panel çıkışını üç ayrı bölümde ölçün; iki polarite ve sağlam hat karşılaştırması yapın.',
+  verification: 'Bağlı okuyucu model akımı içinde çalışmalı, besleme çökmemeli ve kablo/koruma elemanında anormal ısınma olmamalıdır.',
+})
+
+const researchedNodeSources = {
+  fire_zone_alarm_led: ['ctec_fire', 'notifier_nfs_supra'],
+  fire_result_zone_short: ['ctec_fire', 'notifier_nfs_supra'],
+  fire_result_zone_open: ['ctec_fire', 'notifier_nfs_supra'],
+  fire_result_eol_mismatch: ['ctec_fire', 'notifier_nfs_supra', 'notifier_eol_legacy'],
+  fire_result_field_device: ['ctec_fire', 'notifier_nfs_supra'],
+  fire_result_zone_trace: ['ctec_fire', 'notifier_nfs_supra'],
+  fire_siren_fuse: ['ctec_fire'],
+  fire_result_siren_field: ['ctec_fire'],
+  fire_result_siren_fuse: ['ctec_fire'],
+  fire_result_siren_driver: ['ctec_fire'],
+  fire_result_panel_logic: ['ctec_fire'],
+  fire_result_battery: ['ctec_fire', 'yuasa_vrla'],
+  fire_result_charger_high: ['ctec_fire', 'yuasa_vrla'],
+  access_result_rs485_bus: ['sia_osdp_checklist', 'ti_rs485'],
+  access_result_config: ['sia_osdp_checklist', 'paxton_net2'],
+  cctv_result_poe_source: ['axis_poe_power', 'microchip_poe'],
+  cctv_result_link_fault: ['axis_network'],
+  cctv_result_config_or_sensor: ['axis_network'],
+  uvis_result_network: ['hikvision_uvss', 'axis_network'],
+  uvis_result_software: ['hikvision_uvss'],
+  uvis_result_calibration: ['hikvision_uvss'],
+  pbx_power_present: ['cisco_fxs'],
+  pbx_result_power: ['cisco_fxs'],
+  pbx_result_line_voltage: ['cisco_fxs_voltage'],
+  pbx_result_port_card: ['cisco_fxs', 'cisco_fxs_voltage'],
+  pbx_result_port_or_phone: ['cisco_fxs'],
+  sliding_sensor_trigger: ['dormakaba_esa100'],
+  sliding_result_sensor: ['dormakaba_esa100'],
+  sliding_result_mechanical_limit: ['dormakaba_esa100', 'geze_sliding'],
+}
+for (const [nodeId, sourceIds] of Object.entries(researchedNodeSources)) {
+  data.nodes[nodeId].sourceIds = [...new Set([...(data.nodes[nodeId].sourceIds || []), ...sourceIds])]
+}
+
 const profileNames = Object.fromEntries(data.deviceProfiles.map((profile) => [profile.id, profile.name]))
 for (const node of Object.values(data.nodes)) {
   node.category ||= profileNames[node.device] || 'Teknik Teşhis'
   node.sourceIds ||= []
+
+  const sourceTypes = node.sourceIds.map((sourceId) => data.sourceCatalog[sourceId]?.sourceType).filter(Boolean)
+  const level = sourceTypes.includes('manufacturer')
+    ? 'manufacturer'
+    : sourceTypes.includes('standards-body')
+      ? 'standard'
+      : sourceTypes.includes('engineering-guide')
+        ? 'engineering'
+        : 'heuristic'
+  node.evidence = {
+    level,
+    reviewedAt: '2026-07-15',
+    statement: level === 'heuristic'
+      ? 'Bu adım doğrudan model kılavuzuna bağlı değildir; sonucu tek başına parça değişim kararı olarak kullanmayın.'
+      : 'Kaynak kapsamını ve cihaz modelini ölçümden önce doğrulayın.',
+  }
+
+  if (node.type === 'measurement') {
+    const modelSpecificMeasurements = new Set([
+      'ups_charge_voltage', 'ups_inverter_output_voltage',
+      'barrier_24v_input', 'barrier_logic_5v', 'barrier_motor_voltage_dc', 'barrier_motor_voltage_ac', 'barrier_receiver_5v',
+      'fire_zone_resistance', 'fire_zone_resistance_22k', 'fire_zone_resistance_47k', 'fire_panel_24v', 'fire_battery_voltage', 'fire_siren_voltage',
+      'cctv_supply_voltage', 'cctv_ir_voltage', 'cctv_loaded_supply_voltage',
+      'access_adapter_loaded_voltage', 'access_reader_voltage_5v', 'access_reader_voltage_12v', 'access_lock_voltage',
+      'uvis_camera_power_voltage', 'uvis_illumination_output_percent',
+      'pbx_extension_voltage', 'pbx_ring_voltage',
+      'sliding_aux_voltage', 'sliding_motor_output_ratio',
+    ])
+    node.thresholdPolicy = modelSpecificMeasurements.has(node.id)
+      ? 'model_specific'
+      : 'general_screening'
+  }
+}
+
+const measurementNodes = Object.values(data.nodes).filter((node) => node.type === 'measurement')
+data.researchAudit.coverage = {
+  profileCount: data.deviceProfiles.length,
+  nodeCount: Object.keys(data.nodes).length,
+  faultCount: Object.keys(data.faultCatalog).length,
+  sourceCount: Object.keys(data.sourceCatalog).length,
+  measurementCount: measurementNodes.length,
+  sourcedMeasurementCount: measurementNodes.filter((node) => node.sourceIds.length > 0).length,
+  modelSpecificMeasurementCount: measurementNodes.filter((node) => node.thresholdPolicy === 'model_specific').length,
+  heuristicNodeCount: Object.values(data.nodes).filter((node) => node.evidence.level === 'heuristic').length,
 }
 
 for (const profile of data.deviceProfiles) {
   profile.sourceIds = profileSources[profile.id]
   profile.commonSymptoms = data.nodes[profile.startNodeId].options.map((option) => option.label)
+  profile.priorModel = {
+    type: 'heuristic_service_priority',
+    calibrated: false,
+    reviewedAt: '2026-07-15',
+  }
   profile.faultPriors = Object.entries(priorScores[profile.id]).map(([faultId, probability]) => ({
     faultId,
     label: data.faultCatalog[faultId].label,
     probability,
-    basis: priorBasis[faultId] || 'Başlangıç önceliğidir; ölçüm ve izolasyon kanıtları canlı olasılığı yeniden dağıtır.',
+    basis: priorBasis[faultId] || 'Başlangıç servis önceliğidir; ölçüm ve izolasyon kanıtları göreli kanıt payını yeniden sıralar.',
+    weightType: 'heuristic_service_priority',
+    evidenceLevel: 'low',
+    calibrated: false,
+    sourceIds: profile.sourceIds,
   }))
 }
 
