@@ -13,7 +13,7 @@
     "validate:data": "node scripts/diagnostics-validator.mjs",
     "preview": "vite preview",
     "preview:lan": "vite preview --host 0.0.0.0",
-    "serve:pin": "node scripts/pin-server.mjs",
+    "serve:local": "node scripts/local-server.mjs",
     "serve:astra": "node scripts/astra-bridge.mjs",
     "ollama:serve": "/Applications/Ollama.app/Contents/Resources/ollama serve",
     "ollama:list": "/Applications/Ollama.app/Contents/Resources/ollama list",

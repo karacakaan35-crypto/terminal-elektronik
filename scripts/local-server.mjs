@@ -1,4 +1,3 @@
-import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 import { createReadStream, existsSync, statSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { extname, join, normalize, resolve } from 'node:path'
@@ -8,12 +7,9 @@ const rootDir = resolve(fileURLToPath(new URL('..', import.meta.url)))
 const distDir = resolve(rootDir, 'dist')
 const port = Number(process.env.PORT || 4174)
 const host = process.env.HOST || '127.0.0.1'
-const pin = process.env.FIXBOARD_PIN || '1559'
-const secret = process.env.FIXBOARD_SECRET || randomBytes(32).toString('hex')
 const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434'
 const ollamaModel = process.env.FIXBOARD_AI_MODEL || 'gemma4:e2b-it-qat'
-const cookieName = 'fixboard_session'
-const maxAgeSeconds = 60 * 60 * 8
+const maxBodyBytes = 64 * 1024
 
 const mimeTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -29,43 +25,6 @@ const mimeTypes = {
   '.webp': 'image/webp',
 }
 
-function sign(value) {
-  return createHmac('sha256', secret).update(value).digest('hex')
-}
-
-function makeToken() {
-  const payload = `${Date.now()}.${randomBytes(16).toString('hex')}`
-  return `${payload}.${sign(payload)}`
-}
-
-function isValidToken(token = '') {
-  const parts = token.split('.')
-  if (parts.length !== 3) {
-    return false
-  }
-
-  const payload = `${parts[0]}.${parts[1]}`
-  const expected = sign(payload)
-  const ageMs = Date.now() - Number(parts[0])
-
-  if (!Number.isFinite(ageMs) || ageMs < 0 || ageMs > maxAgeSeconds * 1000) {
-    return false
-  }
-
-  if (Buffer.byteLength(parts[2]) !== Buffer.byteLength(expected)) {
-    return false
-  }
-
-  return timingSafeEqual(Buffer.from(parts[2]), Buffer.from(expected))
-}
-
-function getCookie(request, name) {
-  const cookieHeader = request.headers.cookie || ''
-  const cookies = cookieHeader.split(';').map((item) => item.trim())
-  const match = cookies.find((item) => item.startsWith(`${name}=`))
-  return match ? decodeURIComponent(match.slice(name.length + 1)) : ''
-}
-
 function send(response, status, body, headers = {}) {
   response.writeHead(status, {
     'Cache-Control': 'no-store',
@@ -75,84 +34,6 @@ function send(response, status, body, headers = {}) {
     ...headers,
   })
   response.end(body)
-}
-
-function loginPage(error = '') {
-  return `<!doctype html>
-<html lang="tr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Terminal Elektronik - PIN</title>
-    <style>
-      :root { color-scheme: dark; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-      * { box-sizing: border-box; }
-      body {
-        min-height: 100vh;
-        margin: 0;
-        display: grid;
-        place-items: center;
-        padding: 24px;
-        background:
-          linear-gradient(135deg, rgba(244, 63, 94, .18), transparent 34%),
-          linear-gradient(225deg, rgba(20, 184, 166, .16), transparent 34%),
-          #0a0d14;
-        color: #f4f4f5;
-      }
-      main {
-        width: min(430px, 100%);
-        border: 1px solid rgba(255,255,255,.1);
-        border-radius: 12px;
-        padding: 28px;
-        background: rgba(14, 17, 27, .86);
-        box-shadow: 0 24px 80px rgba(0,0,0,.44);
-      }
-      .kicker { color: #67e8f9; font: 700 12px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .08em; }
-      h1 { margin: 12px 0 8px; font-size: 30px; line-height: 1.05; }
-      p { margin: 0 0 22px; color: #a1a1aa; line-height: 1.6; }
-      label { display: block; margin-bottom: 10px; color: #d4d4d8; font-weight: 800; }
-      input {
-        width: 100%;
-        min-height: 58px;
-        border: 1px solid rgba(255,255,255,.14);
-        border-radius: 8px;
-        padding: 0 16px;
-        background: rgba(0,0,0,.24);
-        color: #fff;
-        font: 900 28px ui-monospace, SFMono-Regular, Menlo, monospace;
-        outline: none;
-        letter-spacing: .18em;
-        text-align: center;
-      }
-      input:focus { border-color: rgba(251, 191, 36, .85); box-shadow: 0 0 0 4px rgba(251, 191, 36, .13); }
-      button {
-        width: 100%;
-        min-height: 52px;
-        margin-top: 14px;
-        border: 1px solid rgba(251, 191, 36, .52);
-        border-radius: 8px;
-        background: linear-gradient(90deg, rgba(244, 63, 94, .32), rgba(245, 158, 11, .26), rgba(20, 184, 166, .24));
-        color: white;
-        font-weight: 900;
-        cursor: pointer;
-      }
-      .error { margin-top: 14px; color: #fecaca; font-size: 14px; }
-    </style>
-  </head>
-  <body>
-    <main>
-      <div class="kicker">TERMINAL ELEKTRONIK SECURE ACCESS</div>
-      <h1>Servis Konsolu</h1>
-      <p>Terminal Elektronik'e erişmek için PIN girin.</p>
-      <form method="post" action="/auth">
-        <label for="pin">PIN</label>
-        <input id="pin" name="pin" type="password" inputmode="numeric" autocomplete="one-time-code" maxlength="12" autofocus />
-        <button type="submit">Giriş Yap</button>
-      </form>
-      ${error ? `<div class="error">${error}</div>` : ''}
-    </main>
-  </body>
-</html>`
 }
 
 function safeStaticPath(requestUrl) {
@@ -175,7 +56,12 @@ function safeStaticPath(requestUrl) {
 
 async function readRequestBody(request) {
   const chunks = []
+  let size = 0
   for await (const chunk of request) {
+    size += chunk.length
+    if (size > maxBodyBytes) {
+      throw new Error('PAYLOAD_TOO_LARGE')
+    }
     chunks.push(chunk)
   }
   return Buffer.concat(chunks).toString('utf8')
@@ -323,40 +209,6 @@ const server = createServer(async (request, response) => {
       return
     }
 
-    if (request.method === 'POST' && request.url === '/auth') {
-      const body = await readRequestBody(request)
-      const form = new URLSearchParams(body)
-
-      if (form.get('pin') === pin) {
-        const token = makeToken()
-        response.writeHead(302, {
-          Location: '/',
-          'Set-Cookie': `${cookieName}=${encodeURIComponent(token)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${maxAgeSeconds}`,
-          'Cache-Control': 'no-store',
-        })
-        response.end()
-        return
-      }
-
-      send(response, 401, loginPage('PIN hatalı.'), { 'Content-Type': 'text/html; charset=utf-8' })
-      return
-    }
-
-    if (request.url === '/logout') {
-      response.writeHead(302, {
-        Location: '/',
-        'Set-Cookie': `${cookieName}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0`,
-        'Cache-Control': 'no-store',
-      })
-      response.end()
-      return
-    }
-
-    if (!isValidToken(getCookie(request, cookieName))) {
-      send(response, 401, loginPage(), { 'Content-Type': 'text/html; charset=utf-8' })
-      return
-    }
-
     if (request.method === 'GET' && request.url === '/api/assistant/status') {
       try {
         const result = await fetch(`${ollamaUrl}/api/tags`, { signal: AbortSignal.timeout(3000) })
@@ -436,6 +288,8 @@ const server = createServer(async (request, response) => {
             response.write('\n\n[Derin yanıt süre sınırında durduruldu.]')
           }
           response.end()
+        } else if (error?.message === 'PAYLOAD_TOO_LARGE') {
+          sendJson(response, 413, { error: 'İstek çok büyük.' })
         } else {
           sendJson(response, 503, {
             error: 'Yerel model şu anda yanıt vermiyor.',
@@ -467,6 +321,5 @@ const server = createServer(async (request, response) => {
 })
 
 server.listen(port, host, () => {
-  console.log(`Terminal Elektronik PIN server: http://${host}:${port}`)
-  console.log(`PIN: ${pin}`)
+  console.log(`Terminal Elektronik yerel sunucu: http://${host}:${port}`)
 })

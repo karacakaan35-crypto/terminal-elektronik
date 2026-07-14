@@ -15,31 +15,19 @@ LAN'daki telefon/tabletlerden erişmek için:
 npm run dev:lan
 ```
 
-## PIN Korumalı Yayın
+## Yerel Servis Sunucusu
 
-Production build alıp sadece `dist/` klasörünü PIN ile servis eder:
+Production build alıp uygulamayı yerel Astra/Gemma bağlantısıyla doğrudan servis eder:
 
 ```bash
 npm run build
-npm run serve:pin
+npm run serve:local
 ```
 
 Tarayıcıda açılacak adres:
 
 ```text
 http://127.0.0.1:4174
-```
-
-Varsayılan PIN:
-
-```text
-1559
-```
-
-PIN'i değiştirmek için:
-
-```bash
-FIXBOARD_PIN=2468 npm run serve:pin
 ```
 
 ## Kalıcı Web Yayını
@@ -57,7 +45,7 @@ Bu sürüm bağlantı açıldığında doğrudan teşhis motorunu, PDF raporunu 
 Astra iki çalışma modu sunar:
 
 - `Hızlı Yanıt`: Günlük ve sık saha sorularını cihaz üzerinde anında yanıtlar.
-- `Derin / gemma4`: PIN korumalı sunucu üzerinden yerel Ollama modelini akışlı olarak kullanır; yanıt kullanıcı tarafından durdurulabilir.
+- `Derin / gemma4`: yerel servis sunucusu üzerinden Ollama modelini akışlı olarak kullanır; yanıt kullanıcı tarafından durdurulabilir.
 
 Model kapalıysa Derin mod devre dışı kalır. Aktif teşhis, işlem geçmişi ve teknisyen notları tarayıcıda taslak olarak saklanır.
 
@@ -70,13 +58,13 @@ gemma4
 Farklı model kullanmak için:
 
 ```bash
-FIXBOARD_AI_MODEL=gemma4:12b npm run serve:pin
+FIXBOARD_AI_MODEL=gemma4:12b npm run serve:local
 ```
 
 Ollama farklı adreste çalışıyorsa:
 
 ```bash
-OLLAMA_URL=http://127.0.0.1:11434 FIXBOARD_AI_MODEL=gemma4 npm run serve:pin
+OLLAMA_URL=http://127.0.0.1:11434 FIXBOARD_AI_MODEL=gemma4 npm run serve:local
 ```
 
 Gemma 4 modelini Ollama'ya indirmek için:
@@ -92,13 +80,13 @@ Ollama sunucusunu elle başlatmak gerekirse:
 npm run ollama:serve
 ```
 
-Tunnel kullanırken dışarıya Ollama portunu değil, PIN server portunu açın:
+Tunnel kullanırken dışarıya Ollama portunu değil, uygulama sunucusu portunu açın:
 
 ```bash
 npm run tunnel
 ```
 
-Komutun verdiği `https://...trycloudflare.com` linki Android telefonda hücresel veriyle açılabilir. Tünel kararlılığı için HTTP/2 kullanılır. Mac açık kalmalı; `npm run serve:pin`, Ollama ve tunnel terminali çalıştığı sürece erişim devam eder.
+Komutun verdiği `https://...trycloudflare.com` linki Android telefonda hücresel veriyle açılabilir. Tünel kararlılığı için HTTP/2 kullanılır. Mac açık kalmalı; `npm run serve:local`, Ollama ve tunnel terminali çalıştığı sürece erişim devam eder.
 
 Android Chrome menüsündeki `Ana ekrana ekle` seçeneğiyle uygulama kurulabilir. Bir kez çevrimiçi açılan karar ağacı ve aktif teşhis taslağı bağlantı kesildiğinde de kullanılabilir; Derin Gemma4 modu için Mac bağlantısı gerekir.
 

@@ -616,32 +616,49 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
   ])
 
   useEffect(() => {
-    if (!open || modelStatus.checked) {
+    if (!open) {
       return
     }
 
     let active = true
-    fetch('/api/assistant/status')
-      .then((response) => response.json())
-      .then((status) => {
-        if (active) {
-          setModelStatus({
-            checked: true,
-            available: Boolean(status.connected && status.modelAvailable),
-            model: status.configuredModel || defaultAssistantModel,
-          })
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setModelStatus({ checked: true, available: false, model: defaultAssistantModel })
-        }
-      })
+    const checkModel = () => {
+      fetch('/api/assistant/status', { cache: 'no-store' })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Assistant status HTTP ${response.status}`)
+          }
+          return response.json()
+        })
+        .then((status) => {
+          if (active) {
+            setModelStatus({
+              checked: true,
+              available: Boolean(status.connected && status.modelAvailable),
+              model: status.configuredModel || defaultAssistantModel,
+            })
+          }
+        })
+        .catch(() => {
+          if (active) {
+            setModelStatus((previous) => ({ ...previous, checked: true, available: false }))
+          }
+        })
+    }
+
+    checkModel()
+    const interval = window.setInterval(checkModel, 15_000)
+    window.addEventListener('focus', checkModel)
+    document.addEventListener('visibilitychange', checkModel)
 
     return () => {
       active = false
+      window.clearInterval(interval)
+      window.removeEventListener('focus', checkModel)
+      document.removeEventListener('visibilitychange', checkModel)
     }
-  }, [modelStatus.checked, open])
+  }, [open])
+
+  useEffect(() => () => requestControllerRef.current?.abort(), [])
 
   function upsertAssistantMessage(id, text, source) {
     setMessages((previous) => {
@@ -695,6 +712,7 @@ function AssistantWidget({ selectedProfile, currentNode, history, candidates }) 
     })
 
     if (!response.ok) {
+      setModelStatus((previous) => ({ ...previous, checked: true, available: false }))
       throw new Error(`Local model HTTP ${response.status}`)
     }
 
@@ -1020,17 +1038,82 @@ function ProbeGuide({ node }) {
     ['Kırmızı Prob', node.probeRed, Zap],
   ].filter(([, value]) => value)
 
+  const meterSymbol = /ohm|resistance|continuity/i.test(node.meterMode || '')
+    ? 'Ω'
+    : /diode/i.test(node.meterMode || '')
+      ? '◁|'
+      : /ac/i.test(node.meterMode || '') && !/dc/i.test(node.meterMode || '')
+        ? 'V∿'
+        : 'V⎓'
+  const isDeenergized = /enerjisiz|enerji kesilmiş|kondansatörler boşaltılmış/i.test(node.powerState || '')
+  const expected = node.expected
+    ? `${node.expected.min} – ${node.expected.max} ${node.unit || ''}`.trim()
+    : node.unit
+      ? `Sonucu ${node.unit} olarak kaydedin`
+      : 'Kararlı değeri kaydedin'
+
   return (
-    <div className="grid gap-3 md:grid-cols-2">
-      {items.map(([label, value, Icon]) => (
-        <div key={label} className="rounded-md border border-white/10 bg-white/5 p-3">
-          <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-zinc-500">
-            <Icon className="h-4 w-4 text-rose-200" aria-hidden="true" />
-            {label}
+    <div className="space-y-3">
+      <div className="grid gap-3 md:grid-cols-2">
+        {items.map(([label, value, Icon]) => (
+          <div key={label} className="rounded-md border border-white/10 bg-white/5 p-3">
+            <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-zinc-500">
+              <Icon className="h-4 w-4 text-rose-200" aria-hidden="true" />
+              {label}
+            </div>
+            <div className="text-sm font-semibold leading-6 text-zinc-200">{value}</div>
           </div>
-          <div className="text-sm font-semibold leading-6 text-zinc-200">{value}</div>
+        ))}
+      </div>
+
+      <section
+        className="overflow-hidden rounded-lg border border-cyan-200/20 bg-[#080d16]"
+        aria-label="Prob yerleşim rehberi"
+        data-testid="probe-placement-guide"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-white/5 px-4 py-3">
+          <div>
+            <div className="text-xs font-black uppercase tracking-[0.16em] text-cyan-100">Canlı Prob Yerleşimi</div>
+            <div className="mt-1 text-xs text-zinc-500">Probları bağlamadan önce cihaz modunu ve enerji durumunu doğrulayın.</div>
+          </div>
+          <Badge tone={isDeenergized ? 'emerald' : 'amber'}>{isDeenergized ? 'ENERJİ KESİK' : 'ENERJİLİ ÖLÇÜM'}</Badge>
         </div>
-      ))}
+
+        <div className="grid items-stretch gap-3 p-4 md:grid-cols-[minmax(0,1fr)_150px_minmax(0,1fr)]">
+          <div className="relative overflow-hidden rounded-md border border-zinc-600/50 bg-black/30 p-4">
+            <div className="absolute inset-y-0 left-0 w-1 bg-zinc-300" aria-hidden="true" />
+            <div className="font-mono text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400">COM · SİYAH PROB</div>
+            <div className="mt-3 text-base font-black leading-6 text-white">{node.probeBlack || 'Ortak referans / GND'}</div>
+            <div className="mt-3 h-1 rounded-full bg-gradient-to-r from-zinc-100 via-zinc-500 to-transparent" aria-hidden="true" />
+          </div>
+
+          <div className="flex flex-col items-center justify-center rounded-md border border-cyan-200/20 bg-cyan-300/5 p-3 text-center">
+            <div className="flex h-16 w-20 items-center justify-center rounded-lg border-2 border-cyan-200/30 bg-black/50 font-mono text-3xl font-black text-cyan-100 shadow-inner shadow-cyan-300/10">
+              {meterSymbol}
+            </div>
+            <div className="mt-2 font-mono text-[10px] font-black uppercase tracking-wide text-zinc-500">{meterModeLabels[node.meterMode] || node.meterMode || 'Ölçüm modu'}</div>
+            <div className="mt-2 rounded border border-amber-300/20 bg-amber-300/10 px-2 py-1 font-mono text-[10px] font-bold text-amber-100">{expected}</div>
+          </div>
+
+          <div className="relative overflow-hidden rounded-md border border-rose-300/30 bg-rose-500/5 p-4">
+            <div className="absolute inset-y-0 right-0 w-1 bg-rose-400" aria-hidden="true" />
+            <div className="font-mono text-[10px] font-black uppercase tracking-[0.15em] text-rose-200">V/Ω · KIRMIZI PROB</div>
+            <div className="mt-3 text-base font-black leading-6 text-white">{node.probeRed || 'Ölçülecek test noktası'}</div>
+            <div className="mt-3 h-1 rounded-full bg-gradient-to-l from-rose-400 via-rose-600 to-transparent" aria-hidden="true" />
+          </div>
+        </div>
+
+        <div className={classNames(
+          'border-t px-4 py-3 text-xs font-semibold leading-5',
+          isDeenergized
+            ? 'border-emerald-300/15 bg-emerald-400/5 text-emerald-100/80'
+            : 'border-amber-300/20 bg-amber-400/10 text-amber-100',
+        )}>
+          {isDeenergized
+            ? 'Enerji vermeden önce kondansatörlerin boşaldığını doğrulayın; süreklilik ve direnç ölçümünü enerjili devrede yapmayın.'
+            : 'Enerjili ölçüm: probların kaymasını önleyin, tek elle çalışın ve önce siyah referansı sabitleyin. Şebeke tarafında yalnız uygun ölçüm kategorili ekipman kullanın.'}
+        </div>
+      </section>
     </div>
   )
 }
