@@ -45,12 +45,13 @@ export function validateDiagnostics(data) {
   const allowedEvidenceLevels = new Set(['manufacturer', 'standard', 'engineering', 'heuristic'])
   const allowedSourceTypes = new Set(['manufacturer', 'standards-body', 'engineering-guide'])
   const allowedThresholdPolicies = new Set(['model_specific', 'general_screening'])
+  const allowedToolLevels = new Set(['field_basic', 'field_poe_tester'])
   const profileIds = new Set((data.deviceProfiles || []).map((profile) => profile.id))
   const inboundCounts = Object.fromEntries(Object.keys(nodes).map((nodeId) => [nodeId, 0]))
-  const advancedToolTerms = /osiloskop|oscilloscope|logic probe|lojik prob|programlayıcı|termal kamera|PoE tester|elektronik yük|diferansiyel prob|RS-485 analizörü/iu
+  const advancedToolTerms = /osiloskop|oscilloscope|logic probe|lojik prob|programlayıcı|termal kamera|elektronik yük|diferansiyel prob|RS-485 analizörü/iu
 
-  if (data.fieldMode?.enabled !== true || !Array.isArray(data.fieldMode?.tools) || !data.fieldMode.tools.some((tool) => /multimetre/i.test(tool)) || !data.fieldMode.tools.some((tool) => /bilgisayar/i.test(tool))) {
-    errors.push('fieldMode: enabled field tool list must include a multimeter and computer')
+  if (data.fieldMode?.enabled !== true || !Array.isArray(data.fieldMode?.tools) || !data.fieldMode.tools.some((tool) => /multimetre/i.test(tool)) || !data.fieldMode.tools.some((tool) => /bilgisayar/i.test(tool)) || !data.fieldMode.tools.some((tool) => /PoE test/i.test(tool))) {
+    errors.push('fieldMode: enabled field tool list must include a multimeter, computer and PoE tester')
   }
 
   function validateSourceIds(owner, sourceIds, required = false) {
@@ -93,7 +94,7 @@ export function validateDiagnostics(data) {
       errors.push(`${key}: title, category and prompt are required for diagnostic steps`)
     }
 
-    if (node.toolLevel !== 'field_basic') {
+    if (!allowedToolLevels.has(node.toolLevel)) {
       errors.push(`${key}: every step must be usable with the declared field tool set`)
     }
 

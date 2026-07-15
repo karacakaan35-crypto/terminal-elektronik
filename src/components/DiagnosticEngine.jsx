@@ -89,6 +89,7 @@ const meterModeLabels = {
   'Diode Mode': 'Diyot Modu',
   Continuity: 'Süreklilik',
   'Oscilloscope / RS-485 analyzer': 'Osiloskop / RS-485 Analizörü',
+  'PoE Tester': 'PoE Test Cihazı',
 }
 
 const evidenceLabels = {
@@ -261,11 +262,11 @@ function ProbabilityBar({ item, compact = false }) {
     <div className={compact ? 'space-y-1' : 'rounded-md border border-white/10 bg-white/5 p-3'}>
       <div className="flex items-start justify-between gap-3">
         <div className={classNames('font-semibold leading-5 text-zinc-200', compact ? 'text-xs' : 'text-sm')}>{item.label}</div>
-        <div className={classNames('shrink-0 font-mono font-black text-amber-100', compact ? 'text-xs' : 'text-lg')}>{item.probability} puan</div>
+        <div className={classNames('shrink-0 font-mono font-black text-cyan-100', compact ? 'text-xs' : 'text-lg')}>{item.probability} puan</div>
       </div>
       <div className={classNames('overflow-hidden rounded-full bg-black/30', compact ? 'mt-1 h-1.5' : 'mt-2 h-2')}>
         <div
-          className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-amber-300 to-rose-400"
+          className="h-full rounded-full bg-cyan-300"
           style={{ width: `${item.probability}%` }}
         />
       </div>
@@ -324,43 +325,43 @@ function ServiceIntake({ setServiceInfo, selectedProfileId, setSelectedProfileId
   })
 
   return (
-    <section className="mx-auto grid min-h-screen w-full max-w-7xl place-items-center px-4 pb-40 pt-8 sm:px-6">
-      <div className="w-full space-y-5">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
+    <section className="mx-auto grid min-h-screen w-full max-w-7xl place-items-center px-4 pb-40 pt-10 sm:px-6 sm:pt-14">
+      <div className="w-full space-y-6">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-end">
           <div className="min-w-0">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-md border border-rose-300/30 bg-white/5 px-3 py-2 font-mono text-xs text-rose-100">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/[0.06] px-3 py-1.5 font-mono text-[11px] font-bold tracking-[0.12em] text-cyan-100">
               <TerminalSquare className="h-4 w-4" aria-hidden="true" />
               SAHA SERVIS KONSOLU
             </div>
-            <h1 className="max-w-4xl text-4xl font-black tracking-normal text-white sm:text-5xl">
+            <h1 className="max-w-4xl text-4xl font-black tracking-[-0.04em] text-white sm:text-6xl">
               Terminal <span className="gradient-word">Elektronik</span>
             </h1>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-zinc-300">
-              UPS, CACS, yangın paneli, kamera, bariyer ve santral arızalarını multimetre, bilgisayar ve sağlam deneme kablolarıyla adım adım kontrol eder.
+            <p className="mt-5 max-w-3xl text-base leading-7 text-zinc-400 sm:text-lg sm:leading-8">
+              UPS, CACS, yangın paneli, kamera, bariyer ve santral arızalarını elinizdeki saha araçlarıyla anlaşılır adımlara ayırır.
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Badge tone="cyan">{Object.keys(diagnostics.sourceCatalog).length} TEKNİK KAYNAK</Badge>
-              <Badge tone="amber">AĞIRLIKLAR KALİBRE DEĞİL</Badge>
-              <Badge tone="emerald">İNCELEME {diagnostics.researchAudit?.reviewedAt}</Badge>
+            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-zinc-500">
+              <span><strong className="text-zinc-200">{Object.keys(diagnostics.sourceCatalog).length}</strong> teknik kaynak</span>
+              <span><strong className="text-zinc-200">{Object.keys(diagnostics.nodes).length}</strong> kontrol adımı</span>
+              <span>İnceleme: <strong className="text-zinc-200">{diagnostics.researchAudit?.reviewedAt}</strong></span>
             </div>
             {diagnostics.fieldMode?.enabled ? (
-              <div className="mt-4 max-w-4xl rounded-lg border border-cyan-300/20 bg-cyan-300/[0.06] p-4">
-                <div className="text-sm font-black text-cyan-50">Bu sürüm elinizdeki saha araçlarına göre hazırlandı</div>
+              <div className="field-kit-panel mt-5 max-w-4xl rounded-2xl p-4 sm:p-5">
+                <div className="text-sm font-black text-zinc-100">Atölyenizdeki araçlara göre hazırlandı</div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {diagnostics.fieldMode.tools.map((tool) => (
-                    <span key={tool} className="rounded border border-white/10 bg-black/20 px-2.5 py-1 text-xs font-semibold text-zinc-300">
+                    <span key={tool} className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 text-xs font-semibold text-zinc-300">
                       {tool}
                     </span>
                   ))}
                 </div>
-                <p className="mt-3 text-xs leading-5 text-amber-100">{diagnostics.fieldMode.note}</p>
+                <p className="mt-3 text-xs leading-5 text-zinc-500">{diagnostics.fieldMode.note}</p>
               </div>
             ) : null}
           </div>
 
-          <div className="glass-panel rounded-lg p-4">
+          <div className="glass-panel rounded-2xl p-5">
             <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-cyan-200/20 bg-cyan-300/10 text-cyan-100">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-cyan-200/20 bg-cyan-300/[0.08] text-cyan-100">
                 <DeviceIcon profile={selectedProfile} />
               </div>
               <div className="min-w-0">
@@ -373,7 +374,7 @@ function ServiceIntake({ setServiceInfo, selectedProfileId, setSelectedProfileId
               type="button"
               onClick={() => selectedProfile?.supported && onStart(selectedProfile)}
               disabled={!selectedProfile?.supported}
-              className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-rose-300/45 bg-gradient-to-r from-rose-500/25 via-amber-400/15 to-cyan-400/20 px-4 text-sm font-black text-white transition hover:border-rose-200 disabled:opacity-50"
+              className="primary-action mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-black transition disabled:opacity-50"
             >
               Hızlı Başlat
               <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -381,11 +382,11 @@ function ServiceIntake({ setServiceInfo, selectedProfileId, setSelectedProfileId
           </div>
         </div>
 
-        <div className="glass-panel rounded-lg p-5">
+        <div className="glass-panel rounded-2xl p-4 sm:p-6">
           <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h2 className="text-xl font-black text-white">Cihaz Profili Seç</h2>
-              <p className="mt-1 text-sm text-zinc-500">Cihazı seç, belirtiyi işaretle, ölçüme başla.</p>
+              <h2 className="text-xl font-black tracking-tight text-white">Cihaz seçin</h2>
+              <p className="mt-1 text-sm text-zinc-500">Cihazı seçin, belirtiyi işaretleyin ve kontrole başlayın.</p>
             </div>
             <label className="relative block w-full max-w-md">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
@@ -393,7 +394,7 @@ function ServiceIntake({ setServiceInfo, selectedProfileId, setSelectedProfileId
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="UPS, CACS, kamera, bariyer ara..."
-                className="form-control min-h-11 w-full rounded-md pl-10 pr-3 text-sm font-semibold text-zinc-100 outline-none placeholder:text-zinc-600"
+                className="form-control min-h-12 w-full rounded-xl pl-10 pr-3 text-sm font-semibold text-zinc-100 outline-none placeholder:text-zinc-600"
               />
             </label>
           </div>
@@ -412,21 +413,20 @@ function ServiceIntake({ setServiceInfo, selectedProfileId, setSelectedProfileId
                 }}
                 disabled={!profile.supported}
                 className={classNames(
-                  'module-card min-h-44 rounded-lg p-4 pl-5 text-left transition hover:-translate-y-0.5 hover:border-rose-300/50',
+                  'module-card min-h-40 rounded-xl p-5 text-left transition duration-200 hover:-translate-y-0.5 hover:border-cyan-300/35 hover:bg-[#111923]',
                   selectedProfileId === profile.id && 'module-card-active',
                   !profile.supported && 'opacity-55',
                 )}
               >
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-md border border-white/10 bg-white/5 text-rose-100">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.035] text-cyan-100">
                     <DeviceIcon profile={profile} />
                   </div>
                   <Badge tone={profile.supported ? 'emerald' : 'zinc'}>{profile.supported ? 'AKTIF' : 'HAZIRLANIYOR'}</Badge>
                 </div>
                 <h3 className="text-lg font-black text-white">{profile.name}</h3>
                 <p className="mt-2 text-sm leading-6 text-zinc-400">{profile.description}</p>
-                <FaultPriorPanel profile={profile} compact limit={3} />
-                <div className="mt-4 flex items-center gap-2 text-sm font-bold text-rose-100">
+                <div className="mt-5 flex items-center gap-2 text-sm font-bold text-cyan-100">
                   Teşhisi başlat
                   <ChevronRight className="h-4 w-4" aria-hidden="true" />
                 </div>
@@ -447,10 +447,10 @@ function ServiceIntake({ setServiceInfo, selectedProfileId, setSelectedProfileId
 
 function Header({ selectedProfile, currentNode, onBack, onReset }) {
   return (
-    <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0d1018]/82 px-4 py-3 backdrop-blur-xl sm:px-6">
+    <header className="sticky top-0 z-20 border-b border-white/[0.07] bg-[#090d12]/90 px-4 py-3 backdrop-blur-xl sm:px-6">
       <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-rose-300/30 bg-gradient-to-br from-rose-500/25 via-amber-400/15 to-cyan-400/20 text-rose-100">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/[0.08] text-cyan-100">
             <BrainCircuit className="h-6 w-6" aria-hidden="true" />
           </div>
           <div className="min-w-0">
@@ -467,7 +467,7 @@ function Header({ selectedProfile, currentNode, onBack, onReset }) {
             onClick={onBack}
             aria-label="Bir önceki adıma dön"
             title="Geri"
-            className="border-white/10 bg-white/5 text-zinc-200 hover:border-rose-300/60 hover:text-rose-100"
+            className="border-white/10 bg-white/[0.035] text-zinc-300 hover:border-cyan-300/40 hover:text-cyan-100"
           >
             <span className="hidden sm:inline">Geri</span>
           </IconButton>
@@ -476,7 +476,7 @@ function Header({ selectedProfile, currentNode, onBack, onReset }) {
             onClick={onReset}
             aria-label="Yeni teşhis başlat"
             title="Yeni teşhis"
-            className="border-white/10 bg-white/5 text-zinc-200 hover:border-cyan-300/60 hover:text-cyan-100"
+            className="border-white/10 bg-white/[0.035] text-zinc-300 hover:border-cyan-300/40 hover:text-cyan-100"
           >
             <span className="hidden sm:inline">Yeni Teşhis</span>
           </IconButton>
@@ -489,10 +489,10 @@ function Header({ selectedProfile, currentNode, onBack, onReset }) {
 function Sidebar({ selectedProfile, serviceInfo, history }) {
   return (
     <aside className="space-y-4">
-      <section className="soft-panel rounded-lg p-4">
+      <section className="soft-panel rounded-2xl p-4">
         <div className="mb-4 flex items-center gap-3">
           {selectedProfile ? (
-            <div className="flex h-11 w-11 items-center justify-center rounded-md border border-rose-300/30 bg-rose-400/10 text-rose-100">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/[0.07] text-cyan-100">
               <DeviceIcon profile={selectedProfile} />
             </div>
           ) : null}
@@ -508,7 +508,7 @@ function Sidebar({ selectedProfile, serviceInfo, history }) {
         </div>
       </section>
 
-      <section className="soft-panel rounded-lg p-4">
+      <section className="soft-panel rounded-2xl p-4">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm font-black text-white">
             <History className="h-4 w-4 text-emerald-300" aria-hidden="true" />
@@ -522,7 +522,7 @@ function Sidebar({ selectedProfile, serviceInfo, history }) {
             <p className="text-sm leading-6 text-zinc-500">Henüz ölçüm veya karar kaydı yok.</p>
           ) : (
             history.map((entry, index) => (
-              <div key={`${entry.fromId}-${index}`} className="rounded-md border border-white/10 bg-white/5 p-3">
+              <div key={`${entry.fromId}-${index}`} className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-3">
                 <div className="mb-1 flex items-center justify-between gap-2">
                   <span className="font-mono text-xs text-zinc-500">#{index + 1}</span>
                   <span className="font-mono text-xs text-zinc-600">{entry.time}</span>
@@ -551,7 +551,7 @@ function InfoRow({ label, value }) {
 function ScorePanel({ selectedProfile, candidates, resultNode, notes, setNotes }) {
   return (
     <aside className="space-y-4">
-      <section className="soft-panel rounded-lg p-4">
+      <section className="soft-panel rounded-2xl p-4">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
             <div className="text-sm font-black text-white">Başlangıç Servis Ağırlıkları</div>
@@ -562,7 +562,7 @@ function ScorePanel({ selectedProfile, candidates, resultNode, notes, setNotes }
         <FaultPriorPanel profile={selectedProfile} />
       </section>
 
-      <section className="soft-panel rounded-lg p-4">
+      <section className="soft-panel rounded-2xl p-4">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm font-black text-white">
             <Gauge className="h-4 w-4 text-amber-300" aria-hidden="true" />
@@ -576,10 +576,10 @@ function ScorePanel({ selectedProfile, candidates, resultNode, notes, setNotes }
             <div key={candidate.id} className="rounded-md border border-white/10 bg-white/5 p-3">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div className="text-sm font-bold leading-5 text-zinc-100">{candidate.label}</div>
-                <div className="font-mono text-lg font-black text-amber-100">%{candidate.probability} pay</div>
+                <div className="font-mono text-lg font-black text-cyan-100">%{candidate.probability} pay</div>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-black/30">
-                <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-amber-300 to-red-400" style={{ width: `${candidate.probability}%` }} />
+                <div className="h-full rounded-full bg-cyan-300" style={{ width: `${candidate.probability}%` }} />
               </div>
               <div className="mt-2 flex items-center justify-between gap-2 text-xs text-zinc-500">
                 <span>{candidate.componentGroup}</span>
@@ -590,7 +590,7 @@ function ScorePanel({ selectedProfile, candidates, resultNode, notes, setNotes }
         </div>
       </section>
 
-      <section className="soft-panel rounded-lg p-4">
+      <section className="soft-panel rounded-2xl p-4">
         <div className="mb-3 flex items-center gap-2 text-sm font-black text-white">
           <NotebookPen className="h-4 w-4 text-cyan-200" aria-hidden="true" />
           Teknisyen Notları
@@ -600,12 +600,12 @@ function ScorePanel({ selectedProfile, candidates, resultNode, notes, setNotes }
           onChange={(event) => setNotes(event.target.value)}
           placeholder="Değişen parça, ölçüm ayrıntısı, müşteri notu..."
           rows={6}
-          className="form-control w-full resize-none rounded-md px-3 py-3 text-sm leading-6 text-zinc-100 outline-none transition placeholder:text-zinc-600"
+          className="form-control w-full resize-none rounded-xl px-3 py-3 text-sm leading-6 text-zinc-100 outline-none transition placeholder:text-zinc-600"
         />
       </section>
 
       {resultNode ? (
-        <section className="rounded-lg border border-emerald-400/30 bg-emerald-400/10 p-4">
+        <section className="rounded-2xl border border-emerald-400/25 bg-emerald-400/[0.07] p-4">
           <div className="mb-2 text-sm font-black text-emerald-100">Son Doğrulama</div>
           <p className="text-sm leading-6 text-zinc-300">{resultNode.verification}</p>
         </section>
@@ -993,12 +993,11 @@ function WorkbenchShell({ selectedProfile, serviceInfo, currentNode, history, ca
 
   return (
     <main className="app-bg min-h-screen text-zinc-100">
-      <div className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:42px_42px]" />
       <div className="relative">
         <Header selectedProfile={selectedProfile} currentNode={currentNode} onBack={onBack} onReset={onReset} />
 
         <div className="mx-auto max-w-[1500px] px-4 pb-36 pt-4 sm:px-6">
-          <div className="glass-panel mb-4 grid grid-cols-3 rounded-lg p-1 lg:hidden">
+          <div className="glass-panel mb-4 grid grid-cols-3 rounded-xl p-1 lg:hidden">
             {[
               ['diagnostic', 'Teşhis'],
               ['history', 'Geçmiş'],
@@ -1010,7 +1009,7 @@ function WorkbenchShell({ selectedProfile, serviceInfo, currentNode, history, ca
                 onClick={() => setMobileTab(id)}
                 className={classNames(
                   'min-h-10 rounded-md text-sm font-bold transition',
-                  mobileTab === id ? 'bg-white/10 text-rose-100' : 'text-zinc-500',
+                  mobileTab === id ? 'bg-cyan-300/10 text-cyan-100' : 'text-zinc-500',
                 )}
               >
                 {label}
@@ -1018,7 +1017,7 @@ function WorkbenchShell({ selectedProfile, serviceInfo, currentNode, history, ca
             ))}
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[290px_minmax(0,1fr)_350px]">
+          <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)_330px]">
             <div className={classNames('lg:block', mobileTab === 'history' ? 'block' : 'hidden')}>
               <Sidebar selectedProfile={selectedProfile} serviceInfo={serviceInfo} history={history} />
             </div>
@@ -1044,7 +1043,7 @@ function EvidencePanel({ node }) {
       : null
 
   return (
-    <section className="rounded-md border border-white/10 bg-white/[0.035] p-3" aria-label="Kaynak ve kontrol notu">
+    <section className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-3.5" aria-label="Kaynak ve kontrol notu">
       <div className="flex flex-wrap items-center gap-2">
         <BookOpenCheck className="h-4 w-4 text-cyan-200" aria-hidden="true" />
         <span className="text-xs font-black uppercase tracking-wide text-zinc-400">Kaynak ve not</span>
@@ -1082,6 +1081,11 @@ function ProcedureHeader({ node }) {
   const danger = node.danger ? dangerStyles[node.danger] : 'border-zinc-700 bg-zinc-900 text-zinc-300'
   const categoryLabel = node.category || nodeTypeLabels[node.type] || 'Teşhis'
   const typeLabel = nodeTypeLabels[node.type] || 'Teşhis Adımı'
+  const toolLabel = node.toolLevel === 'field_poe_tester'
+    ? 'PoE TEST CİHAZI'
+    : node.toolLevel === 'field_basic'
+      ? 'MULTİMETRE / PC / KABLO'
+      : null
 
   return (
     <div className="mb-5 space-y-4">
@@ -1089,7 +1093,7 @@ function ProcedureHeader({ node }) {
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone="amber">{categoryLabel}</Badge>
           {categoryLabel !== typeLabel ? <Badge>{typeLabel}</Badge> : null}
-          {node.toolLevel === 'field_basic' ? <Badge tone="cyan">MULTİMETRE / PC / KABLO</Badge> : null}
+          {toolLabel ? <Badge tone="cyan">{toolLabel}</Badge> : null}
         </div>
         {node.danger ? (
           <span className={classNames('inline-flex items-center gap-2 rounded border px-3 py-1 font-mono text-xs font-bold', danger)}>
@@ -1099,7 +1103,7 @@ function ProcedureHeader({ node }) {
         ) : null}
       </div>
       <div>
-        <h1 className="text-3xl font-black text-white">{node.title}</h1>
+        <h1 className="text-3xl font-black tracking-[-0.025em] text-white">{node.title}</h1>
         <p className="mt-3 text-lg leading-8 text-zinc-300">{node.prompt}</p>
       </div>
       <EvidencePanel node={node} />
@@ -1108,14 +1112,17 @@ function ProcedureHeader({ node }) {
 }
 
 function ProbeGuide({ node }) {
+  const isPoeTester = /poe tester/i.test(node.meterMode || '')
   const items = [
     ['Ölçüm Cihazı', meterModeLabels[node.meterMode] || node.meterMode, Gauge],
     ['Kart Durumu', node.powerState, Power],
-    ['Siyah Prob', node.probeBlack, KeyRound],
-    ['Kırmızı Prob', node.probeRed, Zap],
+    [node.probeBlackLabel || 'Siyah Prob', node.probeBlack, KeyRound],
+    [node.probeRedLabel || 'Kırmızı Prob', node.probeRed, Zap],
   ].filter(([, value]) => value)
 
-  const meterSymbol = /oscilloscope|analyzer/i.test(node.meterMode || '')
+  const meterSymbol = isPoeTester
+    ? 'PoE'
+    : /oscilloscope|analyzer/i.test(node.meterMode || '')
     ? 'ΔV'
     : /ohm|resistance|continuity/i.test(node.meterMode || '')
       ? 'Ω'
@@ -1135,7 +1142,7 @@ function ProbeGuide({ node }) {
     <div className="space-y-3">
       <div className="grid gap-3 md:grid-cols-2">
         {items.map(([label, value, Icon]) => (
-          <div key={label} className="rounded-md border border-white/10 bg-white/5 p-3">
+          <div key={label} className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-3.5">
             <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-zinc-500">
               <Icon className="h-4 w-4 text-rose-200" aria-hidden="true" />
               {label}
@@ -1146,7 +1153,7 @@ function ProbeGuide({ node }) {
       </div>
 
       <section
-        className="overflow-hidden rounded-lg border border-cyan-200/20 bg-[#080d16]"
+        className="overflow-hidden rounded-xl border border-cyan-200/15 bg-[#080d12]"
         aria-label="Prob yerleşim rehberi"
         data-testid="probe-placement-guide"
       >
@@ -1161,7 +1168,7 @@ function ProbeGuide({ node }) {
         <div className="grid items-stretch gap-3 p-4 md:grid-cols-[minmax(0,1fr)_150px_minmax(0,1fr)]">
           <div className="relative overflow-hidden rounded-md border border-zinc-600/50 bg-black/30 p-4">
             <div className="absolute inset-y-0 left-0 w-1 bg-zinc-300" aria-hidden="true" />
-            <div className="font-mono text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400">COM · SİYAH PROB</div>
+            <div className="font-mono text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400">{node.probeBlackLabel || 'COM · SİYAH PROB'}</div>
             <div className="mt-3 text-base font-black leading-6 text-white">{node.probeBlack || 'Ortak referans / GND'}</div>
             <div className="mt-3 h-1 rounded-full bg-gradient-to-r from-zinc-100 via-zinc-500 to-transparent" aria-hidden="true" />
           </div>
@@ -1176,7 +1183,7 @@ function ProbeGuide({ node }) {
 
           <div className="relative overflow-hidden rounded-md border border-rose-300/30 bg-rose-500/5 p-4">
             <div className="absolute inset-y-0 right-0 w-1 bg-rose-400" aria-hidden="true" />
-            <div className="font-mono text-[10px] font-black uppercase tracking-[0.15em] text-rose-200">V/Ω · KIRMIZI PROB</div>
+            <div className="font-mono text-[10px] font-black uppercase tracking-[0.15em] text-rose-200">{node.probeRedLabel || 'V/Ω · KIRMIZI PROB'}</div>
             <div className="mt-3 text-base font-black leading-6 text-white">{node.probeRed || 'Ölçülecek test noktası'}</div>
             <div className="mt-3 h-1 rounded-full bg-gradient-to-l from-rose-400 via-rose-600 to-transparent" aria-hidden="true" />
           </div>
@@ -1256,7 +1263,7 @@ function MeasurementNode({ node, onSubmit }) {
   }
 
   return (
-    <section className="glass-panel rounded-lg p-5">
+    <section className="glass-panel rounded-2xl p-5 sm:p-6">
       <ProcedureHeader node={node} />
       <ProbeGuide node={node} />
       <TestMethodPanel node={node} />
@@ -1265,7 +1272,7 @@ function MeasurementNode({ node, onSubmit }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block">
             <span className="mb-2 block text-sm font-bold text-zinc-300">Ölçülen Değer</span>
-            <div className="flex overflow-hidden rounded-lg border border-white/10 bg-black/20 focus-within:border-rose-300">
+            <div className="flex overflow-hidden rounded-xl border border-white/10 bg-black/20 focus-within:border-cyan-300/60">
               <input
                 type="number"
                 step="0.01"
@@ -1274,7 +1281,7 @@ function MeasurementNode({ node, onSubmit }) {
                 placeholder="0.00"
                 className="min-h-24 w-full bg-transparent px-5 font-mono text-4xl font-black text-white outline-none placeholder:text-zinc-700"
               />
-              <span className="flex min-w-24 items-center justify-center border-l border-white/10 bg-white/5 px-5 font-mono text-3xl font-black text-rose-100">
+              <span className="flex min-w-24 items-center justify-center border-l border-white/10 bg-white/[0.035] px-5 font-mono text-3xl font-black text-cyan-100">
                 {node.unit}
               </span>
             </div>
@@ -1289,7 +1296,7 @@ function MeasurementNode({ node, onSubmit }) {
 
           {error ? <div className="rounded-md border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">{error}</div> : null}
 
-          <IconButton type="submit" icon={ChevronRight} className="w-full border-rose-300/50 bg-gradient-to-r from-rose-500/25 via-amber-400/20 to-cyan-400/20 text-white hover:border-rose-200/70">
+          <IconButton type="submit" icon={ChevronRight} className="primary-action w-full rounded-xl">
             Ölçümü Yorumla ve Devam Et
           </IconButton>
         </form>
@@ -1308,7 +1315,7 @@ function ChoiceNode({ node, onAnswer }) {
   const hasMeasurementImage = node.imageUrl && node.imageUrl !== '/measurement-placeholder.svg'
 
   return (
-    <section className="glass-panel rounded-lg p-5">
+    <section className="glass-panel rounded-2xl p-5 sm:p-6">
       <ProcedureHeader node={node} />
       {node.meterMode || node.powerState ? <ProbeGuide node={node} /> : null}
       <TestMethodPanel node={node} />
@@ -1348,7 +1355,7 @@ function ChoiceNode({ node, onAnswer }) {
 
 function SymptomNode({ node, onSelect }) {
   return (
-    <section className="glass-panel rounded-lg p-5">
+    <section className="glass-panel rounded-2xl p-5 sm:p-6">
       <ProcedureHeader node={node} />
 
       <div className="grid gap-3 md:grid-cols-2">
@@ -1357,11 +1364,11 @@ function SymptomNode({ node, onSelect }) {
             key={option.label}
             type="button"
             onClick={() => onSelect(option)}
-            className="group module-card rounded-lg p-4 pl-5 text-left transition hover:-translate-y-0.5 hover:border-rose-300/60"
+            className="group module-card rounded-xl p-5 text-left transition hover:-translate-y-0.5 hover:border-cyan-300/35"
           >
             <div className="mb-3 flex items-center justify-between gap-3">
               <Badge tone="amber">{node.optionBadge || 'BELIRTI'}</Badge>
-              <ChevronRight className="h-5 w-5 text-zinc-600 transition group-hover:text-rose-100" aria-hidden="true" />
+              <ChevronRight className="h-5 w-5 text-zinc-600 transition group-hover:text-cyan-100" aria-hidden="true" />
             </div>
             <div className="text-lg font-black text-white">{option.label}</div>
             <div className="mt-2 text-sm leading-6 text-zinc-500">
@@ -1379,7 +1386,7 @@ function ResultNode({ node, history, candidates, selectedProfile, onDownloadPdf,
 
   return (
     <section className="space-y-4">
-      <div className={classNames('rounded-lg border p-5 shadow-2xl', severityClass)}>
+      <div className={classNames('rounded-2xl border p-5 shadow-xl sm:p-6', severityClass)}>
         <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <Badge tone={node.severity === 'critical' ? 'red' : node.severity === 'warning' ? 'amber' : 'cyan'}>
@@ -1388,8 +1395,8 @@ function ResultNode({ node, history, candidates, selectedProfile, onDownloadPdf,
             <h1 className="mt-3 text-3xl font-black text-white">{node.title}</h1>
             <p className="mt-3 text-lg leading-8 text-zinc-200">{node.summary}</p>
           </div>
-          <div className="rounded-md border border-zinc-700 bg-zinc-950/70 px-4 py-3 text-center">
-            <div className="font-mono text-3xl font-black text-amber-100">%{candidates[0]?.probability || 0}</div>
+          <div className="rounded-xl border border-zinc-700/70 bg-zinc-950/60 px-4 py-3 text-center">
+            <div className="font-mono text-3xl font-black text-cyan-100">%{candidates[0]?.probability || 0}</div>
             <div className="text-xs text-zinc-500">en yüksek kanıt payı</div>
           </div>
         </div>
@@ -1403,9 +1410,9 @@ function ResultNode({ node, history, candidates, selectedProfile, onDownloadPdf,
         </div>
       </div>
 
-      <div className="glass-panel rounded-lg p-5">
+      <div className="glass-panel rounded-2xl p-5 sm:p-6">
         <div className="mb-4 flex items-center gap-2 text-sm font-black text-white">
-          <ClipboardList className="h-4 w-4 text-rose-200" aria-hidden="true" />
+          <ClipboardList className="h-4 w-4 text-cyan-200" aria-hidden="true" />
           Rapor Özeti
         </div>
         <div className="grid gap-3 md:grid-cols-2">
@@ -1419,14 +1426,14 @@ function ResultNode({ node, history, candidates, selectedProfile, onDownloadPdf,
             icon={Download}
             onClick={onDownloadPdf}
             disabled={pdfLoading}
-            className="border-amber-300/50 bg-gradient-to-r from-amber-400/20 to-rose-400/20 text-amber-50 hover:bg-amber-400/25"
+            className="primary-action rounded-xl"
           >
             {pdfLoading ? 'PDF Hazırlanıyor...' : 'Profesyonel PDF Raporu İndir'}
           </IconButton>
           <IconButton
             icon={RotateCcw}
             onClick={onReset}
-            className="border-white/10 bg-white/5 text-zinc-100 hover:border-rose-300/60 hover:text-rose-100"
+            className="rounded-xl border-white/10 bg-white/[0.035] text-zinc-100 hover:border-cyan-300/40 hover:text-cyan-100"
           >
             Yeni Teşhis Başlat
           </IconButton>
@@ -1438,9 +1445,9 @@ function ResultNode({ node, history, candidates, selectedProfile, onDownloadPdf,
 
 function ReportBlock({ icon: Icon, title, text, items }) {
   return (
-    <div className="rounded-md border border-white/10 bg-black/20 p-4">
+    <div className="rounded-xl border border-white/[0.07] bg-black/15 p-4">
       <div className="mb-3 flex items-center gap-2 text-sm font-black text-white">
-        <Icon className="h-4 w-4 text-rose-200" aria-hidden="true" />
+        <Icon className="h-4 w-4 text-cyan-200" aria-hidden="true" />
         {title}
       </div>
       {items ? (

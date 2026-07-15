@@ -42,7 +42,9 @@ Bu sürüm bağlantı açıldığında doğrudan teşhis motorunu, PDF raporunu,
 
 ## Saha Araçları ve Anlaşılır Arıza Dili
 
-Tanı veri seti v4.1; multimetre, kontrol kalemi, bilgisayar, sağlam RJ45/RJ11 deneme kablosu ve uygun sağlam adaptörle uygulanabilecek saha akışına göre hazırlanmıştır. Arıza adayları “kablo kopuk olabilir”, “RJ11/RJ45 ucu kötü çakılmış olabilir”, “klemens gevşek veya oksitli olabilir” ve “besleme hattında kısa devre olabilir” gibi anlaşılır teknik dille gösterilir.
+Tanı veri seti v4.2; multimetre, kontrol kalemi, bilgisayar, 802.3af/at/bt PoE test cihazı, sağlam RJ45/RJ11 deneme kablosu ve uygun sağlam adaptörle uygulanabilecek saha akışına göre hazırlanmıştır. Arıza adayları “kablo kopuk olabilir”, “RJ11/RJ45 ucu kötü çakılmış olabilir”, “klemens gevşek veya oksitli olabilir” ve “besleme hattında kısa devre olabilir” gibi anlaşılır teknik dille gösterilir.
+
+PoE kamera akışı test cihazındaki PSE/PD yönünü, anlaşma sonrası 44–57V genel kontrol aralığını, PoE sınıfını ve kısa sağlam Ethernet kablosuyla karşılaştırmayı birlikte kullanır. Voltajın tek başına kablo kalitesini veya switch güç bütçesini kanıtlamadığı uygulamada açıkça belirtilir.
 
 Kontrol kalemi yalnızca ön kontrol içindir; enerjinin kesildiğini tek başına kanıtlamaz. Gerilim yokluğu uygun multimetreyle doğrulanır. Şebeke, yangın güvenliği ve hareketli mekanizma adımlarındaki güvenlik durdurmaları korunur.
 

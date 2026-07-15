@@ -1,6 +1,6 @@
 {
   "appName": "Terminal Elektronik",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "probabilityDisclaimer": "Bu değerler gerçek arıza olasılığı veya saha istatistiği değildir. Toplamı 100’e normalize edilmiş servis öncelik ağırlıklarıdır; kapatılmış iş emri verisiyle kalibre edilmemiştir.",
   "researchBasis": [
     "Analog dahili hatlarda açık devre, kısa devre, hat voltajı ve FXS/FXO port durumları kontrol edilir.",
@@ -4331,48 +4331,96 @@
     },
     "cctv_poe_voltage": {
       "id": "cctv_poe_voltage",
-      "type": "question_boolean",
+      "type": "measurement",
       "device": "cctv",
-      "category": "PoE ve Ethernet Kontrolü",
-      "title": "Sağlam PoE Portu ve Kısa Ethernet Kablosu Denemesi",
-      "prompt": "Kamerayı switch yanına alın. Kısa ve sağlam bir Ethernet kablosuyla, çalıştığı bilinen PoE portu veya uygun enjektörde deneyin. Kamera açılıyor ve ağ ışığı geliyor mu?",
+      "category": "PoE Port Kontrolü",
+      "title": "PoE Test Cihazıyla Hat Voltajı",
+      "prompt": "PoE test cihazını switch/enjektör ile kamera veya saha kablosu arasına bağlayın. Anlaşma tamamlandıktan sonra cihazın gösterdiği DC voltajı girin.",
+      "unit": "V",
+      "meterMode": "PoE Tester",
+      "powerState": "PoE test cihazı PSE ile PD arasında; bağlantı anlaşması tamamlanmış",
+      "probeBlack": "Switch veya PoE enjektöründen gelen kablo",
+      "probeRed": "Kameraya ya da saha kablosuna giden kablo",
+      "expected": {
+        "min": 44,
+        "max": 57
+      },
       "danger": "medium",
+      "hint": "Voltajın normal olması tek başına kablonun, güç sınıfının veya port bütçesinin yeterli olduğunu kanıtlamaz. Tester sınıf/güç gösteriyorsa onu da not edin.",
       "testSteps": [
-        "Saha kablosunu iki uçtan ayırın.",
-        "Kamerayı kısa ve sağlam Ethernet kablosuyla switch yanında deneyin.",
-        "Aynı kablo ve portta çalışan başka bir kamera varsa sonucu karşılaştırın."
+        "Test cihazının 802.3af/at/bt desteğini ve PSE/PD yönünü kontrol edin.",
+        "Önce kısa sağlam Ethernet kablosuyla switch yanında referans ölçümü alın.",
+        "Sonra saha kablosunu bağlayın; voltaj, PoE sınıfı ve kamera açılırken görülen en düşük değeri karşılaştırın."
       ],
       "stopConditions": [
-        "Çıplak RJ45 uçlarına multimetre probu sokulacak",
-        "Pasif PoE yönü veya kamera beslemesi bilinmiyor"
+        "Çıplak RJ45 pinlerine multimetre probu uygulanacak",
+        "Pasif PoE yönü veya kamera besleme tipi bilinmiyor",
+        "RJ45 fişinde erime, kararma veya aşırı ısınma var"
       ],
+      "rules": [
+        {
+          "when": {
+            "operator": "<",
+            "value": 40
+          },
+          "label": "PoE anlaşması yok veya hat voltajı düşük",
+          "next": "cctv_result_poe_source",
+          "scoreDelta": {
+            "poe_power_fault": 42,
+            "cctv_cable_fault": 12
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 40,
+            "max": 43.99
+          },
+          "label": "Voltaj sınırda; kısa sağlam kabloyla karşılaştırın",
+          "next": "cctv_known_good_short_cable",
+          "scoreDelta": {
+            "poe_power_fault": 24,
+            "cctv_cable_fault": 18
+          }
+        },
+        {
+          "when": {
+            "operator": "between",
+            "min": 44,
+            "max": 57
+          },
+          "label": "PoE voltajı normal; kablo ve ağ bağlantısını ayrıca kontrol edin",
+          "next": "cctv_known_good_short_cable",
+          "scoreDelta": {
+            "poe_power_fault": -8
+          }
+        },
+        {
+          "when": {
+            "operator": ">",
+            "value": 58
+          },
+          "label": "Voltaj yüksek; pasif PoE veya yanlış enjektör olabilir",
+          "next": "cctv_result_power_reference",
+          "scoreDelta": {
+            "poe_power_fault": 24
+          }
+        }
+      ],
+      "fallbackNext": "cctv_known_good_short_cable",
       "sourceIds": [
         "axis_poe_power",
         "microchip_poe"
       ],
-      "unknownLabel": "Sağlam PoE portu yok",
-      "scoreYes": {
-        "cctv_cable_fault": 48,
-        "poe_power_fault": -12
-      },
-      "scoreNo": {
-        "cctv_cable_fault": -12,
-        "poe_power_fault": 18
-      },
-      "scoreUnknown": {
-        "poe_power_fault": 8
-      },
-      "yesLabel": "Kısa sağlam kabloyla çalışıyor",
-      "noLabel": "Kısa kabloyla da çalışmıyor",
-      "nextYes": "cctv_result_cable",
-      "nextNo": "cctv_poe_budget",
-      "nextUnknown": "cctv_result_power_reference",
-      "toolLevel": "field_basic",
+      "probeBlackLabel": "PSE / IN",
+      "probeRedLabel": "PD / OUT",
+      "toolLevel": "field_poe_tester",
       "evidence": {
         "level": "manufacturer",
         "reviewedAt": "2026-07-15",
         "statement": "Bu kontrol teknik kaynağa dayanır. Cihaz modeli farklıysa etiketi ve bağlantı şemasını da kontrol edin."
-      }
+      },
+      "thresholdPolicy": "general_screening"
     },
     "cctv_input_resistance": {
       "id": "cctv_input_resistance",
@@ -5773,14 +5821,14 @@
       "device": "access",
       "severity": "warning",
       "title": "Röle Çekiyor, Kontak/Çıkış Yolu Arızası",
-      "summary": "Röle tetikleniyor ancak kilit çıkışında voltaj oluşmuyor. Röle kontağı, normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC))) bağlantısı veya klemens yolu hatalı olabilir.",
+      "summary": "Röle tetikleniyor ancak kilit çıkışında voltaj oluşmuyor. Röle kontağı, normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC)))) bağlantısı veya klemens yolu hatalı olabilir.",
       "components": [
         "Röle kontağı",
-        "normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC)))/COM bağlantısı",
+        "normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC))))/COM bağlantısı",
         "Klemens",
         "Kilit besleme köprüsü"
       ],
-      "repair": "COM-normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC))) kontak sürekliliğini komut sırasında ölçün. Kilit beslemesinin COM hattına geldiğini doğrulayın.",
+      "repair": "COM-normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC)))) kontak sürekliliğini komut sırasında ölçün. Kilit beslemesinin COM hattına geldiğini doğrulayın.",
       "verification": "Komutla röle kontağı doğru çıkışı anahtarlamalı.",
       "category": "CACS / Erişim Kontrol",
       "sourceIds": [],
@@ -7036,7 +7084,7 @@
         "Açma butonu",
         "Giriş optokuplörü"
       ],
-      "repair": "normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC))) ayarı, sensör beslemesi ve giriş LED hattını kontrol edin.",
+      "repair": "normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC)))) ayarı, sensör beslemesi ve giriş LED hattını kontrol edin.",
       "verification": "Sensör tetiklenince kart giriş LED’i değişmeli.",
       "category": "Otomatik Kayar Kapı",
       "sourceIds": [
@@ -7438,15 +7486,15 @@
       "device": "support",
       "severity": "warning",
       "title": "Yardımcı Röle / Kontaktör Arızası",
-      "summary": "Röle kontağı doğru değişmiyor. Bobin, sürücü transistoru, flyback diyot veya normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC))) kontağı arızalı olabilir.",
+      "summary": "Röle kontağı doğru değişmiyor. Bobin, sürücü transistoru, flyback diyot veya normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC)))) kontağı arızalı olabilir.",
       "components": [
         "Röle bobini",
         "Sürücü transistoru",
         "Flyback diyot",
-        "normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC))) kontak"
+        "normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC)))) kontak"
       ],
       "repair": "Bobin gerilimini ve kontak sürekliliğini komut sırasında ölçün.",
-      "verification": "Komutla COM-normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC))) doğru değişmeli.",
+      "verification": "Komutla COM-normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (normalde açık/kapalı (NO/NC)))) doğru değişmeli.",
       "category": "Besleme & Yardımcı Cihazlar",
       "sourceIds": [],
       "evidence": {
@@ -9638,7 +9686,7 @@
       "prompt": "Yönetilebilir switch veya PoE test cihazı kamerayı algılıyor, sınıflandırıyor ve portu açık tutuyor mu?",
       "yesLabel": "PoE aktif ve kararlı",
       "noLabel": "Port açılmıyor/kapanıyor",
-      "unknownLabel": "sağlam PoE portu ve kısa Ethernet kablosu/switch verisi yok",
+      "unknownLabel": "PoE test cihazı/switch verisi yok",
       "nextYes": "cctv_link_activity",
       "nextNo": "cctv_known_good_short_cable",
       "nextUnknown": "cctv_poe_voltage",
@@ -9911,7 +9959,7 @@
         "max": 12.8
       },
       "danger": "low",
-      "hint": "PoE kamerada bu testi çıplak RJ45 üzerinde yapmayın; sağlam PoE portu ve kısa Ethernet kablosu kullanın.",
+      "hint": "PoE kamerada bu testi çıplak RJ45 üzerinde yapmayın; PoE test cihazı kullanın.",
       "testSteps": [
         "DMM MIN/MAX modunu açın.",
         "IR veya PTZ yükünü güvenli biçimde tetikleyin.",
@@ -13088,8 +13136,8 @@
       "nodeCount": 277,
       "faultCount": 83,
       "sourceCount": 24,
-      "measurementCount": 40,
-      "sourcedMeasurementCount": 25,
+      "measurementCount": 41,
+      "sourcedMeasurementCount": 26,
       "modelSpecificMeasurementCount": 26,
       "heuristicNodeCount": 81
     }
@@ -13100,6 +13148,7 @@
       "Multimetre",
       "Kontrol kalemi (yalnız ön kontrol)",
       "Bilgisayar / servis yazılımı",
+      "PoE test cihazı (802.3af/at/bt)",
       "Sağlam Ethernet / RJ45 deneme kablosu",
       "Sağlam RJ11 telefon kablosu ve analog telefon",
       "Sağlam DC adaptör ve deneme kablosu"

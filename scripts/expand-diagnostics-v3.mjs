@@ -79,13 +79,14 @@ function result(config) {
   }
 }
 
-data.version = '4.1.0'
+data.version = '4.2.0'
 data.fieldMode = {
   enabled: true,
   tools: [
     'Multimetre',
     'Kontrol kalemi (yalnız ön kontrol)',
     'Bilgisayar / servis yazılımı',
+    'PoE test cihazı (802.3af/at/bt)',
     'Sağlam Ethernet / RJ45 deneme kablosu',
     'Sağlam RJ11 telefon kablosu ve analog telefon',
     'Sağlam DC adaptör ve deneme kablosu',
@@ -2013,21 +2014,31 @@ function replaceWithFieldQuestion(nodeId, config) {
   })
 }
 
-replaceWithFieldQuestion('cctv_poe_voltage', {
-  category: 'PoE ve Ethernet Kontrolü',
-  title: 'Sağlam PoE Portu ve Kısa Ethernet Kablosu Denemesi',
-  prompt: 'Kamerayı switch yanına alın. Kısa ve sağlam bir Ethernet kablosuyla, çalıştığı bilinen PoE portu veya uygun enjektörde deneyin. Kamera açılıyor ve ağ ışığı geliyor mu?',
-  yesLabel: 'Kısa sağlam kabloyla çalışıyor',
-  noLabel: 'Kısa kabloyla da çalışmıyor',
-  unknownLabel: 'Sağlam PoE portu yok',
-  nextYes: 'cctv_result_cable',
-  nextNo: 'cctv_poe_budget',
-  nextUnknown: 'cctv_result_power_reference',
-  scoreYes: { cctv_cable_fault: 48, poe_power_fault: -12 },
-  scoreNo: { cctv_cable_fault: -12, poe_power_fault: 18 },
-  scoreUnknown: { poe_power_fault: 8 },
-  testSteps: ['Saha kablosunu iki uçtan ayırın.', 'Kamerayı kısa ve sağlam Ethernet kablosuyla switch yanında deneyin.', 'Aynı kablo ve portta çalışan başka bir kamera varsa sonucu karşılaştırın.'],
-  stopConditions: ['Çıplak RJ45 uçlarına multimetre probu sokulacak', 'Pasif PoE yönü veya kamera beslemesi bilinmiyor'],
+Object.assign(data.nodes.cctv_poe_voltage, {
+  type: 'measurement',
+  category: 'PoE Port Kontrolü',
+  title: 'PoE Test Cihazıyla Hat Voltajı',
+  prompt: 'PoE test cihazını switch/enjektör ile kamera veya saha kablosu arasına bağlayın. Anlaşma tamamlandıktan sonra cihazın gösterdiği DC voltajı girin.',
+  unit: 'V',
+  meterMode: 'PoE Tester',
+  powerState: 'PoE test cihazı PSE ile PD arasında; bağlantı anlaşması tamamlanmış',
+  probeBlackLabel: 'PSE / IN',
+  probeRedLabel: 'PD / OUT',
+  probeBlack: 'Switch veya PoE enjektöründen gelen kablo',
+  probeRed: 'Kameraya ya da saha kablosuna giden kablo',
+  expected: { min: 44, max: 57 },
+  danger: 'medium',
+  hint: 'Voltajın normal olması tek başına kablonun, güç sınıfının veya port bütçesinin yeterli olduğunu kanıtlamaz. Tester sınıf/güç gösteriyorsa onu da not edin.',
+  testSteps: ['Test cihazının 802.3af/at/bt desteğini ve PSE/PD yönünü kontrol edin.', 'Önce kısa sağlam Ethernet kablosuyla switch yanında referans ölçümü alın.', 'Sonra saha kablosunu bağlayın; voltaj, PoE sınıfı ve kamera açılırken görülen en düşük değeri karşılaştırın.'],
+  stopConditions: ['Çıplak RJ45 pinlerine multimetre probu uygulanacak', 'Pasif PoE yönü veya kamera besleme tipi bilinmiyor', 'RJ45 fişinde erime, kararma veya aşırı ısınma var'],
+  rules: [
+    { when: { operator: '<', value: 40 }, label: 'PoE anlaşması yok veya hat voltajı düşük', next: 'cctv_result_poe_source', scoreDelta: { poe_power_fault: 42, cctv_cable_fault: 12 } },
+    { when: { operator: 'between', min: 40, max: 43.99 }, label: 'Voltaj sınırda; kısa sağlam kabloyla karşılaştırın', next: 'cctv_known_good_short_cable', scoreDelta: { poe_power_fault: 24, cctv_cable_fault: 18 } },
+    { when: { operator: 'between', min: 44, max: 57 }, label: 'PoE voltajı normal; kablo ve ağ bağlantısını ayrıca kontrol edin', next: 'cctv_known_good_short_cable', scoreDelta: { poe_power_fault: -8 } },
+    { when: { operator: '>', value: 58 }, label: 'Voltaj yüksek; pasif PoE veya yanlış enjektör olabilir', next: 'cctv_result_power_reference', scoreDelta: { poe_power_fault: 24 } },
+  ],
+  fallbackNext: 'cctv_known_good_short_cable',
+  sourceIds: ['axis_poe_power', 'microchip_poe'],
 })
 
 replaceWithFieldQuestion('access_bus_voltage', {
@@ -2475,7 +2486,7 @@ function simplifyFieldText(value) {
   }
 
   return value
-    .replace(/PoE tester/giu, 'sağlam PoE portu ve kısa Ethernet kablosu')
+    .replace(/PoE tester/giu, 'PoE test cihazı')
     .replace(/RS-485 analizörü/giu, 'bilgisayar servis yazılımı')
     .replace(/diferansiyel prob/giu, 'sağlam kısa kablo')
     .replace(/osiloskop/giu, 'multimetre MIN/MAX kaydı')
@@ -2548,7 +2559,7 @@ function simplifyFieldText(value) {
 
 const simpleScalarFields = ['category', 'title', 'prompt', 'hint', 'summary', 'repair', 'verification', 'yesLabel', 'noLabel', 'unknownLabel', 'powerState', 'probeBlack', 'probeRed', 'optionBadge']
 for (const node of Object.values(data.nodes)) {
-  node.toolLevel = 'field_basic'
+  node.toolLevel = node.id === 'cctv_poe_voltage' ? 'field_poe_tester' : 'field_basic'
   for (const field of simpleScalarFields) {
     node[field] = simplifyFieldText(node[field])
   }

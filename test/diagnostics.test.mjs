@@ -107,12 +107,28 @@ test('OSDP screening uses a short known-good cable and computer settings instead
   assert.equal(node.meterMode, undefined)
 })
 
+test('PoE tester reading separates a healthy negotiated voltage from a missing or weak source', () => {
+  const node = diagnostics.nodes.cctv_poe_voltage
+  const nominal = evaluateMeasurement(node, 48)
+  const low = evaluateMeasurement(node, 38)
+
+  assert.equal(node.type, 'measurement')
+  assert.equal(node.meterMode, 'PoE Tester')
+  assert.equal(node.toolLevel, 'field_poe_tester')
+  assert.equal(nominal.passed, true)
+  assert.equal(nominal.nextNodeId, 'cctv_known_good_short_cable')
+  assert.equal(low.passed, false)
+  assert.equal(low.nextNodeId, 'cctv_result_poe_source')
+})
+
 test('field mode limits every decision step to the declared workshop tools', () => {
-  const advancedToolTerms = /osiloskop|oscilloscope|logic probe|lojik prob|programlayıcı|termal kamera|PoE tester|elektronik yük|diferansiyel prob|RS-485 analizörü/iu
+  const advancedToolTerms = /osiloskop|oscilloscope|logic probe|lojik prob|programlayıcı|termal kamera|elektronik yük|diferansiyel prob|RS-485 analizörü/iu
+  const allowedToolLevels = new Set(['field_basic', 'field_poe_tester'])
 
   assert.equal(diagnostics.fieldMode.enabled, true)
   assert.ok(diagnostics.fieldMode.tools.some((tool) => /multimetre/i.test(tool)))
   assert.ok(diagnostics.fieldMode.tools.some((tool) => /bilgisayar/i.test(tool)))
+  assert.ok(diagnostics.fieldMode.tools.some((tool) => /PoE test/i.test(tool)))
 
   for (const node of Object.values(diagnostics.nodes)) {
     const userFacingText = [
@@ -123,7 +139,7 @@ test('field mode limits every decision step to the declared workshop tools', () 
       ...(node.rules || []).map((rule) => rule.label),
     ].filter(Boolean).join(' ')
 
-    assert.equal(node.toolLevel, 'field_basic', node.id)
+    assert.ok(allowedToolLevels.has(node.toolLevel), node.id)
     assert.doesNotMatch(userFacingText, advancedToolTerms, node.id)
   }
 })
