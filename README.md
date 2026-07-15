@@ -40,9 +40,15 @@ npm run build:sites
 
 Bu sürüm bağlantı açıldığında doğrudan teşhis motorunu, PDF raporunu, hızlı Astra yanıtlarını ve Google AI Studio API ile çalışan derin Astra yanıtlarını sunar. API anahtarı yalnızca Sites sunucu ortamında tutulur ve tarayıcıya gönderilmez.
 
+## Saha Araçları ve Anlaşılır Arıza Dili
+
+Tanı veri seti v4.1; multimetre, kontrol kalemi, bilgisayar, sağlam RJ45/RJ11 deneme kablosu ve uygun sağlam adaptörle uygulanabilecek saha akışına göre hazırlanmıştır. Arıza adayları “kablo kopuk olabilir”, “RJ11/RJ45 ucu kötü çakılmış olabilir”, “klemens gevşek veya oksitli olabilir” ve “besleme hattında kısa devre olabilir” gibi anlaşılır teknik dille gösterilir.
+
+Kontrol kalemi yalnızca ön kontrol içindir; enerjinin kesildiğini tek başına kanıtlamaz. Gerilim yokluğu uygun multimetreyle doğrulanır. Şebeke, yangın güvenliği ve hareketli mekanizma adımlarındaki güvenlik durdurmaları korunur.
+
 ## Tanı Verisi ve Doğruluk
 
-Tanı veri seti v4; 10 cihaz profili, 279 karar/sonuç düğümü, 83 arıza sınıfı ve 24 teknik kaynak içerir. Her adım kaynak seviyesini (`üretici`, `standart kuruluşu`, `mühendislik rehberi` veya `servis hipotezi`) ve ölçüm eşiğinin model özel mi genel tarama mı olduğunu gösterir.
+Veri seti 10 cihaz profili, 277 karar/sonuç düğümü, 83 arıza sınıfı ve 24 teknik kaynak içerir. Her adım kaynak seviyesini (`üretici bilgisi`, `standart bilgisi`, `ölçüm rehberi` veya `genel servis kontrolü`) ve ölçüm eşiğinin modele göre mi genel kontrol mü olduğunu gösterir.
 
 Başlangıç servis ağırlıkları gerçek saha arıza oranı değildir. Toplamı 100'e normalize edilmiş, kapatılmış iş emri verisiyle henüz kalibre edilmemiş öncelik puanlarıdır. Model etiketi ve üretici servis kılavuzu her zaman uygulamadaki genel eşikten önce gelir.
 

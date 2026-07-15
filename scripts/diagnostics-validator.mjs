@@ -47,6 +47,11 @@ export function validateDiagnostics(data) {
   const allowedThresholdPolicies = new Set(['model_specific', 'general_screening'])
   const profileIds = new Set((data.deviceProfiles || []).map((profile) => profile.id))
   const inboundCounts = Object.fromEntries(Object.keys(nodes).map((nodeId) => [nodeId, 0]))
+  const advancedToolTerms = /osiloskop|oscilloscope|logic probe|lojik prob|programlayıcı|termal kamera|PoE tester|elektronik yük|diferansiyel prob|RS-485 analizörü/iu
+
+  if (data.fieldMode?.enabled !== true || !Array.isArray(data.fieldMode?.tools) || !data.fieldMode.tools.some((tool) => /multimetre/i.test(tool)) || !data.fieldMode.tools.some((tool) => /bilgisayar/i.test(tool))) {
+    errors.push('fieldMode: enabled field tool list must include a multimeter and computer')
+  }
 
   function validateSourceIds(owner, sourceIds, required = false) {
     if (required && (!Array.isArray(sourceIds) || sourceIds.length === 0)) {
@@ -86,6 +91,21 @@ export function validateDiagnostics(data) {
 
     if (!node.title || !node.category || (node.type !== 'result' && !node.prompt)) {
       errors.push(`${key}: title, category and prompt are required for diagnostic steps`)
+    }
+
+    if (node.toolLevel !== 'field_basic') {
+      errors.push(`${key}: every step must be usable with the declared field tool set`)
+    }
+
+    const userFacingText = [
+      node.category, node.title, node.prompt, node.hint, node.summary, node.repair, node.verification,
+      node.yesLabel, node.noLabel, node.unknownLabel, node.meterMode, node.powerState, node.probeBlack, node.probeRed,
+      ...(node.components || []), ...(node.testSteps || []), ...(node.stopConditions || []),
+      ...(node.options || []).flatMap((option) => [option.label, option.description]),
+      ...(node.rules || []).map((rule) => rule.label),
+    ].filter(Boolean).join(' ')
+    if (advancedToolTerms.test(userFacingText)) {
+      errors.push(`${key}: user-facing copy requires an unavailable advanced tool`)
     }
 
     validateSourceIds(key, node.sourceIds)

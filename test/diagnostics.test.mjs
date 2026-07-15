@@ -96,14 +96,43 @@ test('fire panel battery branch separates float charging from an undercharged 24
   assert.equal(undercharged.passed, false)
 })
 
-test('OSDP electrical screening requires differential activity and does not claim protocol validity', () => {
-  const inactive = evaluateMeasurement(diagnostics.nodes.access_bus_voltage, 0.1)
-  const active = evaluateMeasurement(diagnostics.nodes.access_bus_voltage, 1.5)
+test('OSDP screening uses a short known-good cable and computer settings instead of a special analyzer', () => {
+  const node = diagnostics.nodes.access_bus_voltage
 
-  assert.equal(inactive.nextNodeId, 'access_result_rs485_bus')
-  assert.equal(active.nextNodeId, 'access_result_config')
-  assert.match(active.label, /çerçevesini analiz edin/i)
-  assert.match(diagnostics.nodes.access_bus_voltage.hint, /kanıtlamaz/i)
+  assert.equal(node.type, 'question_boolean')
+  assert.match(node.prompt, /kısa ve sağlam bir kablo/i)
+  assert.match(node.prompt, /bilgisayar/i)
+  assert.equal(node.nextYes, 'access_result_rs485_bus')
+  assert.equal(node.nextNo, 'access_result_config')
+  assert.equal(node.meterMode, undefined)
+})
+
+test('field mode limits every decision step to the declared workshop tools', () => {
+  const advancedToolTerms = /osiloskop|oscilloscope|logic probe|lojik prob|programlayıcı|termal kamera|PoE tester|elektronik yük|diferansiyel prob|RS-485 analizörü/iu
+
+  assert.equal(diagnostics.fieldMode.enabled, true)
+  assert.ok(diagnostics.fieldMode.tools.some((tool) => /multimetre/i.test(tool)))
+  assert.ok(diagnostics.fieldMode.tools.some((tool) => /bilgisayar/i.test(tool)))
+
+  for (const node of Object.values(diagnostics.nodes)) {
+    const userFacingText = [
+      node.category, node.title, node.prompt, node.hint, node.summary, node.repair, node.verification,
+      node.yesLabel, node.noLabel, node.unknownLabel, node.meterMode, node.powerState, node.probeBlack, node.probeRed,
+      ...(node.components || []), ...(node.testSteps || []), ...(node.stopConditions || []),
+      ...(node.options || []).flatMap((option) => [option.label, option.description]),
+      ...(node.rules || []).map((rule) => rule.label),
+    ].filter(Boolean).join(' ')
+
+    assert.equal(node.toolLevel, 'field_basic', node.id)
+    assert.doesNotMatch(userFacingText, advancedToolTerms, node.id)
+  }
+})
+
+test('common cable and contact faults are written in understandable field language', () => {
+  assert.match(diagnostics.faultCatalog.pbx_cabling_fault.label, /RJ11.*çakılmış.*kablo.*kopuk.*oksitli/i)
+  assert.match(diagnostics.faultCatalog.cctv_cable_fault.label, /Ethernet\/RJ45.*kopuk.*çakılmış.*temassız/i)
+  assert.match(diagnostics.faultCatalog.support_connector_fault.label, /jak.*klemens.*temassız.*oksitli/i)
+  assert.match(diagnostics.nodes.pbx_result_cabling.summary, /RJ11 ucu iyi çakılmamış.*damardan biri kopmuş.*oksitlenmiş/i)
 })
 
 test('research audit coverage matches the generated dataset', () => {

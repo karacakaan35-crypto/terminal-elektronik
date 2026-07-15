@@ -79,11 +79,23 @@ function result(config) {
   }
 }
 
-data.version = '4.0.0'
+data.version = '4.1.0'
+data.fieldMode = {
+  enabled: true,
+  tools: [
+    'Multimetre',
+    'Kontrol kalemi (yalnız ön kontrol)',
+    'Bilgisayar / servis yazılımı',
+    'Sağlam Ethernet / RJ45 deneme kablosu',
+    'Sağlam RJ11 telefon kablosu ve analog telefon',
+    'Sağlam DC adaptör ve deneme kablosu',
+  ],
+  note: 'Kontrol kalemi tek başına enerjinin kesildiğini kanıtlamaz. Gerilim yokluğu uygun multimetreyle doğrulanmalıdır.',
+}
 data.diagnosticMethodology = {
   evidencePolicy: 'Başlangıç puanları kalibre edilmiş arıza olasılığı değil, normalize edilmiş servis önceliğidir; canlı kanıt yalnız göreli sıralamayı günceller.',
   measurementPolicy: 'Üretici model etiketi ve servis kılavuzu, uygulamadaki genel aralıklardan önce gelir.',
-  isolationPolicy: 'Bilinen sağlam kablo, yük, port veya modülle A/B karşılaştırması yapılmadan kart değişimi önerilmez.',
+  isolationPolicy: 'Sağlam kablo, adaptör, port veya cihazla karşılaştırma yapılmadan kart değişimi önerilmez.',
   safetyPolicy: 'Şebeke, hareketli mekanizma ve yangın güvenliği devrelerinde yalnız yetkili teknisyen ve uygun kategori ölçü aletiyle işlem yapılır.',
 }
 
@@ -1982,6 +1994,585 @@ for (const [nodeId, sourceIds] of Object.entries(researchedNodeSources)) {
   data.nodes[nodeId].sourceIds = [...new Set([...(data.nodes[nodeId].sourceIds || []), ...sourceIds])]
 }
 
+function replaceWithFieldQuestion(nodeId, config) {
+  const node = data.nodes[nodeId]
+  const measurementFields = ['unit', 'meterMode', 'powerState', 'probeBlack', 'probeRed', 'expected', 'hint', 'rules', 'fallbackNext', 'thresholdPolicy']
+  for (const field of measurementFields) {
+    delete node[field]
+  }
+
+  Object.assign(node, {
+    type: 'question_boolean',
+    unknownLabel: 'Kontrol edemiyorum',
+    scoreYes: {},
+    scoreNo: {},
+    scoreUnknown: {},
+    testSteps: [],
+    stopConditions: [],
+    ...config,
+  })
+}
+
+replaceWithFieldQuestion('cctv_poe_voltage', {
+  category: 'PoE ve Ethernet Kontrolü',
+  title: 'Sağlam PoE Portu ve Kısa Ethernet Kablosu Denemesi',
+  prompt: 'Kamerayı switch yanına alın. Kısa ve sağlam bir Ethernet kablosuyla, çalıştığı bilinen PoE portu veya uygun enjektörde deneyin. Kamera açılıyor ve ağ ışığı geliyor mu?',
+  yesLabel: 'Kısa sağlam kabloyla çalışıyor',
+  noLabel: 'Kısa kabloyla da çalışmıyor',
+  unknownLabel: 'Sağlam PoE portu yok',
+  nextYes: 'cctv_result_cable',
+  nextNo: 'cctv_poe_budget',
+  nextUnknown: 'cctv_result_power_reference',
+  scoreYes: { cctv_cable_fault: 48, poe_power_fault: -12 },
+  scoreNo: { cctv_cable_fault: -12, poe_power_fault: 18 },
+  scoreUnknown: { poe_power_fault: 8 },
+  testSteps: ['Saha kablosunu iki uçtan ayırın.', 'Kamerayı kısa ve sağlam Ethernet kablosuyla switch yanında deneyin.', 'Aynı kablo ve portta çalışan başka bir kamera varsa sonucu karşılaştırın.'],
+  stopConditions: ['Çıplak RJ45 uçlarına multimetre probu sokulacak', 'Pasif PoE yönü veya kamera beslemesi bilinmiyor'],
+})
+
+replaceWithFieldQuestion('access_bus_voltage', {
+  category: 'RS485 / OSDP Kablo Kontrolü',
+  title: 'Kısa Sağlam Kablo ve Ayar Denemesi',
+  prompt: 'Okuyucuyu kontrolörün yanına alın. Kısa ve sağlam bir kabloyla bağlayın; A/B uçlarının ters olmadığını, klemenslerin gevşek veya oksitli olmadığını ve bilgisayardaki adres/port ayarını kontrol edin. Okuyucu görülüyor mu?',
+  yesLabel: 'Kısa sağlam kabloyla çalışıyor',
+  noLabel: 'Kısa kabloyla da çalışmıyor',
+  unknownLabel: 'Kısa kablo veya yazılım erişimi yok',
+  nextYes: 'access_result_rs485_bus',
+  nextNo: 'access_result_config',
+  nextUnknown: 'access_result_rs485_bus',
+  scoreYes: { reader_bus_fault: 38, access_rs485_fault: 26 },
+  scoreNo: { reader_bus_fault: -8, access_rs485_fault: 18, access_credential_config: 16 },
+  scoreUnknown: { reader_bus_fault: 10 },
+  testSteps: ['Enerjiyi kesin; A/B ve besleme uçlarını etikete göre yeniden kontrol edin.', 'Kablo damarlarında kopukluk ve damarlar arasında kısa devre olup olmadığını multimetreyle ölçün.', 'Okuyucuyu kısa sağlam kabloyla bağlayıp bilgisayar yazılımında adres ve port ayarını kontrol edin.'],
+  stopConditions: ['Kablo üzerinde beklenmeyen yüksek gerilim var', 'Okuyucu besleme voltajı bilinmiyor'],
+})
+
+replaceWithFieldQuestion('support_ripple_test', {
+  category: 'Adaptör Karşılaştırması',
+  title: 'Sağlam Adaptörle Sorun Kayboluyor mu?',
+  prompt: 'Aynı voltajda ve yeterli akımda olduğu bilinen sağlam bir adaptör ile deneyin. Cihazın yeniden başlaması, görüntü çizgisi veya uğultu kayboluyor mu?',
+  yesLabel: 'Sağlam adaptörle sorun kayboldu',
+  noLabel: 'Sorun devam ediyor',
+  unknownLabel: 'Uygun sağlam adaptör yok',
+  nextYes: 'support_result_ripple',
+  nextNo: 'support_connector_test',
+  nextUnknown: 'support_connector_test',
+  scoreYes: { support_psu_ripple: 44, capacitor_esr: 18 },
+  scoreNo: { support_psu_ripple: -10, support_connector_fault: 12 },
+  scoreUnknown: { support_psu_ripple: 8 },
+  testSteps: ['Adaptörlerin çıkış voltajı ve artı/eksi yönü aynı olmalıdır.', 'Sağlam adaptörün akım değeri cihazın istediğinden düşük olmamalıdır.', 'Sorunu aynı yük ve kabloyla tekrar deneyin.'],
+  stopConditions: ['Adaptör voltajı veya artı/eksi yönü uyuşmuyor', 'Kablo, jak veya adaptör ısınıyor'],
+})
+
+replaceWithFieldQuestion('general_ripple_check', {
+  category: 'Besleme Kararlılığı',
+  title: 'Açılışta 3.3V veya 5V Düşüyor mu?',
+  prompt: 'Multimetrenin MIN/MAX özelliğiyle cihaz açılırken 5V ve 3.3V hatlarını ayrı ayrı izleyin. Voltaj belirgin düşüyor veya cihaz tekrar tekrar açılmaya çalışıyor mu?',
+  yesLabel: 'Voltaj düşüyor / cihaz yeniden başlıyor',
+  noLabel: 'Voltajlar kararlı',
+  unknownLabel: 'MIN/MAX yok; gözlemle karar veremiyorum',
+  nextYes: 'general_result_capacitor',
+  nextNo: 'general_power_sequence',
+  nextUnknown: 'general_power_sequence',
+  scoreYes: { capacitor_esr: 42, general_regulator_fault: 18, general_reset_fault: 14 },
+  scoreNo: { capacitor_esr: -10 },
+  scoreUnknown: { general_reset_fault: 6 },
+  testSteps: ['Siyah probu kart eksi/GND noktasına sabitleyin.', '5V ve 3.3V noktalarını cihaz açılırken ayrı ayrı MIN/MAX ile ölçün.', 'Varsa aynı voltajlı sağlam adaptörle sonucu karşılaştırın.'],
+  stopConditions: ['Prob kayıp iki noktayı kısa devre edebilir', 'Kartta yanık, duman veya aşırı ısınma var'],
+})
+
+Object.assign(data.nodes.access_adapter_ripple, {
+  category: 'Besleme Kararlılığı',
+  title: 'Yük Binerken Voltaj Düşüyor mu?',
+  prompt: 'Kilit veya okuyucu çalıştığı anda multimetrenin MIN/MAX değerinde belirgin düşme oluyor ya da panel yeniden başlıyor mu? Aynı voltajlı sağlam adaptörle de karşılaştırın.',
+  yesLabel: 'Voltaj düşüyor / panel yeniden başlıyor',
+  noLabel: 'Voltaj sabit',
+  unknownLabel: 'MIN/MAX veya sağlam adaptör yok',
+  testSteps: ['Multimetreyi panelin DC girişine bağlayıp MIN/MAX kaydını açın.', 'Kilit ve okuyucuyu ayrı ayrı çalıştırın.', 'Aynı voltaj ve yeterli akımdaki sağlam adaptörle tekrar deneyin.'],
+})
+
+Object.assign(data.nodes.access_wiegand_activity, {
+  category: 'Okuyucu Kablo Kontrolü',
+  title: 'Okuyucu Kablosu ve Bilgisayar Kaydı Kontrolü',
+  prompt: 'D0, D1, eksi/GND ve besleme uçları doğru mu; kabloda kopukluk, kısa devre, gevşek veya oksitli klemens var mı? Kısa sağlam kabloyla kart okutunca bilgisayardaki olay kaydına kart numarası geliyor mu?',
+  yesLabel: 'Kısa kabloyla olay kaydı geliyor',
+  noLabel: 'Olay kaydı gelmiyor',
+  unknownLabel: 'Yazılıma erişilemiyor',
+  testSteps: ['Enerjiyi kesin ve D0, D1, eksi/GND ile besleme damarlarını etikete göre kontrol edin.', 'Kabloda kopukluk ve damarlar arası kısa devreyi multimetreyle ölçün.', 'Kısa sağlam kabloyla kart okutun ve bilgisayardaki olay kaydını izleyin.'],
+})
+delete data.nodes.access_wiegand_activity.meterMode
+delete data.nodes.access_wiegand_activity.powerState
+delete data.nodes.access_wiegand_activity.probeBlack
+delete data.nodes.access_wiegand_activity.probeRed
+
+Object.assign(data.nodes.general_power_sequence, {
+  category: 'Açılış Kontrolü',
+  title: '5V ve 3.3V Sabitken Kart Yine Açılmıyor mu?',
+  prompt: '5V ve 3.3V açılış sırasında sabit kaldığı hâlde ekran, durum ışığı veya bilgisayar bağlantısı hâlâ gelmiyor mu?',
+  yesLabel: 'Besleme sabit ama kart açılmıyor',
+  noLabel: 'Besleme düşüyor veya dalgalanıyor',
+  unknownLabel: 'Açılış değerini ölçemiyorum',
+  nextYes: 'general_reset_check',
+  nextNo: 'general_result_capacitor',
+  nextUnknown: 'general_reset_check',
+  testSteps: ['Multimetrede MIN/MAX ile 5V ve 3.3V değerlerini ayrı kaydedin.', 'Ekran, durum ışıkları ve bilgisayar bağlantısının açılış davranışını not edin.', 'Bağlı çevre kablolarını tek tek ayırarak cihazın açılıp açılmadığını deneyin.'],
+  stopConditions: ['Kartta yanık, duman veya aşırı ısınma var'],
+})
+
+Object.assign(data.nodes.general_reset_check, {
+  category: 'Açılış Belirtisi',
+  title: 'Kart Sürekli Yeniden Başlıyor mu?',
+  prompt: 'Durum ışığı, ekran veya bilgisayar bağlantısı düzenli aralıklarla gidip geliyor; röle sürekli çekip bırakıyor ya da cihaz açılış ekranında kalıyor mu?',
+  yesLabel: 'Sürekli yeniden başlıyor',
+  noLabel: 'Tek sefer açılıyor ama çalışmıyor',
+  unknownLabel: 'Belirti görülemiyor',
+  nextYes: 'general_result_reset_fault',
+  nextNo: 'general_clock_check',
+  nextUnknown: 'general_clock_check',
+  scoreYes: { general_reset_fault: 48, general_regulator_fault: 10 },
+  scoreNo: { general_reset_fault: -10 },
+  scoreUnknown: { general_reset_fault: 6 },
+  testSteps: ['Ekran ve durum ışıklarının açılış sırasını izleyin.', 'Bilgisayarda USB, seri port veya Ethernet bağlantısının gelip gittiğini kontrol edin.', 'Bağlı çevre cihazlarını enerjisizken tek tek ayırıp yeniden deneyin.'],
+})
+
+Object.assign(data.nodes.general_clock_check, {
+  category: 'Kart Açılış Kontrolü',
+  title: 'Kartta Herhangi Bir Açılış Belirtisi Var mı?',
+  prompt: '5V ve 3.3V normal olduğu hâlde durum ışığı yanıyor, ekran değişiyor, röle bir kez çekiyor veya bilgisayar cihazı görüyor mu?',
+  yesLabel: 'Bir açılış belirtisi var',
+  noLabel: 'Hiçbir açılış belirtisi yok',
+  unknownLabel: 'Belirtiyi ayırt edemiyorum',
+  nextYes: 'general_memory_detected',
+  nextNo: 'general_result_clock_fault',
+  nextUnknown: 'general_memory_detected',
+  testSteps: ['Kartı enerjilendirirken ışık, ekran ve röle sesini izleyin.', 'Bilgisayarda yeni USB/seri/Ethernet cihazı oluşup oluşmadığına bakın.', 'Varsa üreticinin servis programında cihaz araması yapın.'],
+})
+
+Object.assign(data.nodes.general_memory_detected, {
+  category: 'Ayar ve Kayıt Kontrolü',
+  title: 'Bilgisayar Cihaz Bilgisini veya Ayarları Okuyor mu?',
+  prompt: 'Üreticinin servis programı cihazı görüyor; model, sürüm, kayıt veya ayar bilgilerini tutarlı biçimde okuyabiliyor mu?',
+  yesLabel: 'Cihaz ve ayarlar okunuyor',
+  noLabel: 'Cihaz görülüyor ama bilgi okunmuyor',
+  unknownLabel: 'Servis programına erişilemiyor',
+  nextYes: 'general_bus_activity',
+  nextNo: 'general_result_memory_fault',
+  nextUnknown: 'general_bus_activity',
+  testSteps: ['Doğru USB, seri veya Ethernet kablosunu kullanın.', 'Bilgisayarın cihazı görüp görmediğini kontrol edin.', 'Ayarları değiştirmeden önce ekrandaki mevcut bilgilerin görüntüsünü veya notunu alın.'],
+  stopConditions: ['Yedek alınmadan ayarlar silinecek veya cihaz yazılımı yazılacak'],
+})
+
+Object.assign(data.nodes.general_bus_activity, {
+  category: 'Bilgisayar Bağlantısı',
+  title: 'Bilgisayarda Bağlantı veya Hata Kaydı Var mı?',
+  prompt: 'USB, seri port veya Ethernet bağlantısı bilgisayarda görünüyor; servis programında anlaşılır bir hata kaydı oluşuyor mu?',
+  yesLabel: 'Bağlantı veya hata kaydı var',
+  noLabel: 'Bilgisayar cihazı görmüyor',
+  unknownLabel: 'Bilgisayar bağlantısı yok',
+  nextYes: 'general_result_firmware_peripheral',
+  nextNo: 'general_result_firmware',
+  nextUnknown: 'general_result_firmware',
+  testSteps: ['Sağlam olduğu bilinen USB, seri veya Ethernet kablosu kullanın.', 'Bilgisayarda doğru portun oluştuğunu kontrol edin.', 'Hata kaydını silmeden önce kodu ve zamanı not edin.'],
+})
+
+Object.assign(data.nodes.general_thermal_inspection, {
+  category: 'Aralıklı Arıza',
+  title: 'Arıza Isınınca veya Soğukken Değişiyor mu?',
+  prompt: 'Cihaz normal çalışırken gözle ve dikkatli dokunma kontrolünde aşırı ısınan parça, ısınınca kesilen bağlantı veya soğukken zor açılma görülüyor mu?',
+  yesLabel: 'Isıyla birlikte arıza değişiyor',
+  noLabel: 'Sıcaklıkla ilişkisi yok',
+  unknownLabel: 'Güvenli kontrol yapılamıyor',
+  testSteps: ['Kartı yanık, kararma, şişmiş kondansatör ve çatlak lehim açısından gözle kontrol edin.', 'Kablo ve soketleri zorlamadan hafifçe kontrol edin.', 'Aşırı ısınan bölge varsa enerjiyi kesin ve yerini not edin.'],
+  stopConditions: ['Parça dokunulamayacak kadar sıcak', 'Yanık kokusu, duman veya erime var', 'Kontrol şebeke gerilimi açıkken yapılacak'],
+})
+
+Object.assign(data.nodes.support_load_drop, {
+  title: 'Cihaz Çalışırken Voltaj Belirgin Düşüyor mu?',
+  prompt: 'Boştaki voltaj ile cihaz çalışırken ölçülen en düşük değeri karşılaştırın. Voltaj belirgin düşüyor veya cihaz yeniden başlıyor mu?',
+  yesLabel: 'Voltaj düşüyor / cihaz yeniden başlıyor',
+  noLabel: 'Yükte voltaj sabit',
+  unknownLabel: 'MIN/MAX ile ölçemiyorum',
+  testSteps: ['Multimetrenin MIN/MAX kaydını açın.', 'Cihazın en çok güç çektiği anı çalıştırın.', 'Adaptör çıkışı ile cihaz girişindeki voltajı ayrı ayrı karşılaştırın.'],
+})
+
+Object.assign(data.nodes.support_load_isolation, {
+  category: 'Sağlam Cihazla Karşılaştırma',
+  title: 'Adaptör Sağlam Eş Cihazda Çalışıyor mu?',
+  prompt: 'Adaptörü, aynı voltaj ve benzer akım isteyen sağlam bir cihazda deneyin. Voltaj sabit kalıyor ve cihaz normal çalışıyor mu?',
+  yesLabel: 'Sağlam cihazda çalışıyor',
+  noLabel: 'Sağlam cihazda da çöküyor',
+  unknownLabel: 'Uygun eş cihaz yok',
+  testSteps: ['İki cihazın voltajını, artı/eksi yönünü ve akım ihtiyacını karşılaştırın.', 'Adaptörü önce enerjisizken bağlayın.', 'Çalışırken voltajı ve ısınmayı gözleyin.'],
+})
+
+Object.assign(data.nodes.uvis_illumination_output_percent, {
+  hint: 'Çıkış darbeli veya yanıp sönen tipteyse multimetre doğru değer göstermeyebilir. Böyle durumda segmentleri gözle karşılaştırın ve sağlam aydınlatma modülüyle deneyin.',
+})
+Object.assign(data.nodes.sliding_motor_output_ratio, {
+  hint: 'Motor çıkışı darbeli veya frekans kontrollü ise standart multimetre yanıltıcı olabilir. Bu durumda kablo, soket, mekanik sıkışma ve bilgisayardaki hata kaydını önce kontrol edin.',
+  testSteps: ['Enerjiyi kesin; motor kablosunda kopukluk, gevşek veya oksitli soket olup olmadığını kontrol edin.', 'Hareket alanını emniyete alın ve kapının elle rahat hareket edip etmediğini kontrol edin.', 'Üretici açıkça multimetreyle ölçüm noktası veriyorsa çıkışı yük altında ölçün.'],
+  stopConditions: ['Hareket alanı emniyete alınmadı', 'Korumasız şebeke terminali var', 'Üretici standart multimetreyle ölçüme izin vermiyor'],
+})
+
+Object.assign(data.nodes.pbx_result_cabling, {
+  title: 'RJ11 Ucu veya Telefon Kablosu Arızası',
+  summary: 'Santral portu kısa bağlantıda çalışıyor. RJ11 ucu iyi çakılmamış, iki damardan biri kopmuş, yanlış çift bağlanmış, priz/klemens gevşemiş veya ek yeri oksitlenmiş olabilir.',
+  components: ['RJ11 fişi ve orta iki uç', 'Telefon prizi, patch panel ve klemensler', 'İki damarlı telefon kablosu ve ek yerleri'],
+  repair: 'Hattı parçalara ayırın; kopuk veya kısa devre olan bölümü bulun. Oksitli ekleri temizleyin, gevşek bağlantıları sıkın ve RJ11 ucunu doğru iki damarla yeniden çakın.',
+  verification: 'Sağlam telefon sahadaki prizde çevir sesi vermeli, arama yapmalı ve her çağrıda çalmalıdır.',
+})
+Object.assign(data.nodes.cctv_result_cable, {
+  title: 'RJ45 Ucu veya Ethernet Kablosu Arızası',
+  summary: 'Kamera kısa sağlam kabloyla çalışıyor. Saha kablosunda damar kopması, RJ45 ucun kötü çakılması, yanlış renk sırası, gevşek patch panel veya oksitli ek olabilir.',
+  components: ['İki uçtaki RJ45 fişler', 'Ethernet kablosunun sekiz damarı', 'Patch panel, keystone ve ek noktaları'],
+  repair: 'Kabloyu iki uçtan ayırıp sürekliliği kontrol edin. Hatalı RJ45 uçlarını doğru renk sırasıyla yeniden çakın; oksitli veya gevşek ekleri yenileyin.',
+  verification: 'Kamera saha kablosunda açılmalı; switch ağ ışığı sabit kalmalı ve bilgisayardan görüntü kesintisiz gelmelidir.',
+})
+Object.assign(data.nodes.access_result_rs485_bus, {
+  title: 'Okuyucu Kablosu, A/B Yönü veya Klemens Arızası',
+  summary: 'Okuyucu kısa sağlam kabloyla çalışıyor. Saha kablosu kopuk veya kısa devre olabilir; A/B uçları ters, klemens gevşek ya da bağlantı oksitli olabilir.',
+  repair: 'Enerjiyi kesin. Kablo damarlarını uçtan uca ölçün, A/B bağlantısını şemaya göre düzeltin ve oksitli/gevşek klemensleri yenileyin.',
+  verification: 'Okuyucu saha kablosunda her kartı okumalı ve olay bilgisayardaki kayda düşmelidir.',
+})
+Object.assign(data.nodes.ups_result_scope_required, {
+  title: 'Röle Komutu veya Bağlantısı Belirsiz',
+  summary: 'Röle çekme sesi duyulmuyor. Röle bobini, sürücü parçası, soket veya kontrol bağlantısı arızalı olabilir.',
+  components: ['Röle bobini ve kontakları', 'Röle sürücü parçası', 'Soket, klemens ve lehimler'],
+  repair: 'Enerjiyi kesin; röle bobinini ve kablo sürekliliğini multimetreyle kontrol edin. Bilgisayar servis ekranı varsa röle komutunun oluştuğunu doğrulayın.',
+  verification: 'Komut verildiğinde röle bir kez çekmeli, kontak çıkışı değişmeli ve bağlantı ısınmamalıdır.',
+})
+Object.assign(data.nodes.barrier_result_scope_required, {
+  title: 'Motor Komutu veya Röle Bağlantısı Belirsiz',
+  summary: 'Motor komutu verildiği hâlde röle sesi duyulmuyor. Emniyet girişi, röle bobini, sürücü parçası veya bağlantı temassız olabilir.',
+  components: ['Emniyet girişleri', 'Motor rölesi ve bobini', 'Klemens, soket ve lehimler'],
+  repair: 'Bilgisayar veya kart ekranındaki emniyet durumlarını kontrol edin. Enerjiyi kestikten sonra röle bobini ve kablo sürekliliğini multimetreyle ölçün.',
+  verification: 'Emniyet girişleri normalken aç/kapa komutunda röle çekmeli ve motor bağlantısına çıkış gelmelidir.',
+})
+Object.assign(data.nodes.barrier_result_remote_receiver, {
+  title: 'Kumanda, Pil, Anten veya Alıcı Arızası',
+  summary: 'Alıcı beslemesi var fakat kumandaya tepki yok. Kumanda pili bitmiş, kumanda tanıtması silinmiş, anten kopmuş veya alıcı kartı arızalı olabilir.',
+  components: ['Kumanda pili', 'Anten kablosu ve lehimi', 'Kumanda alıcı kartı', 'Kumanda tanıtma ayarı'],
+  repair: 'Yeni pil ve sağlam kumandayla deneyin. Anten kablosunda kopukluk ve lehim çatlağı olup olmadığını kontrol edin; gerekirse kumandayı yeniden tanıtın.',
+  verification: 'Kumandaya her basıldığında alıcı ışığı yanmalı ve bariyer komutu güvenilir biçimde algılamalıdır.',
+})
+Object.assign(data.nodes.access_result_reader_bus, {
+  title: 'Okuyucu Kablosu veya Okuyucu Arızası',
+  summary: 'Okuyucuda besleme var ancak kart bilgisi kontrolöre ulaşmıyor. D0/D1 veya A/B kablosu kopuk, ters, kısa devre, gevşek ya da oksitli olabilir; okuyucu da arızalı olabilir.',
+  components: ['Okuyucu veri kablosu', 'D0/D1 veya A/B klemensleri', 'Okuyucu ve kontrolör bağlantısı'],
+  repair: 'Enerjiyi kesin; kablo damarlarını uçtan uca ölçün. Klemensleri temizleyip sıkın ve okuyucuyu kısa sağlam kabloyla kontrolör yanında deneyin.',
+  verification: 'Kart okutulduğunda okuyucu tepki vermeli ve kart numarası bilgisayardaki olay kaydında görünmelidir.',
+})
+Object.assign(data.nodes.general_result_clock_fault, {
+  title: 'Ana Kart Açılışı Başlamıyor',
+  summary: '5V ve 3.3V normal olduğu hâlde kartta ışık, ekran, röle veya bilgisayar bağlantısı belirtisi yok. Ana işlemciyi başlatan kristal bölümü veya çevresindeki lehimler arızalı olabilir.',
+  components: ['Kristal ve çevresindeki küçük kondansatörler', 'Ana işlemci besleme bağlantıları', 'Oksitli veya çatlak lehimler'],
+  repair: 'Kristal ve çevresini oksit, kırık parça ve çatlak lehim açısından büyüteçle kontrol edin. Özel ölçüm gerektiren kart içi onarım için kart servisine yönlendirin.',
+  verification: 'Onarım sonrası kart her açılışta ışık, ekran veya bilgisayar bağlantısı belirtisi vermelidir.',
+})
+Object.assign(data.nodes.general_result_memory_fault, {
+  title: 'Cihaz Ayar Hafızası Okunamıyor',
+  summary: 'Bilgisayar cihazı görüyor ancak model, sürüm veya ayar bilgilerini okuyamıyor. Hafıza entegresi, beslemesi veya lehim bağlantısı arızalı olabilir.',
+  components: ['Ayar hafızası entegresi', 'Hafıza besleme hattı', 'Entegre lehimleri ve bağlantı yolları'],
+  repair: 'Önce mevcut ayarların yedeğini koruyun. Entegre çevresinde oksit ve çatlak lehim kontrolü yapın; hafıza yazma işlemini yalnız doğru model dosyası varsa uygulayın.',
+  verification: 'Bilgisayar servis programı cihaz bilgilerini her bağlantıda aynı ve hatasız okumalıdır.',
+})
+Object.assign(data.nodes.ups_result_output_filter, {
+  title: 'Çıkışta Voltaj Düşmesi veya Dalgalanma',
+  summary: 'Sorun hem şebeke hem akü çalışmasında görülüyor. Zayıf kondansatör, gevşek/oksitli klemens veya çatlak lehim voltajı bozuyor olabilir.',
+  components: ['Çıkış kondansatörleri', 'Klemens ve yüksek akım kabloları', 'Röle ve güç kartı lehimleri'],
+  repair: 'Şişmiş kondansatör, kararmış parça, oksitli klemens ve çatlak lehim kontrolü yapın. Çıkış voltajını multimetre MIN/MAX ile boşta ve yükte karşılaştırın.',
+  verification: 'Yük bağlandığında çıkış voltajı belirgin düşmemeli ve UPS yeniden başlamamalıdır.',
+})
+Object.assign(data.nodes.general_result_capacitor, {
+  title: 'Zayıf Kondansatör veya Besleme Düşmesi',
+  summary: '5V/3.3V ortalama değeri normal görünse de açılışta voltaj düşüyor veya cihaz yeniden başlıyor. Zayıf kondansatör, adaptör ya da besleme bağlantısı buna sebep olabilir.',
+  components: ['Şişmiş veya sızdırmış kondansatörler', 'Adaptör ve DC giriş bağlantısı', '5V/3.3V besleme bölümü', 'Çatlak lehim ve oksitli soketler'],
+  repair: 'Önce sağlam adaptörle karşılaştırın. Şişmiş/sızdırmış kondansatörleri ve çatlak lehimleri kontrol edin; değişimde aynı kapasite, voltaj ve sıcaklık değerini kullanın.',
+  verification: 'Cihaz soğuk ve sıcakken tek seferde açılmalı; multimetre MIN/MAX değerinde belirgin voltaj düşmesi görülmemelidir.',
+})
+Object.assign(data.nodes.general_result_firmware, {
+  title: 'Cihaz Yazılımı veya Bağlı Parça Açılışı Engelliyor',
+  summary: 'Temel beslemeler var ancak kart açılışı tamamlamıyor. Bozuk ayar/yazılım veya kısa devre yapan bağlı bir sensör, ekran ya da haberleşme modülü olabilir.',
+  components: ['Cihaz ayarları ve doğru model yazılımı', 'Bağlı sensör, ekran ve haberleşme kabloları', 'Ana kart hafızası'],
+  repair: 'Bağlı parçaları enerjisizken tek tek ayırıp yeniden deneyin. Yazılım veya ayar yüklemeden önce mevcut yedeği alın ve tam model/revizyon uyumunu doğrulayın.',
+  verification: 'Kart tekrarlı açılışlarda normal başlamalı ve bağlı parçaları bilgisayar servis programında görmelidir.',
+})
+Object.assign(data.nodes.general_result_firmware_peripheral, {
+  title: 'Bağlı Sensör, Röle veya Haberleşme Kablosu Sorunu',
+  summary: 'Ana kart açılıyor. Sorun bağlı sensör, röle çıkışı, saha kablosu, soket veya cihaz ayarında olabilir.',
+  components: ['Sensör ve saha kabloları', 'Röle çıkışları ve klemensler', 'Bilgisayar servis ayarları'],
+  repair: 'Bağlı parçaları enerjisizken tek tek ayırın; kablo kopması, kısa devre, gevşek soket ve oksit kontrolü yapın. Bilgisayardaki hata kaydını not edin.',
+  verification: 'Tüm girişler ve çıkışlar tek tek denendiğinde hata tekrarlanmamalıdır.',
+})
+Object.assign(data.nodes.general_result_thermal, {
+  title: 'Isıya Bağlı Lehim veya Soket Temassızlığı',
+  summary: 'Arıza cihaz ısınınca ya da soğukken değişiyor. Çatlak lehim, oksitli soket veya zayıflamış kondansatör olabilir.',
+  components: ['Ağır parçaların ve soketlerin lehimleri', 'Şişmiş veya sızdırmış kondansatörler', 'Oksitli konnektör ve kablolar'],
+  repair: 'Şüpheli bölgeyi büyüteçle kontrol edin. Oksitli soketi temizleyin, gevşek bağlantıyı yenileyin; rastgele ısıtma yapmak yerine görülen çatlak lehimi onarın.',
+  verification: 'Cihaz hem soğukken hem ısındıktan sonra kesintisiz çalışmalıdır.',
+})
+Object.assign(data.nodes.support_result_ripple, {
+  title: 'Adaptör Voltajı Dalgalı',
+  summary: 'Adaptörün ortalama voltajı normal görünse de yük bindiğinde voltaj düşüyor veya parazit oluşuyor. Adaptör kondansatörü zayıf olabilir.',
+  components: ['Adaptör çıkış kondansatörleri', 'DC kablo ve jak', 'Bağlı cihazın akım ihtiyacı'],
+  repair: 'Aynı voltaj ve yeterli akımdaki sağlam adaptörle karşılaştırın. Sorun kaybolursa adaptörü değiştirin; DC jak ve kabloda temassızlık/ısınma kontrolü yapın.',
+  verification: 'Cihaz en yüksek yükte çalışırken yeniden başlamamalı, parazit yapmamalı ve voltaj belirgin düşmemelidir.',
+})
+Object.assign(data.nodes.support_result_psu_weak, {
+  title: 'Adaptör Yük Altında Zayıf Kalıyor',
+  summary: 'Adaptör boşta normal voltaj gösteriyor ancak cihaz bağlanınca voltaj düşüyor. Adaptör zayıf, akım değeri yetersiz veya bağlı cihaz fazla akım çekiyor olabilir.',
+  components: ['Adaptör', 'DC kablo ve jak', 'Bağlı cihaz'],
+  repair: 'Aynı voltajda ve yeterli akımdaki sağlam adaptörle deneyin. Sağlam adaptör de çöküyorsa bağlı cihazda kısa devre veya aşırı akım arayın.',
+  verification: 'Cihaz normal yükte çalışırken voltaj sabit kalmalı ve yeniden başlama olmamalıdır.',
+})
+Object.assign(data.nodes.fire_result_panel_logic, {
+  title: 'Yangın Paneli Sürekli Yeniden Başlıyor',
+  summary: 'Ana besleme normal ancak panel kararsız. 5V/3.3V besleme, zayıf kondansatör, gevşek soket veya ana kart arızası olabilir.',
+  components: ['5V/3.3V besleme bölümü', 'Kondansatörler', 'Ana kart soketleri ve lehimleri'],
+  repair: 'Panel yetkili biçimde devre dışıyken soket, oksit, şişmiş kondansatör ve çatlak lehim kontrolü yapın. 5V/3.3V değerini MIN/MAX ile izleyin.',
+  verification: 'Panel en az 30 dakika yeniden başlamadan çalışmalı ve yeni sistem arızası göstermemelidir.',
+})
+Object.assign(data.nodes.fire_result_charger_high, {
+  title: 'Akü Şarj Voltajı Çok Yüksek',
+  summary: 'Panelin akü şarj voltajı model değerinin üzerinde. Şarj bölümü arızalıysa akü ısınabilir ve zarar görebilir.',
+  components: ['Şarj bölümü', 'Akü bağlantıları', 'Şarj çıkış kondansatörleri'],
+  repair: 'Aküyü uzun süre yüksek voltajda bırakmayın. Doğru model değerini kontrol edin ve şarj bölümünü yetkili kart servisine yönlendirin.',
+  verification: 'Şarj voltajı üretici değerine dönmeli; akü ısınmamalı veya şişmemelidir.',
+})
+Object.assign(data.nodes.cctv_result_ir_driver, {
+  title: 'Gece Görüş LED’i veya Işık Sensörü Arızası',
+  summary: 'Karanlıkta gece görüş ışıkları yanmıyor. Işık sensörü, LED kartı, soket veya bağlantı kablosu arızalı olabilir.',
+  components: ['Gece görüş LED kartı', 'Işık sensörü', 'LED kart soketi ve kablosu'],
+  repair: 'Kamera camını kapatıp gece modunu deneyin. LED soketinde gevşeklik, oksit ve kablo kopması kontrolü yapın; sağlam LED modülüyle karşılaştırın.',
+  verification: 'Karanlıkta LED’ler yanmalı ve görüntü gece moduna geçmelidir.',
+})
+Object.assign(data.nodes.sliding_result_control_card, {
+  title: 'Kayar Kapı Motoru, Kablosu veya Kontrol Kartı Arızası',
+  summary: 'Açma komutu geliyor ancak motor hareket etmiyor. Motor kablosu kopuk, soket gevşek/oksitli, kapı mekanik olarak sıkışmış veya kontrol kartı arızalı olabilir.',
+  components: ['Motor kablosu ve soketi', 'Kapı rayı ve hareketli parçalar', 'Motor ve kontrol kartı çıkışı'],
+  repair: 'Enerjiyi kesin; motor kablosunda kopukluk ve sokette oksit/gevşeklik kontrolü yapın. Kapının elle rahat hareket ettiğini doğrulayın; sonra bilgisayardaki hata kaydını inceleyin.',
+  verification: 'Kapı aç/kapa komutunda takılmadan hareket etmeli ve güvenlik sensörleri çalışmalıdır.',
+})
+Object.assign(data.nodes.pbx_result_dtmf, {
+  title: 'Telefon Tuşları veya Numara Ayarı Sorunu',
+  summary: 'Çevir sesi var ancak bazı tuşlar algılanmıyor veya arama tamamlanmıyor. Telefon tuşları ya da santral numara/yetki ayarı sorunlu olabilir.',
+  components: ['Analog telefon tuşları', 'Santral portu', 'Numara planı ve arama yetkisi'],
+  repair: 'Sağlam telefonla tüm tuşları deneyin. Aynı sorun varsa bilgisayardan numara planı, tuş algılama modu ve arama yetkisini kontrol edin.',
+  verification: '0-9, * ve # tuşları doğru algılanmalı; izinli numaralar aranabilmelidir.',
+})
+Object.assign(data.nodes.pbx_result_audio, {
+  title: 'Ahize, Kablo veya Parazit Kaynaklı Ses Sorunu',
+  summary: 'Arama kuruluyor fakat ses tek yönlü, zayıf, uğultulu veya parazitli. Ahize kablosu, telefon hattı, oksitli ek veya yakındaki güç kablosu sebep olabilir.',
+  components: ['Ahize ve spiral kablo', 'RJ11 fişi ve telefon hattı', 'Oksitli ekler ve yakındaki güç kabloları'],
+  repair: 'Sağlam ahize/telefonla deneyin. RJ11 uçlarını ve ekleri yenileyin; telefon kablosunu motor, floresan ve güç kablolarından uzaklaştırarak karşılaştırın.',
+  verification: 'İki yönde ses temiz, dengeli, uğultusuz ve kesintisiz olmalıdır.',
+})
+Object.assign(data.nodes.pbx_result_trunk, {
+  title: 'Dış Hat veya Yönlendirme Ayarı Sorunu',
+  summary: 'Dahili aramalar çalışıyor ancak dış arama çalışmıyor. Operatör hattı, dış hat portu, SIP bağlantısı veya santral yönlendirme ayarı sorunlu olabilir.',
+  components: ['Operatör dış hattı', 'Santral dış hat portu veya SIP hesabı', 'Gelen/giden arama yönlendirmesi'],
+  repair: 'Bilgisayar yönetim ekranında dış hat durumunu ve hata kaydını kontrol edin. Operatör hattını ve yönlendirme ayarını ayrı ayrı deneyin.',
+  verification: 'Gelen ve giden dış çağrılar kurulmalı ve iki yönde ses gelmelidir.',
+})
+
+delete data.nodes.general_result_need_scope
+delete data.nodes.general_result_need_programmer
+
+const plainFaultLabels = {
+  battery_degraded: 'Akü zayıflamış veya bir hücresi bozulmuş olabilir',
+  charger_fault: 'Akü şarj olmuyor; adaptör, kablo veya şarj bölümü arızalı olabilir',
+  input_protection_fault: 'Giriş sigortası atmış, diyot yanmış veya girişte temassızlık olabilir',
+  rail_short: '5V/3.3V besleme hattında kısa devre veya fazla akım çeken parça olabilir',
+  capacitor_esr: 'Kondansatör zayıflamış; cihaz bu yüzden yeniden başlıyor olabilir',
+  mosfet_short: 'Güç transistörü kısa devre olmuş olabilir',
+  relay_driver: 'Röle bobini, sürücü parçası veya bağlantısı arızalı olabilir',
+  motor_output: 'Motor çıkışı, kontaktör, kablo veya klemens arızalı olabilir',
+  photo_sensor: 'Fotosel kirli, hizasız, kablosu kopuk veya bağlantısı temassız olabilir',
+  remote_receiver: 'Kumanda pili, alıcı anteni veya kumanda tanıtma ayarı sorunlu olabilir',
+  mcu_boot: 'Ana kart veya cihaz yazılımı açılmıyor olabilir',
+  zone_loop_fault: 'Yangın hattında kablo kopması veya kısa devre olabilir',
+  siren_output_fault: 'Siren sigortası, çıkışı, kablosu veya sirenin kendisi arızalı olabilir',
+  panel_battery_fault: 'Yangın paneli aküsü zayıf veya şarj bağlantısı arızalı olabilir',
+  poe_power_fault: 'PoE portu, enjektör, Ethernet kablosu veya kamera beslemesi arızalı olabilir',
+  video_link_fault: 'RJ45/BNC kablosu, switch portu veya bağlantı ucu arızalı olabilir',
+  ir_led_fault: 'Gece görüş LED’i, ışık sensörü veya bağlantısı arızalı olabilir',
+  reader_bus_fault: 'Okuyucu veri kablosu kopuk, uçlar ters veya klemens temassız olabilir',
+  lock_output_fault: 'Kilit rölesi, diyot, kablo veya kilit beslemesi arızalı olabilir',
+  access_psu_sag: 'Adaptör yük bindiğinde voltaj düşürüyor veya bağlantısı temassız olabilir',
+  uvis_control_power: 'UVIS bilgisayarı, kayıt cihazı, monitör veya güç kablosu arızalı olabilir',
+  uvis_trigger_fault: 'Araç sensörü, fotosel veya tetik kablosu arızalı olabilir',
+  uvis_network_fault: 'UVIS Ethernet kablosu, switch portu veya ağ ayarı sorunlu olabilir',
+  uvis_software_fault: 'UVIS programı, kayıt ayarı veya bilgisayar servisi çalışmıyor olabilir',
+  pbx_power_fault: 'Santral beslemesi, güç kablosu veya port kartı arızalı olabilir',
+  pbx_line_fault: 'Telefon hattında voltaj yok; kablo, priz veya santral portu arızalı olabilir',
+  pbx_port_fault: 'Santral telefon portu veya bağlı telefon arızalı olabilir',
+  pbx_config_fault: 'Santral abone, dış hat veya yönlendirme ayarı yanlış olabilir',
+  sliding_sensor_fault: 'Kapı radarı, fotosel, açma butonu veya kablosu arızalı olabilir',
+  sliding_drive_fault: 'Kayar kapı motoru, sürücü kartı veya motor kablosu arızalı olabilir',
+  sliding_mechanical_fault: 'Kapı rayında sıkışma, limit veya konum sensörü sorunu olabilir',
+  support_psu_fault: 'Adaptör çıkışı yanlış, düşük veya tamamen yok olabilir',
+  support_relay_fault: 'Röle, kontaktör veya normalde açık/kapalı kontak arızalı olabilir',
+  general_visual_damage: 'Kartta yanık, oksit, sıvı izi veya çatlak lehim olabilir',
+  general_regulator_fault: 'Kartın 5V/3.3V beslemesi düşük, yüksek veya kesik olabilir',
+  general_clock_memory_fault: 'Ana kart açılmıyor; hafıza, kristal veya cihaz yazılımı sorunlu olabilir',
+  battery_connection_fault: 'Akü klemensi, kablo pabucu veya seri bağlantı temassız olabilir',
+  ups_overload: 'UPS kapasitesi aşılmış veya bağlı cihazda kısa devre olabilir',
+  ups_transfer_fault: 'UPS şebekeden aküye geçemiyor; röle veya bağlantı arızalı olabilir',
+  ups_inverter_fault: 'UPS aküden çıkış üretemiyor; güç kartı veya trafo arızalı olabilir',
+  bluebus_fault: 'Bariyer güvenlik cihazı, kablosu veya tanıtma ayarı sorunlu olabilir',
+  stop_input_fault: 'Acil durdurma girişi aktif, kablosu kopuk veya bağlantısı kararsız olabilir',
+  barrier_encoder_fault: 'Bariyer konum sensörü, limit veya öğrenme ayarı sorunlu olabilir',
+  barrier_mechanical_fault: 'Bariyer kolu, yay veya redüktör sıkışmış olabilir',
+  barrier_mains_fault: 'Bariyer şebeke girişi, sigortası veya yardımcı beslemesi arızalı olabilir',
+  fire_eol_mismatch: 'Yangın hattı sonu direnci yanlış, gevşek veya panel modeline uygun olmayabilir',
+  fire_earth_fault: 'Yangın hattında kablo gövdeye/toprağa değiyor olabilir',
+  fire_aux_overload: 'Panel yardımcı çıkışında kısa devre veya fazla yük olabilir',
+  fire_field_device_fault: 'Dedektör, buton, siren veya saha bağlantısı arızalı olabilir',
+  cctv_cable_fault: 'Ethernet/RJ45 kablosu kopuk, uç yanlış çakılmış veya ek yeri temassız olabilir',
+  cctv_poe_budget_fault: 'PoE switch gücü kameraya yetmiyor olabilir',
+  cctv_network_config: 'Kamera IP, ağ geçidi veya ağ ayarı yanlış olabilir',
+  cctv_stream_fault: 'Kamera görüntü biçimi, cihaz yazılımı veya kayıt kanalı uyumsuz olabilir',
+  cctv_image_optics: 'Kamera camı/lensi kirli, nemli veya gece ışığı yansıyor olabilir',
+  cctv_storage_fault: 'Kayıt diski/SD kart dolu, bozuk veya yazma izni kapalı olabilir',
+  access_psu_ripple: 'Adaptör voltajı dalgalanıyor; panel bu yüzden yeniden başlıyor olabilir',
+  access_reader_power: 'Okuyucu besleme kablosu kopuk, eksi hattı temassız veya voltaj düşük olabilir',
+  access_credential_config: 'Kart yetkisi, kart biçimi veya zaman ayarı yanlış olabilir',
+  access_lock_mechanical: 'Kilit sıkışmış, kapı baskı yapıyor veya kabloda voltaj düşüyor olabilir',
+  access_door_input_fault: 'Kapı kontağı, çıkış butonu veya acil açma kablosu arızalı olabilir',
+  access_rs485_fault: 'RS485 A/B uçları ters, kablo kopuk, klemens gevşek veya adres yanlış olabilir',
+  uvis_illumination_fault: 'UVIS aydınlatma çubuğu, kablosu veya sürücüsü arızalı olabilir',
+  uvis_storage_fault: 'UVIS kayıt diski dolu, bozuk veya yazma izni kapalı olabilir',
+  uvis_calibration_fault: 'UVIS kamera hizası veya görüntü birleştirme ayarı bozulmuş olabilir',
+  pbx_cabling_fault: 'RJ11 ucu kötü çakılmış, telefon kablosu kopuk veya ek yeri oksitli olabilir',
+  pbx_handset_fault: 'Telefon, ahize kablosu veya RJ11 soketi arızalı olabilir',
+  pbx_ring_fault: 'Santral zil sinyali zayıf veya telefonun zil devresi arızalı olabilir',
+  pbx_audio_fault: 'Ahize, telefon kablosu veya çevredeki elektriksel parazit sesi bozuyor olabilir',
+  pbx_dtmf_fault: 'Telefon tuş sesi veya santral numara planı ayarı sorunlu olabilir',
+  pbx_trunk_fault: 'Dış hat, operatör bağlantısı veya yönlendirme ayarı sorunlu olabilir',
+  sliding_safety_fault: 'Kayar kapı güvenlik sensörü, kablosu veya ayarı arızalı olabilir',
+  sliding_encoder_fault: 'Kayar kapı konum sensörü veya öğrenme ayarı bozulmuş olabilir',
+  sliding_lock_fault: 'Kayar kapı kilidi, kablosu veya kilit durum girişi arızalı olabilir',
+  sliding_battery_fault: 'Kayar kapı acil güç aküsü zayıf veya şarj olmuyor olabilir',
+  support_psu_sag: 'Adaptör cihaz çalışırken voltaj düşürüyor olabilir',
+  support_psu_ripple: 'Adaptör voltajı dalgalı; cihazı yeniden başlatıyor veya parazit yapıyor olabilir',
+  support_connector_fault: 'DC jak, klemens, kablo veya lehim temassız/oksitli olabilir',
+  support_load_short: 'Bağlı cihazda kısa devre veya fazla akım çekme olabilir',
+  general_reset_fault: 'Besleme düşüyor veya kart sürekli yeniden başlıyor olabilir',
+  general_clock_fault: 'Ana kartta açılışı başlatan bölüm arızalı olabilir',
+  general_memory_fault: 'Cihaz ayarlarını tutan hafıza veya bağlantıları arızalı olabilir',
+  general_firmware_fault: 'Cihaz yazılımı bozuk veya bağlı bir parça açılışı engelliyor olabilir',
+  general_thermal_fault: 'Isınınca açılan lehim çatlağı, oksitli soket veya arızalı parça olabilir',
+}
+for (const [faultId, label] of Object.entries(plainFaultLabels)) {
+  if (data.faultCatalog[faultId]) {
+    data.faultCatalog[faultId].label = label
+  }
+}
+
+function simplifyFieldText(value) {
+  if (typeof value !== 'string') {
+    return value
+  }
+
+  return value
+    .replace(/PoE tester/giu, 'sağlam PoE portu ve kısa Ethernet kablosu')
+    .replace(/RS-485 analizörü/giu, 'bilgisayar servis yazılımı')
+    .replace(/diferansiyel prob/giu, 'sağlam kısa kablo')
+    .replace(/osiloskop/giu, 'multimetre MIN/MAX kaydı')
+    .replace(/oscilloscope/giu, 'multimetre MIN/MAX kaydı')
+    .replace(/logic probe/giu, 'bilgisayar olay kaydı')
+    .replace(/lojik prob/giu, 'bilgisayar olay kaydı')
+    .replace(/programlayıcı/giu, 'bilgisayar servis yazılımı')
+    .replace(/termal kamera/giu, 'görsel sıcaklık kontrolü')
+    .replace(/elektronik yük/giu, 'sağlam eş cihaz')
+    .replace(/\bSMPS\b/gu, 'güç kaynağı')
+    .replace(/\bMOSFET\b/gu, 'güç transistörü')
+    .replace(/\bVRLA\b/gu, 'kapalı tip kurşun akü')
+    .replace(/\bFloat\b/gu, 'bekleme şarj')
+    .replace(/\bboost\/cyclic\b/giu, 'hızlı/döngüsel')
+    .replace(/\bself-test\b/giu, 'kendi kendine test')
+    .replace(/\bPGOOD\b/gu, 'besleme hazır sinyali')
+    .replace(/\bpull-up\b/giu, 'sinyal direnci')
+    .replace(/\bgate\/base\b/giu, 'kontrol ucu')
+    .replace(/\bSoC\b/gu, 'ana işlemci')
+    .replace(/\bTVS\b/gu, 'koruma diyodu')
+    .replace(/\btriac\b/giu, 'güç anahtarı')
+    .replace(/\bBGA\/QFN\b/gu, 'büyük entegre')
+    .replace(/\bPWM\/VFD\b/gu, 'motor sürücü')
+    .replace(/\bDSP\b/gu, 'ses işleme devresi')
+    .replace(/ESR yükselmiş/giu, 'zayıflamış')
+    .replace(/ESR ölçümü yapın/giu, 'Şişmiş veya sızdırmış kondansatörleri kontrol edin')
+    .replace(/ESR ile kontrol edin/giu, 'sağlam kondansatörle karşılaştırın')
+    .replace(/ESR\/kapasite/giu, 'kondansatör durumu')
+    .replace(/düşük ESR eşdeğerleriyle/giu, 'aynı özellikte yenileriyle')
+    .replace(/\bESR\b/gu, 'kondansatör iç direnci')
+    .replace(/deep discharge/giu, 'derin boşalma')
+    .replace(/\bfeedback\b/giu, 'geri besleme')
+    .replace(/\bclock\b/giu, 'saat sinyali')
+    .replace(/\bdump\b/giu, 'yedek dosya')
+    .replace(/\bverify\b/giu, 'doğrulama')
+    .replace(/\bhot-ground\b/giu, 'şebeke tarafı eksi referansı')
+    .replace(/ripple/giu, 'besleme dalgalanması')
+    .replace(/transient/giu, 'ani voltaj değişimi')
+    .replace(/brownout/giu, 'voltaj düşüp yeniden başlama')
+    .replace(/MCU/gu, 'ana işlemci')
+    .replace(/firmware/giu, 'cihaz yazılımı')
+    .replace(/boot/giu, 'açılış')
+    .replace(/FXS port/giu, 'santral analog telefon portu')
+    .replace(/FXS/giu, 'analog telefon portu')
+    .replace(/endpoint/giu, 'telefon cihazı')
+    .replace(/stream/giu, 'canlı görüntü')
+    .replace(/codec/giu, 'görüntü biçimi')
+    .replace(/krimp/giu, 'uç çakımı')
+    .replace(/terminasyon/giu, 'hat sonlandırma direnci')
+    .replace(/polarite/giu, 'artı/eksi yönü')
+    .replace(/\bREN\b/gu, 'telefon zil yükü')
+    .replace(/\bDTMF\b/gu, 'tuş sesi (DTMF)')
+    .replace(/\bEMI\b/gu, 'elektriksel parazit')
+    .replace(/encoder/giu, 'konum sensörü')
+    .replace(/enkoder/giu, 'konum sensörü')
+    .replace(/konfigürasyon/giu, 'ayar')
+    .replace(/regülasyon/giu, 'voltaj kararlılığı')
+    .replace(/datasheet/giu, 'üretici teknik belgesi')
+    .replace(/diferansiyel/giu, 'A-B arasındaki')
+    .replace(/stitching/giu, 'görüntü birleştirme')
+    .replace(/NO\/NC/giu, 'normalde açık/kapalı (NO/NC)')
+    .replace(/multimetre MIN\/MAX kaydıla/giu, 'multimetrenin MIN/MAX kaydıyla')
+    .replace(/ana işlemci[’']yu/giu, 'ana işlemciyi')
+    .replace(/elektriksel parazit[’']lı/giu, 'elektriksel parazitli')
+    .replace(/voltaj kararlılığıu/giu, 'voltaj kararlılığı')
+    .replace(/besleme dalgalanması ve ani voltaj değişimi tepki/giu, 'besleme dalgalanması ve ani voltaj değişimini')
+    .replace(/\s{2,}/gu, ' ')
+    .trim()
+}
+
+const simpleScalarFields = ['category', 'title', 'prompt', 'hint', 'summary', 'repair', 'verification', 'yesLabel', 'noLabel', 'unknownLabel', 'powerState', 'probeBlack', 'probeRed', 'optionBadge']
+for (const node of Object.values(data.nodes)) {
+  node.toolLevel = 'field_basic'
+  for (const field of simpleScalarFields) {
+    node[field] = simplifyFieldText(node[field])
+  }
+  for (const field of ['components', 'testSteps', 'stopConditions']) {
+    if (Array.isArray(node[field])) {
+      node[field] = node[field].map(simplifyFieldText)
+    }
+  }
+  if (Array.isArray(node.options)) {
+    node.options = node.options.map((option) => ({
+      ...option,
+      label: simplifyFieldText(option.label),
+      description: simplifyFieldText(option.description),
+    }))
+  }
+  if (Array.isArray(node.rules)) {
+    node.rules = node.rules.map((rule) => ({ ...rule, label: simplifyFieldText(rule.label) }))
+  }
+}
+for (const fault of Object.values(data.faultCatalog)) {
+  fault.label = simplifyFieldText(fault.label)
+  fault.componentGroup = simplifyFieldText(fault.componentGroup)
+}
+
 const profileNames = Object.fromEntries(data.deviceProfiles.map((profile) => [profile.id, profile.name]))
 for (const node of Object.values(data.nodes)) {
   node.category ||= profileNames[node.device] || 'Teknik Teşhis'
@@ -1999,8 +2590,8 @@ for (const node of Object.values(data.nodes)) {
     level,
     reviewedAt: '2026-07-15',
     statement: level === 'heuristic'
-      ? 'Bu adım doğrudan model kılavuzuna bağlı değildir; sonucu tek başına parça değişim kararı olarak kullanmayın.'
-      : 'Kaynak kapsamını ve cihaz modelini ölçümden önce doğrulayın.',
+      ? 'Bu kontrol genel servis tecrübesine dayanır. Önce kablo, soket, oksit ve beslemeyi kontrol edin; tek başına bu sonuca göre parça değiştirmeyin.'
+      : 'Bu kontrol teknik kaynağa dayanır. Cihaz modeli farklıysa etiketi ve bağlantı şemasını da kontrol edin.',
   }
 
   if (node.type === 'measurement') {
@@ -2033,6 +2624,7 @@ data.researchAudit.coverage = {
 }
 
 for (const profile of data.deviceProfiles) {
+  profile.description = simplifyFieldText(profile.description)
   profile.sourceIds = profileSources[profile.id]
   profile.commonSymptoms = data.nodes[profile.startNodeId].options.map((option) => option.label)
   profile.priorModel = {
@@ -2044,7 +2636,7 @@ for (const profile of data.deviceProfiles) {
     faultId,
     label: data.faultCatalog[faultId].label,
     probability,
-    basis: priorBasis[faultId] || 'Başlangıç servis önceliğidir; ölçüm ve izolasyon kanıtları göreli kanıt payını yeniden sıralar.',
+    basis: simplifyFieldText(priorBasis[faultId] || 'Bu yalnız başlangıç servis önceliğidir; yapılan kontroller adayların sırasını değiştirir.'),
     weightType: 'heuristic_service_priority',
     evidenceLevel: 'low',
     calibrated: false,

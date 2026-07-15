@@ -92,10 +92,10 @@ const meterModeLabels = {
 }
 
 const evidenceLabels = {
-  manufacturer: { label: 'Üretici kaynağı', tone: 'emerald' },
-  standard: { label: 'Standart kuruluşu', tone: 'cyan' },
-  engineering: { label: 'Mühendislik rehberi', tone: 'amber' },
-  heuristic: { label: 'Servis hipotezi', tone: 'red' },
+  manufacturer: { label: 'Üretici bilgisi', tone: 'emerald' },
+  standard: { label: 'Standart bilgisi', tone: 'cyan' },
+  engineering: { label: 'Ölçüm rehberi', tone: 'amber' },
+  heuristic: { label: 'Genel servis kontrolü', tone: 'red' },
 }
 
 const defaultAssistantModel = 'gemini-3.1-flash-lite'
@@ -336,13 +336,26 @@ function ServiceIntake({ setServiceInfo, selectedProfileId, setSelectedProfileId
               Terminal <span className="gradient-word">Elektronik</span>
             </h1>
             <p className="mt-4 max-w-3xl text-base leading-7 text-zinc-300">
-              UPS, CACS, yangın paneli, kamera, bariyer ve santral arızalarında ölçüm sırası, kanıta dayalı servis önceliği ve raporu tek ekranda toparlar.
+              UPS, CACS, yangın paneli, kamera, bariyer ve santral arızalarını multimetre, bilgisayar ve sağlam deneme kablolarıyla adım adım kontrol eder.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Badge tone="cyan">{Object.keys(diagnostics.sourceCatalog).length} TEKNİK KAYNAK</Badge>
               <Badge tone="amber">AĞIRLIKLAR KALİBRE DEĞİL</Badge>
               <Badge tone="emerald">İNCELEME {diagnostics.researchAudit?.reviewedAt}</Badge>
             </div>
+            {diagnostics.fieldMode?.enabled ? (
+              <div className="mt-4 max-w-4xl rounded-lg border border-cyan-300/20 bg-cyan-300/[0.06] p-4">
+                <div className="text-sm font-black text-cyan-50">Bu sürüm elinizdeki saha araçlarına göre hazırlandı</div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {diagnostics.fieldMode.tools.map((tool) => (
+                    <span key={tool} className="rounded border border-white/10 bg-black/20 px-2.5 py-1 text-xs font-semibold text-zinc-300">
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-3 text-xs leading-5 text-amber-100">{diagnostics.fieldMode.note}</p>
+              </div>
+            ) : null}
           </div>
 
           <div className="glass-panel rounded-lg p-4">
@@ -1025,16 +1038,16 @@ function EvidencePanel({ node }) {
   const evidence = evidenceLabels[node.evidence?.level] || evidenceLabels.heuristic
   const sources = (node.sourceIds || []).map((sourceId) => diagnostics.sourceCatalog[sourceId]).filter(Boolean)
   const thresholdLabel = node.thresholdPolicy === 'model_specific'
-    ? 'MODEL KILAVUZU ZORUNLU'
+    ? 'MODELİNE GÖRE DEĞİŞİR'
     : node.thresholdPolicy === 'general_screening'
-      ? 'GENEL TARAMA ARALIĞI'
+      ? 'GENEL KONTROL'
       : null
 
   return (
-    <section className="rounded-md border border-white/10 bg-white/[0.035] p-3" aria-label="Teknik dayanak ve kanıt seviyesi">
+    <section className="rounded-md border border-white/10 bg-white/[0.035] p-3" aria-label="Kaynak ve kontrol notu">
       <div className="flex flex-wrap items-center gap-2">
         <BookOpenCheck className="h-4 w-4 text-cyan-200" aria-hidden="true" />
-        <span className="text-xs font-black uppercase tracking-wide text-zinc-400">Teknik dayanak</span>
+        <span className="text-xs font-black uppercase tracking-wide text-zinc-400">Kaynak ve not</span>
         <Badge tone={evidence.tone}>{evidence.label}</Badge>
         {thresholdLabel ? <Badge tone={node.thresholdPolicy === 'model_specific' ? 'red' : 'zinc'}>{thresholdLabel}</Badge> : null}
         <span className="font-mono text-[11px] text-zinc-600">{node.evidence?.reviewedAt}</span>
@@ -1059,7 +1072,7 @@ function EvidencePanel({ node }) {
           ))}
         </div>
       ) : (
-        <div className="mt-2 text-xs font-semibold text-amber-100">Doğrudan model kaynağı yok; ölçüm sonucunu tek başına parça değişim kararı olarak kullanmayın.</div>
+        <div className="mt-2 text-xs font-semibold text-amber-100">Bu kontrol genel servis tecrübesine dayanır. Önce kablo, soket, oksit ve besleme kontrolü yapın.</div>
       )}
     </section>
   )
@@ -1076,6 +1089,7 @@ function ProcedureHeader({ node }) {
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone="amber">{categoryLabel}</Badge>
           {categoryLabel !== typeLabel ? <Badge>{typeLabel}</Badge> : null}
+          {node.toolLevel === 'field_basic' ? <Badge tone="cyan">MULTİMETRE / PC / KABLO</Badge> : null}
         </div>
         {node.danger ? (
           <span className={classNames('inline-flex items-center gap-2 rounded border px-3 py-1 font-mono text-xs font-bold', danger)}>
