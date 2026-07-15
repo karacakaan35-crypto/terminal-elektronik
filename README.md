@@ -40,6 +40,20 @@ npm run build:sites
 
 Bu sürüm bağlantı açıldığında doğrudan teşhis motorunu, PDF raporunu, hızlı Astra yanıtlarını ve Google AI Studio API ile çalışan derin Astra yanıtlarını sunar. API anahtarı yalnızca Sites sunucu ortamında tutulur ve tarayıcıya gönderilmez.
 
+## Saha Araçları ve Anlaşılır Arıza Dili
+
+Tanı veri seti v4.2; multimetre, kontrol kalemi, bilgisayar, 802.3af/at/bt PoE test cihazı, sağlam RJ45/RJ11 deneme kablosu ve uygun sağlam adaptörle uygulanabilecek saha akışına göre hazırlanmıştır. Arıza adayları “kablo kopuk olabilir”, “RJ11/RJ45 ucu kötü çakılmış olabilir”, “klemens gevşek veya oksitli olabilir” ve “besleme hattında kısa devre olabilir” gibi anlaşılır teknik dille gösterilir.
+
+PoE kamera akışı test cihazındaki PSE/PD yönünü, anlaşma sonrası 44–57V genel kontrol aralığını, PoE sınıfını ve kısa sağlam Ethernet kablosuyla karşılaştırmayı birlikte kullanır. Voltajın tek başına kablo kalitesini veya switch güç bütçesini kanıtlamadığı uygulamada açıkça belirtilir.
+
+Kontrol kalemi yalnızca ön kontrol içindir; enerjinin kesildiğini tek başına kanıtlamaz. Gerilim yokluğu uygun multimetreyle doğrulanır. Şebeke, yangın güvenliği ve hareketli mekanizma adımlarındaki güvenlik durdurmaları korunur.
+
+## Tanı Verisi ve Doğruluk
+
+Veri seti 10 cihaz profili, 277 karar/sonuç düğümü, 83 arıza sınıfı ve 24 teknik kaynak içerir. Her adım kaynak seviyesini (`üretici bilgisi`, `standart bilgisi`, `ölçüm rehberi` veya `genel servis kontrolü`) ve ölçüm eşiğinin modele göre mi genel kontrol mü olduğunu gösterir.
+
+Başlangıç servis ağırlıkları gerçek saha arıza oranı değildir. Toplamı 100'e normalize edilmiş, kapatılmış iş emri verisiyle henüz kalibre edilmemiş öncelik puanlarıdır. Model etiketi ve üretici servis kılavuzu her zaman uygulamadaki genel eşikten önce gelir.
+
 ## Google AI Studio ile Astra
 
 Codex Sites üzerindeki Astra iki çalışma modu sunar:

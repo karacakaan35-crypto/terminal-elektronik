@@ -50,7 +50,115 @@ test('professional dataset keeps broad profile, node, fault and source coverage'
   assert.equal(diagnostics.deviceProfiles.length, 10)
   assert.ok(Object.keys(diagnostics.nodes).length >= 275)
   assert.ok(Object.keys(diagnostics.faultCatalog).length >= 80)
-  assert.ok(Object.keys(diagnostics.sourceCatalog).length >= 12)
+  assert.ok(Object.keys(diagnostics.sourceCatalog).length >= 20)
+})
+
+test('service weights are explicitly uncalibrated and never represented as field failure rates', () => {
+  assert.equal(diagnostics.researchAudit.priorCalibration, 'uncalibrated_heuristic')
+  assert.match(diagnostics.probabilityDisclaimer, /gerçek arıza olasılığı|saha istatistiği/i)
+
+  for (const profile of diagnostics.deviceProfiles) {
+    assert.equal(profile.priorModel.type, 'heuristic_service_priority')
+    assert.equal(profile.priorModel.calibrated, false)
+    assert.ok(profile.faultPriors.every((prior) => prior.calibrated === false))
+  }
+})
+
+test('every diagnostic step exposes reviewed evidence and every measurement declares threshold scope', () => {
+  const allowedEvidenceLevels = new Set(['manufacturer', 'standard', 'engineering', 'heuristic'])
+  const allowedThresholdPolicies = new Set(['model_specific', 'general_screening'])
+
+  for (const node of Object.values(diagnostics.nodes)) {
+    assert.ok(allowedEvidenceLevels.has(node.evidence.level), node.id)
+    assert.match(node.evidence.reviewedAt, /^\d{4}-\d{2}-\d{2}$/, node.id)
+
+    if (node.type === 'measurement') {
+      assert.ok(allowedThresholdPolicies.has(node.thresholdPolicy), node.id)
+    }
+  }
+})
+
+test('high-risk model-dependent measurements keep manufacturer references', () => {
+  assert.equal(diagnostics.nodes.fire_zone_resistance.thresholdPolicy, 'model_specific')
+  assert.deepEqual(diagnostics.nodes.fire_zone_resistance.sourceIds, ['ctec_fire'])
+  assert.deepEqual(diagnostics.nodes.fire_zone_resistance_47k.sourceIds, ['notifier_nfs_supra'])
+  assert.equal(diagnostics.nodes.pbx_extension_voltage.thresholdPolicy, 'model_specific')
+  assert.deepEqual(diagnostics.nodes.ups_charge_voltage.sourceIds, ['yuasa_vrla'])
+})
+
+test('fire panel battery branch separates float charging from an undercharged 24V group', () => {
+  const nominalFloat = evaluateMeasurement(diagnostics.nodes.fire_battery_voltage, 27.3)
+  const undercharged = evaluateMeasurement(diagnostics.nodes.fire_battery_voltage, 24)
+
+  assert.equal(nominalFloat.nextNodeId, 'fire_panel_24v')
+  assert.equal(nominalFloat.passed, true)
+  assert.equal(undercharged.nextNodeId, 'fire_result_battery')
+  assert.equal(undercharged.passed, false)
+})
+
+test('OSDP screening uses a short known-good cable and computer settings instead of a special analyzer', () => {
+  const node = diagnostics.nodes.access_bus_voltage
+
+  assert.equal(node.type, 'question_boolean')
+  assert.match(node.prompt, /kısa ve sağlam bir kablo/i)
+  assert.match(node.prompt, /bilgisayar/i)
+  assert.equal(node.nextYes, 'access_result_rs485_bus')
+  assert.equal(node.nextNo, 'access_result_config')
+  assert.equal(node.meterMode, undefined)
+})
+
+test('PoE tester reading separates a healthy negotiated voltage from a missing or weak source', () => {
+  const node = diagnostics.nodes.cctv_poe_voltage
+  const nominal = evaluateMeasurement(node, 48)
+  const low = evaluateMeasurement(node, 38)
+
+  assert.equal(node.type, 'measurement')
+  assert.equal(node.meterMode, 'PoE Tester')
+  assert.equal(node.toolLevel, 'field_poe_tester')
+  assert.equal(nominal.passed, true)
+  assert.equal(nominal.nextNodeId, 'cctv_known_good_short_cable')
+  assert.equal(low.passed, false)
+  assert.equal(low.nextNodeId, 'cctv_result_poe_source')
+})
+
+test('field mode limits every decision step to the declared workshop tools', () => {
+  const advancedToolTerms = /osiloskop|oscilloscope|logic probe|lojik prob|programlayıcı|termal kamera|elektronik yük|diferansiyel prob|RS-485 analizörü/iu
+  const allowedToolLevels = new Set(['field_basic', 'field_poe_tester'])
+
+  assert.equal(diagnostics.fieldMode.enabled, true)
+  assert.ok(diagnostics.fieldMode.tools.some((tool) => /multimetre/i.test(tool)))
+  assert.ok(diagnostics.fieldMode.tools.some((tool) => /bilgisayar/i.test(tool)))
+  assert.ok(diagnostics.fieldMode.tools.some((tool) => /PoE test/i.test(tool)))
+
+  for (const node of Object.values(diagnostics.nodes)) {
+    const userFacingText = [
+      node.category, node.title, node.prompt, node.hint, node.summary, node.repair, node.verification,
+      node.yesLabel, node.noLabel, node.unknownLabel, node.meterMode, node.powerState, node.probeBlack, node.probeRed,
+      ...(node.components || []), ...(node.testSteps || []), ...(node.stopConditions || []),
+      ...(node.options || []).flatMap((option) => [option.label, option.description]),
+      ...(node.rules || []).map((rule) => rule.label),
+    ].filter(Boolean).join(' ')
+
+    assert.ok(allowedToolLevels.has(node.toolLevel), node.id)
+    assert.doesNotMatch(userFacingText, advancedToolTerms, node.id)
+  }
+})
+
+test('common cable and contact faults are written in understandable field language', () => {
+  assert.match(diagnostics.faultCatalog.pbx_cabling_fault.label, /RJ11.*çakılmış.*kablo.*kopuk.*oksitli/i)
+  assert.match(diagnostics.faultCatalog.cctv_cable_fault.label, /Ethernet\/RJ45.*kopuk.*çakılmış.*temassız/i)
+  assert.match(diagnostics.faultCatalog.support_connector_fault.label, /jak.*klemens.*temassız.*oksitli/i)
+  assert.match(diagnostics.nodes.pbx_result_cabling.summary, /RJ11 ucu iyi çakılmamış.*damardan biri kopmuş.*oksitlenmiş/i)
+})
+
+test('research audit coverage matches the generated dataset', () => {
+  const measurements = Object.values(diagnostics.nodes).filter((node) => node.type === 'measurement')
+  const coverage = diagnostics.researchAudit.coverage
+
+  assert.equal(coverage.nodeCount, Object.keys(diagnostics.nodes).length)
+  assert.equal(coverage.sourceCount, Object.keys(diagnostics.sourceCatalog).length)
+  assert.equal(coverage.measurementCount, measurements.length)
+  assert.equal(coverage.sourcedMeasurementCount, measurements.filter((node) => node.sourceIds.length > 0).length)
 })
 
 test('every out-of-range measurement resolves to an explicit or inferred abnormal rule', () => {
@@ -71,7 +179,7 @@ test('every out-of-range measurement resolves to an explicit or inferred abnorma
   }
 })
 
-test('live candidate probabilities are normalized to 100 percent', () => {
+test('live candidate evidence shares are normalized to 100 percent', () => {
   for (const profile of diagnostics.deviceProfiles) {
     const scores = createInitialScores(profile.id, diagnostics.faultPriorScores)
     const allowedFaultIds = Object.keys(scores)
